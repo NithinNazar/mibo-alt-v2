@@ -101,7 +101,7 @@ const CorporateLanding: React.FC = () => {
                 </div>
 
                 {/* Grid with 4 cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
                     {cards.map((card, index) => (
                         <div key={index} className="bg-white rounded-3xl shadow-sm overflow-hidden relative">
                             {/* Text section */}

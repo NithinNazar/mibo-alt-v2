@@ -50,11 +50,11 @@
 // export default MentalHealthCard;
 
 import React from 'react';
-import sampleImage from '../assets/Banner.jpg'; // replace with your image path
+import sampleImage from '../assets/Mental-wellness-month.png'; // replace with your image path
 
 const MentalHealthCard: React.FC = () => {
     return (
-        <div className="flex flex-col items-center text-center px-6  pb-0">
+        <div className="flex flex-col items-center w-full h-full bg-[#def2ff] text-center px-6  py-6">
             {/* Image with SVG blob shape */}
             {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
                 <defs>

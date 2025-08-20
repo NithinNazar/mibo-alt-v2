@@ -123,7 +123,7 @@ const MentalHealthServices = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#fff] ">
+        <div className="min-h-screen bg-[#E9F6F4] ">
             <div className="max-w-4xl mx-auto p-6">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -158,7 +158,7 @@ const MentalHealthServices = () => {
                             <div
                                 key={service.id}
                                 className={`relative rounded-md
-       bg-[#E9F6F4] hover:bg-[#B3E5FF] 
+       bg-[#BDE3DE] hover:bg-[#B3E5FF] 
      `}
                             >
                                 <div className=" rounded-2xl">
@@ -219,7 +219,6 @@ const MentalHealthServices = () => {
                         ))}
                     </div>
                 </div> */}
-                
 
                 {/* Footer CTA */}
                 {/* <div className="mt-16 bg-white rounded-2xl p-8 shadow-xl border border-slate-200 text-center">

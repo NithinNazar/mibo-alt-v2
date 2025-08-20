@@ -187,9 +187,9 @@ const App = () => {
                 {/* ⬆ add padding-top so content doesn't go under header 
                      (adjust 80px to your header height) */}
                 {isMobile ? (
-                    <div className="flex flex-col justify-start items-center pt-5 pb-10">
+                    <div className="flex flex-col justify-start items-center ">
                         <PremiumSlider />
-                        <div className="flex justify-center pt-8 w-full">
+                        <div className="flex justify-center">
                             <MentalHealthCard />
                         </div>
                     </div>
