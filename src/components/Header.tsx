@@ -22,7 +22,7 @@ const Header = () => {
             shadow-sm border-b border-gray-100 
             transition-all duration-1000 ease-out
             ${isVisible ? 'transform translate-y-0 opacity-100' : 'transform -translate-y-full opacity-0'}
-        `}
+   `}
         >
             <div className="max-w-[1480px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 flex-wrap gap-y-2">
                 {/* Logo */}

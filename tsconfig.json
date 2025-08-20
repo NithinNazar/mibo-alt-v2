@@ -1,7 +1,17 @@
+// {
+//   "files": [],
+//   "references": [
+//     { "path": "./tsconfig.app.json" },
+//     { "path": "./tsconfig.node.json" }
+//   ]
+// }
+
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+      "allowJs": true,
+      "lib": ["es2015", "dom"], // ✅ Allow JS/JSX files
+      "jsx": "react-jsx", // ✅ For React 17+ (use "react" if React < 17)
+      "esModuleInterop": true // ✅ Helps with default imports
+  },
+  "include": ["src"]         // ✅ Make sure src folder is included
 }
