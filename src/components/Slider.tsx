@@ -1,5 +1,9 @@
 import  { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import slide1 from '../assets/individual_therapy.jpg';
+import slide2 from '../assets/group_session.jpg';
+import slide3 from '../assets/online_counselling.jpg';
+import slide4 from '../assets/famlily_therapy.jpg';
 
 const PremiumSlider = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -9,25 +13,25 @@ const PremiumSlider = () => {
     const slides = [
         {
             id: 1,
-            image: 'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=800&h=600&fit=crop',
+            image: slide1,
             title: 'Individual Therapy',
             subtitle: 'Personalized mental health support',
         },
         {
             id: 2,
-            image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=600&fit=crop',
+            image: slide2,
             title: 'Group Sessions',
             subtitle: 'Community-based healing',
         },
         {
             id: 3,
-            image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=600&fit=crop',
+            image: slide3,
             title: 'Online Counseling',
             subtitle: 'Remote support from anywhere',
         },
         {
             id: 4,
-            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop',
+            image: slide4,
             title: 'Family Therapy',
             subtitle: 'Strengthening family bonds',
         },

@@ -1969,7 +1969,6 @@ const DepartmentGraphs: React.FC = () => {
             <div className="text-center py-6 sm:py-8 md:py-12 px-4">
                 <h1
                     className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight6"
-                    style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
                 >
                     Department Analytics
                 </h1>

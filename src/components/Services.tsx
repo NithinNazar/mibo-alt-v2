@@ -1,6 +1,6 @@
-// import  { useState } from 'react';
+// import { useState} from 'react';
+// import type { ReactNode } from 'react';
 // import { ChevronRight, ChevronDown, User, Users, Monitor } from 'lucide-react';
-
 
 // type Service = {
 //     id: string;
@@ -21,11 +21,11 @@
 // };
 
 // const MentalHealthServices = () => {
-//     const [expandedService, setExpandedService] = useState(null);
-//     const [currentPage, setCurrentPage] = useState('home');
-//     const [selectedCondition, setSelectedCondition] = useState(null);
+//     const [expandedService, setExpandedService] = useState<string | null>(null);
+//     const [currentPage, setCurrentPage] = useState<'home' | 'detail'>('home');
+//     const [selectedCondition, setSelectedCondition] = useState<Condition | null>(null);
 
-//     const services = [
+//     const services: Service[] = [
 //         {
 //             id: 'in-patient',
 //             title: 'In-Patient',
@@ -51,15 +51,13 @@
 //         },
 //     ];
 
-    
-
-//     const toggleService = (serviceId) => {
+//     const toggleService = (serviceId: string) => {
 //         setExpandedService(expandedService === serviceId ? null : serviceId);
 //     };
 
-//     // const goToConditionDetail = (condition) => {
-//     //     setSelectedCondition(condition);
-//     //     setCurrentPage('detail');
+//     // const goToConditionDetail = (condition: Condition) => {
+//     //   setSelectedCondition(condition);
+//     //   setCurrentPage('detail');
 //     // };
 
 //     const goToHome = () => {
@@ -142,7 +140,7 @@
 //     }
 
 //     return (
-//         <div className="min-h-screen bg-[#E9F6F4] ">
+//         <div className=" bg-[#E9F6F4] ">
 //             <div className="max-w-4xl mx-auto p-6">
 //                 {/* Header */}
 //                 <div className="text-center mb-8">
@@ -150,63 +148,38 @@
 //                     <p className="text-[10px] sm:text-[10px] text-slate-600  mx-auto leading-relaxed">
 //                         Comprehensive care for your mental wellbeing
 //                     </p>
-//                     <style>
-//                         {`
-//                             @keyframes premium-underline {
-//                             0% { transform: translateX(-100%); }
-//                             50% { transform: translateX(0%); }
-//                             100% { transform: translateX(100%); }
-//                         }
-// `}
-//                     </style>
-
-//                     {/* <div className="relative mt-4 h-1 w-20 mx-auto mb-0 overflow-hidden rounded-full shadow-lg">
-//                         <div
-//                             className="absolute inset-0 bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c]"
-//                             style={{
-//                                 animation: 'premium-underline 3s ease-in-out infinite',
-//                             }}
-//                         ></div>
-//                     </div> */}
 //                 </div>
 
 //                 {/* Services Section */}
 //                 <div className="mb-14">
 //                     <div className="space-y-3">
 //                         {services.map((service) => (
-//                             <div
-//                                 key={service.id}
-//                                 className={`relative rounded-md
-//        bg-[#BDE3DE] hover:bg-[#B3E5FF] 
-//      `}
-//                             >
-//                                 <div className=" rounded-2xl">
+//                             <div key={service.id} className="relative rounded-md bg-[#BDE3DE] hover:bg-[#B3E5FF]">
+//                                 <div className="rounded-2xl">
 //                                     <button
 //                                         onClick={() => toggleService(service.id)}
 //                                         className={`w-full flex items-center justify-between p-4 text-left rounded-2xl transition-all duration-300 
-//     ${expandedService === service.id ? 'bg-white/10' : 'hover:bg-white/10'}`}
+//                       ${expandedService === service.id ? 'bg-white/10' : 'hover:bg-white/10'}`}
 //                                     >
 //                                         {/* Title & description container */}
 //                                         <div>
 //                                             <h3 className="text-sm ml-2 font-extrabold text-slate-700">{service.title}</h3>
-//                                             {/* <p className="text-slate-100 text-xs">{service.description}</p> */}
 //                                         </div>
 
 //                                         {/* Chevron on far right */}
 //                                         <ChevronDown
 //                                             className={`w-5 h-5 text-slate-700 transform transition-transform duration-500 ease-in-out 
-//       ${expandedService === service.id ? 'rotate-180 scale-110' : 'rotate-0'}`}
+//                         ${expandedService === service.id ? 'rotate-180 scale-110' : 'rotate-0'}`}
 //                                         />
 //                                     </button>
 //                                     <div
 //                                         className={`transition-all duration-500 ease-in-out overflow-hidden 
-//             ${expandedService === service.id ? 'max-h-96 opacity-100 p-6' : 'max-h-0 opacity-0 p-0'}`}
+//                       ${expandedService === service.id ? 'max-h-96 opacity-100 p-6' : 'max-h-0 opacity-0 p-0'}`}
 //                                     >
-//                                         <p className="text-gra mb-4 text-sm leading-relaxed">{service.details}</p>
+//                                         <p className="mb-4 text-sm leading-relaxed">{service.details}</p>
 //                                         <button
-//                                             className="bg-[#18276c]  text-[#d8e2dc]
-//               px-6 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg 
-//               transform hover:scale-105 active:scale-95 transition-all duration-300"
+//                                             className="bg-[#18276c] text-[#d8e2dc] px-6 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg 
+//                         transform hover:scale-105 active:scale-95 transition-all duration-300"
 //                                         >
 //                                             Learn More
 //                                         </button>
@@ -216,37 +189,6 @@
 //                         ))}
 //                     </div>
 //                 </div>
-
-//                 {/* Conditions Section */}
-//                 {/* <div>
-//                     <h2 className="text-2xl font-bold text-slate-800 mb-4">What are you struggling with?</h2>
-//                     <p className="text-slate-600 mb-8">Mibo is here to support you with all your mental health needs.</p>
-
-//                     <div className="grid gap-4">
-//                         {conditions.map((condition) => (
-//                             <button
-//                                 key={condition.id}
-//                                 onClick={() => goToConditionDetail(condition)}
-//                                 className={`${condition.color} text-white p-6 rounded-2xl flex items-center justify-between group hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 shadow-lg`}
-//                             >
-//                                 <div className="flex items-center">
-//                                     <div className="bg-white bg-opacity-20 p-3 rounded-xl mr-4">{condition.icon}</div>
-//                                     <span className="text-lg font-semibold">{condition.title}</span>
-//                                 </div>
-//                                 <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-200" />
-//                             </button>
-//                         ))}
-//                     </div>
-//                 </div> */}
-
-//                 {/* Footer CTA */}
-//                 {/* <div className="mt-16 bg-white rounded-2xl p-8 shadow-xl border border-slate-200 text-center">
-//                     <h3 className="text-2xl font-bold text-slate-800 mb-4">Ready to Take the Next Step?</h3>
-//                     <p className="text-slate-600 mb-6">Connect with our mental health professionals today</p>
-//                     <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl text-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-//                         Get Started Today
-//                     </button>
-//                 </div> */}
 //             </div>
 //         </div>
 //     );
@@ -255,9 +197,13 @@
 // export default MentalHealthServices;
 
 
-import { useState} from 'react';
+
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { ChevronRight, ChevronDown, User, Users, Monitor } from 'lucide-react';
+import inPatientImg from '../assets/In-patient.jpg';
+import inPersonImg from '../assets/in-person.jpg';
+import onlineImg from '../assets/online.jpg';
 
 type Service = {
     id: string;
@@ -282,29 +228,38 @@ const MentalHealthServices = () => {
     const [currentPage, setCurrentPage] = useState<'home' | 'detail'>('home');
     const [selectedCondition, setSelectedCondition] = useState<Condition | null>(null);
 
+    // Service background images
+   const getServiceImage = (serviceId: string) => {
+       const images = {
+           'in-patient': inPatientImg,
+           'in-person': inPersonImg,
+           online: onlineImg,
+       };
+
+       return images[serviceId as keyof typeof images] || images['in-person'];
+   };
+
     const services: Service[] = [
         {
             id: 'in-patient',
             title: 'In-Patient',
             icon: <User className="w-6 h-6" />,
             description: 'Comprehensive residential care for intensive mental health treatment',
-            details:
-                'When clicked a brief description of service appears in drop down, and a CTA button to book appointment now/learn more button directing user to the section explaining how mibo handles each type of mental health problems',
+            details: 'Comprehensive care in a supportive residential environment',
         },
         {
             id: 'in-person',
             title: 'In-Person',
             icon: <Users className="w-6 h-6" />,
             description: 'Face-to-face therapy sessions with qualified mental health professionals',
-            details:
-                'Personalized therapy sessions in a comfortable, professional environment with experienced therapists.',
+            details: 'Personalized therapy with experienced professionals',
         },
         {
             id: 'online',
             title: 'Online Services',
             icon: <Monitor className="w-6 h-6" />,
             description: 'Convenient virtual therapy and counseling sessions from anywhere',
-            details: 'Access mental health support through secure video calls, chat, and digital tools.',
+            details: 'Virtual therapy sessions from anywhere you feel comfortable',
         },
     ];
 
@@ -397,7 +352,7 @@ const MentalHealthServices = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#E9F6F4] ">
+        <div className=" bg-[#E9F6F4] ">
             <div className="max-w-4xl mx-auto p-6">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -411,11 +366,11 @@ const MentalHealthServices = () => {
                 <div className="mb-14">
                     <div className="space-y-3">
                         {services.map((service) => (
-                            <div key={service.id} className="relative rounded-md bg-[#BDE3DE] hover:bg-[#B3E5FF]">
-                                <div className="rounded-2xl">
+                            <div key={service.id} className="relative rounded-2xl overflow-hidden shadow-lg">
+                                <div className="relative rounded-2xl">
                                     <button
                                         onClick={() => toggleService(service.id)}
-                                        className={`w-full flex items-center justify-between p-4 text-left rounded-2xl transition-all duration-300 
+                                        className={`w-full flex items-center justify-between p-4 text-left rounded-2xl transition-all duration-300 bg-[#BDE3DE] 
                       ${expandedService === service.id ? 'bg-white/10' : 'hover:bg-white/10'}`}
                                     >
                                         {/* Title & description container */}
@@ -430,16 +385,31 @@ const MentalHealthServices = () => {
                                         />
                                     </button>
                                     <div
-                                        className={`transition-all duration-500 ease-in-out overflow-hidden 
-                      ${expandedService === service.id ? 'max-h-96 opacity-100 p-6' : 'max-h-0 opacity-0 p-0'}`}
+                                        className={`relative transition-all duration-500 ease-in-out overflow-hidden 
+                      ${expandedService === service.id ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
                                     >
-                                        <p className="mb-4 text-sm leading-relaxed">{service.details}</p>
-                                        <button
-                                            className="bg-[#18276c] text-[#d8e2dc] px-6 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg 
-                        transform hover:scale-105 active:scale-95 transition-all duration-300"
+                                        {/* Background Image */}
+                                        <div
+                                            className="relative h-48 bg-cover bg-center bg-no-repeat"
+                                            style={{ backgroundImage: `url(${getServiceImage(service.id)})` }}
                                         >
-                                            Learn More
-                                        </button>
+                                            {/* Dark overlay for text readability */}
+                                            <div className="absolute inset-0 bg-black/50"></div>
+
+                                            {/* Content overlay */}
+                                            <div className="absolute inset-0 flex flex-col justify-end p-6">
+                                                <div className="text-white mb-4">
+                                                    <p className="text-lg font-semibold mb-2">{service.details}</p>
+                                                </div>
+                                                <button
+                                                    className="bg-white/20 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-xl font-semibold 
+                                                    hover:bg-white/30 hover:border-white/50 transform hover:scale-105 active:scale-95 transition-all duration-300 
+                                                    w-fit shadow-lg"
+                                                >
+                                                    Learn More
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -452,4 +422,3 @@ const MentalHealthServices = () => {
 };
 
 export default MentalHealthServices;
-
