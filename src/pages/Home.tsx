@@ -8,8 +8,14 @@ import MentalHealthServices from '../components/Services';
 import MentalHealthConcerns from '../components/Concerns';
 import CareServiceComponent from '../components/Features';
 import SupportServices from '../components/Mibo_Supports';
+import lottie from 'lottie-web';
+import { defineElement } from 'lord-icon-element';
+import Location from '../components/Location';
 
 const Home = () => {
+
+
+    defineElement(lottie.loadAnimation);
     return (
         <div>
             <div>
@@ -22,6 +28,7 @@ const Home = () => {
                 <MentalHealthConcerns />
                 <CareServiceComponent />
                 <SupportServices />
+                <Location />
 
             </div>
         </div>

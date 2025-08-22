@@ -85,22 +85,33 @@
 
 
 
-import userIcon from '../assets/internet.png'; // replace with your actual file
+// import userIcon from '../assets/internet.png'; // replace with your actual file
 import heartIcon from '../assets/solidarity.png'; // replace with your actual file
 import messageIcon from '../assets/arabic.png'; // replace with your actual file
+import animationData from '../assets/wired-lineal-981-consultation-in-reveal.json';
+import Lottie from 'lottie-react';
 
 export default function SupportServices() {
     return (
         <div className="max-w-md mx-auto space-y-8 p-6">
             {/* Support shaped around you */}
-            <div className="animate-fade-in opacity-0 animation-delay-100">
+            {/* <div className="animate-fade-in opacity-0 animation-delay-100">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="flex gap-1">
                         <img src={userIcon} alt="Users" className="w-6 h-6" />
-                        {/* <img src={userIcon} alt="Users" className="w-5 h-5 -ml-2" />
-                        <img src={userIcon} alt="Users" className="w-4 h-4 -ml-1" /> */}
+
                     </div>
                 </div>
+                <h2 className="text-lg font-semibold text-[#3c493f] mb-3">Support shaped around you</h2>
+                <p className="text-gray-600 text-[0.875rem] leading-relaxed">
+                    We look at your needs and experiences to connect you with someone who understands where you're coming
+                    from and what support looks like.
+                </p>
+            </div> */}
+            <div className="animate-fade-in opacity-0 animation-delay-100 relative">
+                {/* Lottie animation moved slightly to the left */}
+                <Lottie animationData={animationData} className="w-20 h-20 relative left-[-10px]" loop={true} />
+
                 <h2 className="text-lg font-semibold text-[#3c493f] mb-3">Support shaped around you</h2>
                 <p className="text-gray-600 text-[0.875rem] leading-relaxed">
                     We look at your needs and experiences to connect you with someone who understands where you're coming
