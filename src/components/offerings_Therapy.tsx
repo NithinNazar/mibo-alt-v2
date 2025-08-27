@@ -3,9 +3,9 @@ import wavePng from '../assets/wave.jpg'; // Add your wave PNG import here
 
 const OfferingsAndTherapy = () => {
     return (
-        <div className="max-w-md mx-auto bg-white">
+        <div className="max-w-md mx-auto bg-white pb-14">
             {/* First Section - Our mental healthcare offerings */}
-            <div className="text-center px-8 pt-12 pb-6">
+            <div className="text-center px-8 pt-16 pb-6">
                 <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight">
                     Our mental healthcare offerings
                 </h1>

@@ -7,4 +7,5 @@
 body {
     font-family: "Quicksand", sans-serif;
     font-optical-sizing: auto;
+    scroll-behavior: smooth;
   }

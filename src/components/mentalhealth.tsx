@@ -54,7 +54,7 @@ import sampleImage from '../assets/Mental-wellness-month.png'; // replace with y
 
 const MentalHealthCard: React.FC = () => {
     return (
-        <div className="flex flex-col items-center w-full h-full bg-[#def2ff] text-center px-6  py-6">
+        <div className="flex flex-col items-center w-full h-full bg-[#def2ff] text-center px-6 pt-14 pb-14">
             {/* Image with SVG blob shape */}
             {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
                 <defs>
@@ -79,7 +79,7 @@ const MentalHealthCard: React.FC = () => {
             </div>
             {/* Title */}
             <h2
-                className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
+                className="mt-6  text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
                 style={{ fontFamily: 'Quicksand, sans-serif' }}
             >
                 Trust Mibo with your <br /> mental health

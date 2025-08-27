@@ -93,7 +93,7 @@ import Lottie from 'lottie-react';
 
 export default function SupportServices() {
     return (
-        <div className="max-w-md mx-auto space-y-8 p-6">
+        <div className="max-w-md mx-auto space-y-8 p-6 pt-14 pb-14">
             {/* Support shaped around you */}
             {/* <div className="animate-fade-in opacity-0 animation-delay-100">
                 <div className="flex items-center gap-3 mb-4">

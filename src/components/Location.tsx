@@ -261,9 +261,9 @@ const LocationCardsSlider = () => {
     }, [centers.length]);
 
     return (
-        <div className="max-w-sm mx-auto p-4 bg-blue-100">
+        <div className="max-w-sm mx-auto p-6 pt-6 pb-14 bg-blue-100">
             <div className="mb-8">
-                <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug">
+                <h1 className="mt-6  mb-4 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug">
                     Care and support near you
                 </h1>
                 <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.8rem] text-center">
