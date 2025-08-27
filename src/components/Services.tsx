@@ -353,7 +353,7 @@ const MentalHealthServices = () => {
 
     return (
         <div className=" bg-[#E9F6F4] ">
-            <div className="max-w-4xl mx-auto p-6">
+            <div className="max-w-4xl mx-auto p-6 pb-14 pt-14 ">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] ">Mental Health Services</h1>

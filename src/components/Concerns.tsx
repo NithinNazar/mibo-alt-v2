@@ -1,20 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-    //   Focus,
-    //   Users,
-    ArrowRight,
-    //   Cloud,
-    //   AlertCircle,
-    //   Target,
-    //   Activity,
+import { ArrowRight } from 'lucide-react';
+import depressionIcon from '../assets/depression.gif';
+import stress from '../assets/anxiety.gif'
+import doubt from '../assets/doubt.gif'
+import bipolar from '../assets/bipolar.gif'
+import adhd from '../assets/adhd.gif'
+import Anxiety from '../assets/anxiety (1).gif'
 
-} from 'lucide-react';
-import depressionIcon from '../assets/depression.png';
-// import anxietyIcon from '../assets/icons/anxiety.png';
-// import ocdIcon from '../assets/icons/ocd.png';
-// import bipolarIcon from '../assets/icons/bipolar.png';
-// import adhdIcon from '../assets/icons/adhd.png';
-// import socialIcon from '../assets/icons/social.png';
 
 const MentalHealthCards = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,31 +26,31 @@ const MentalHealthCards = () => {
         {
             name: 'Generalized Anxiety Disorder (GAD)',
             description: 'Chronic feelings of worry and fear about everyday situations affecting your daily life.',
-            icon: depressionIcon,
+            icon: stress,
             color: 'from-orange-400 to-orange-600',
         },
         {
             name: 'Obsessive Compulsive Disorder (OCD)',
             description: 'Repetitive thoughts and behaviors that interfere with your daily routine.',
-            icon: depressionIcon,
+            icon: doubt,
             color: 'from-orange-400 to-orange-600',
         },
         {
             name: 'Bipolar Disorder',
             description: 'Extreme mood swings including emotional highs and lows affecting your energy.',
-            icon: depressionIcon,
+            icon: bipolar,
             color: 'from-orange-400 to-orange-600',
         },
         {
             name: 'Adult ADHD',
             description: 'Difficulty with attention, hyperactivity, and impulse control in adult life.',
-            icon: depressionIcon,
+            icon: adhd,
             color: 'from-orange-400 to-orange-600',
         },
         {
             name: 'Social Anxiety',
             description: 'Intense fear of social situations and being judged by others.',
-            icon: depressionIcon,
+            icon: Anxiety,
             color: 'from-orange-400 to-orange-600',
         },
     ];
@@ -141,13 +133,24 @@ const MentalHealthCards = () => {
     //   const IconComponent = currentCondition.icon;
 
     // Auto-advance cards every 5 seconds
+    // useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         nextCard();
+    //     }, 5000);
+
+    //     return () => clearInterval(timer);
+    // }, [currentIndex]);
     useEffect(() => {
-        const timer = setInterval(() => {
-            nextCard();
-        }, 5000);
+        let timer: ReturnType<typeof setInterval>;
+
+        if (!isDragging.current) {
+            timer = setInterval(() => {
+                nextCard();
+            }, 3000);
+        }
 
         return () => clearInterval(timer);
-    }, [currentIndex]);
+    }, [isDragging.current]);
 
     // Mouse event listeners
     useEffect(() => {
@@ -166,14 +169,14 @@ const MentalHealthCards = () => {
     }, []);
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-[#E0F2FF]">
+        <div className="max-w-md mx-auto p-6 bg-[#E0F2FF] pb-16">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug">
+                <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug pt-4">
                     Mental health concerns we care for
                 </h1>
                 <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.8rem] text-center">
-                    Amaha offers support for 30+ mental health conditions. Explore some of the most common ones below to see
+                    Mibo offers support for 30+ mental health conditions. Explore some of the most common ones below to see
                     how we approach care.
                 </p>
             </div>
@@ -201,7 +204,7 @@ const MentalHealthCards = () => {
                             <img
                                 src={currentCondition.icon}
                                 alt={currentCondition.name}
-                                className="w-10 h-10 sm:w-18 sm:h-18 object-contain"
+                                className="w-10 h-10 sm:w-18 sm:h-18 mr-6 object-contain"
                             />
                         </div>
 

@@ -51,7 +51,7 @@ import chattingImg from '../assets/chatting.jpg';
 export default function CareServiceComponent() {
     return (
         <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-            <div className="max-w-7xl mx-auto px-4 py-12">
+            <div className="max-w-7xl mx-auto px-4 py-14">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     {/* Left Content */}
                     <div className="space-y-8">

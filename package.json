@@ -12,8 +12,12 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.15.1",
     "@tailwindcss/postcss": "^4.1.12",
     "framer-motion": "^12.23.12",
+    "lord-icon-element": "^4.1.2",
+    "lottie-react": "^2.4.1",
+    "lottie-web": "^5.13.0",
     "lucide-react": "^0.540.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

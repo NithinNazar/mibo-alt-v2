@@ -120,7 +120,7 @@ const CorporateLanding: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-gray-100 p-6 pt-14 pb-14">
             <div className="max-w-5xl mx-auto">
                 {/* Header Text */}
                 <div className="mb-10 text-center">

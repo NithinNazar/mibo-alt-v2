@@ -11,7 +11,6 @@
 //     Pie,
 //     Cell,
 //     RadialBarChart,
-//     RadialBar,
 // } from 'recharts';
 // import {
 //     TrendingUp,
@@ -28,87 +27,76 @@
 //     MoreVertical,
 //     ArrowUp,
 //     ArrowDown,
-//     ChevronDown,
+//     // ChevronDown,
 //     Pill,
 //     HandHelping,
 //     ChevronLeft,
 //     ChevronRight,
 // } from 'lucide-react';
-// import AnimatedButton from '../ui/Button/Button';
+// import type { LucideIcon } from 'lucide-react'; 
 
-// // Custom Dropdown Component
-// const CustomDropdown = ({ value, onChange, options, placeholder = 'Select...', className = '' }) => {
-//     const [isOpen, setIsOpen] = useState(false);
-//     const dropdownRef = useRef(null);
+// // Type Definitions
+// // interface DropdownOption {
+// //     value: string;
+// //     label: string;
+// // }
 
-//     useEffect(() => {
-//         const handleClickOutside = (event) => {
-//             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-//                 setIsOpen(false);
-//             }
-//         };
-//         document.addEventListener('mousedown', handleClickOutside);
-//         return () => document.removeEventListener('mousedown', handleClickOutside);
-//     }, []);
+// interface Review {
+//     rating: number;
+//     count: number;
+//     name: string;
+// }
 
-//     const selectedOption = options.find((option) => option.value === value);
+// interface MonthlyTrendData {
+//     month: string;
+//     satisfaction: number;
+//     patients: number;
+// }
 
-//     return (
-//         <div className={`relative ${className}`} ref={dropdownRef}>
-//             <button
-//                 type="button"
-//                 onClick={() => setIsOpen(!isOpen)}
-//                 className="w-full px-3 py-2 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl 
-//                          focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300 
-//                          text-xs whitespace-nowrap text-center flex items-center justify-between"
-//             >
-//                 <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
-//                     {selectedOption ? selectedOption.label : placeholder}
-//                 </span>
-//                 <ChevronDown
-//                     className={`w-4 h-4 ml-2 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-//                 />
-//             </button>
+// interface Department {
+//     id: number;
+//     name: string;
+//     icon: LucideIcon;
+//     satisfaction: number;
+//     patients: number;
+//     avgRating: number;
+//     responseRate: number;
+//     nps: number;
+//     waitTime: number;
+//     staffRating: number;
+//     facilityRating: number;
+//     treatmentRating: number;
+//     trend: number;
+//     reviews: Review[];
+//     monthlyTrend: MonthlyTrendData[];
+// }
 
-//             {isOpen && (
-//                 <div
-//                     className="absolute top-full left-0 right-0 mt-1 bg-white/95 backdrop-blur-sm border border-white/20 
-//                                rounded-xl shadow-lg z-50 max-h-60 overflow-auto"
-//                 >
-//                     {options.map((option) => (
-//                         <button
-//                             key={option.value}
-//                             type="button"
-//                             onClick={() => {
-//                                 onChange(option.value);
-//                                 setIsOpen(false);
-//                             }}
-//                             className={`w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-white/50 
-//                                        transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl 
-//                                        ${
-//                                            value === option.value
-//                                                ? 'bg-white/30 text-gray-900 font-medium'
-//                                                : 'text-gray-700'
-//                                        }`}
-//                         >
-//                             {option.label}
-//                         </button>
-//                     ))}
-//                 </div>
-//             )}
-//         </div>
-//     );
-// };
+// interface TooltipPayload {
+//     value: number;
+//     payload?: any;
+// }
 
+// interface CustomTooltipProps {
+//     active?: boolean;
+//     payload?: TooltipPayload[];
+//     label?: string;
+// }
+
+// interface CustomPieTooltipProps {
+//     active?: boolean;
+//     payload?: Array<{
+//         payload: Review;
+//     }>;
+// }
 // // Counter Animation Hook
-// const useCounterAnimation = (end, duration = 2000, start = 0) => {
-//     const [count, setCount] = useState(start);
+// const useCounterAnimation = (end: number, duration: number = 2000, start: number = 0): number => {
+//     const [count, setCount] = useState<number>(start);
 
 //     useEffect(() => {
 //         if (start === end) return;
 
-//         let startTime;
-//         const animate = (currentTime) => {
+//         let startTime: number;
+//         const animate = (currentTime: number) => {
 //             if (!startTime) startTime = currentTime;
 //             const progress = Math.min((currentTime - startTime) / duration, 1);
 //             const easeOutQuart = 1 - Math.pow(1 - progress, 4);
@@ -132,7 +120,19 @@
 // };
 
 // // Animated Counter Component
-// const AnimatedCounter = ({ end, duration = 2000, decimals = 0, suffix = '' }) => {
+// interface AnimatedCounterProps {
+//     end: number;
+//     duration?: number;
+//     decimals?: number;
+//     suffix?: string;
+// }
+
+// const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ 
+//     end, 
+//     duration = 2000, 
+//     decimals = 0, 
+//     suffix = '' 
+// }) => {
 //     const count = useCounterAnimation(end, duration);
 //     const displayValue = decimals > 0 ? count.toFixed(decimals) : Math.floor(count);
 
@@ -144,42 +144,19 @@
 //     );
 // };
 
-// const DepartmentGraphs = () => {
-//     const [selectedView, setSelectedView] = useState('grid');
-//     const [searchTerm, setSearchTerm] = useState('');
-//     const [filterCriteria, setFilterCriteria] = useState('all');
-//     const [animatedData, setAnimatedData] = useState([]);
-//     const [isLoading, setIsLoading] = useState(true);
-//     const [hoveredDept, setHoveredDept] = useState(null);
-//     const [sortBy, setSortBy] = useState('satisfaction');
-//     const [sortOrder, setSortOrder] = useState('desc');
-//     const [currentIndex, setCurrentIndex] = useState(0);
-//     const scrollContainerRef = useRef(null);
+// const DepartmentGraphs: React.FC = () => {
+//     const [selectedView] = useState<string>('grid');
+//     const [searchTerm] = useState<string>('');
+//     const [filterCriteria] = useState<string>('all');
+//     const [animatedData, setAnimatedData] = useState<Department[]>([]);
+//     const [isLoading, setIsLoading] = useState<boolean>(true);
+//     // const [ setHoveredDept] = useState<number | null>(null);
+//     const [sortBy] = useState<string>('satisfaction');
+//     const [sortOrder] = useState<'asc' | 'desc'>('desc');
+//     const [currentIndex, setCurrentIndex] = useState<number>(0);
+//     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-//     // Filter and Sort Options
-//     const filterOptions = [
-//         { value: 'all', label: 'All Departments' },
-//         { value: 'excellent', label: 'Excellent (95%+)' },
-//         { value: 'good', label: 'Good (90-95%)' },
-//         { value: 'average', label: 'Average (<90%)' },
-//     ];
-
-//     const sortOptions = [
-//         { value: 'satisfaction-desc', label: 'Satisfaction ↓' },
-//         { value: 'satisfaction-asc', label: 'Satisfaction ↑' },
-//         { value: 'patients-desc', label: 'Patients ↓' },
-//         { value: 'patients-asc', label: 'Patients ↑' },
-//         { value: 'nps-desc', label: 'NPS ↓' },
-//         { value: 'trend-desc', label: 'Trend ↓' },
-//     ];
-
-//     const handleSortChange = (value) => {
-//         const [criteria, order] = value.split('-');
-//         setSortBy(criteria);
-//         setSortOrder(order);
-//     };
-
-//     const departmentData = [
+//     const departmentData: Department[] = [
 //         {
 //             id: 1,
 //             name: 'Psychology',
@@ -332,8 +309,8 @@
 //                     (filterCriteria === 'average' && dept.satisfaction < 90))
 //         )
 //         .sort((a, b) => {
-//             const aVal = a[sortBy];
-//             const bVal = b[sortBy];
+//             const aVal = (a as any)[sortBy];
+//             const bVal = (b as any)[sortBy];
 //             return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
 //         });
 
@@ -347,7 +324,20 @@
 //         return () => clearTimeout(timer);
 //     }, []);
 
-//     const scrollToCard = (direction) => {
+//     // Auto-scroll cards every 5 seconds
+//     useEffect(() => {
+//         let timer: ReturnType<typeof setInterval>;
+
+//         if (filteredData.length > 0) {
+//             timer = setInterval(() => {
+//                 scrollToCard('next');
+//             }, 5000);
+//         }
+
+//         return () => clearInterval(timer);
+//     }, [filteredData]);
+
+//     const scrollToCard = (direction: 'next' | 'prev'): void => {
 //         if (!scrollContainerRef.current) return;
 
 //         const container = scrollContainerRef.current;
@@ -364,7 +354,7 @@
 //     };
 
 //     // Custom Tooltip Components
-//     const CustomTooltip = ({ active, payload, label }) => {
+//     const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
 //         if (active && payload && payload.length) {
 //             return (
 //                 <div className="bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-xl border border-white/20">
@@ -375,7 +365,7 @@
 //         return null;
 //     };
 
-//     const CustomPieTooltip = ({ active, payload }) => {
+//     const CustomPieTooltip: React.FC<CustomPieTooltipProps> = ({ active, payload }) => {
 //         if (active && payload && payload.length) {
 //             const data = payload[0].payload;
 //             return (
@@ -387,7 +377,12 @@
 //         return null;
 //     };
 
-//     const DepartmentCard = ({ dept, index }) => {
+//     interface DepartmentCardProps {
+//         dept: Department;
+//         index: number;
+//     }
+
+//     const DepartmentCard: React.FC<DepartmentCardProps> = ({ dept, index }) => {
 //         const IconComponent = dept.icon;
 //         const delay = index * 100;
 //         const pieColors = ['#2FA19A', '#18276c', '#20B2AA', '#4682B4', '#5F9EA0'];
@@ -405,8 +400,8 @@
 //                     animationDelay: `${delay}ms`,
 //                     animation: 'slideInUp 0.8s ease-out forwards',
 //                 }}
-//                 onMouseEnter={() => setHoveredDept(dept.id)}
-//                 onMouseLeave={() => setHoveredDept(null)}
+//                 // onMouseEnter={() => setHoveredDept(dept.id)}
+//                 // onMouseLeave={() => setHoveredDept(null)}
 //             >
 //                 {/* Header Section */}
 //                 <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -503,9 +498,9 @@
 //                                 paddingAngle={3}
 //                                 dataKey="count"
 //                                 animationDuration={2000}
-//                                 animationDelay={delay}
+//                                 // animationDelay={delay}
 //                             >
-//                                 {dept.reviews.map((entry, index) => (
+//                                 {dept.reviews.map((_, index) => (
 //                                     <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
 //                                 ))}
 //                             </Pie>
@@ -548,7 +543,7 @@
 //         );
 //     };
 
-//     const DetailedCard = ({ dept, index }) => {
+//     const DetailedCard: React.FC<DepartmentCardProps> = ({ dept, index }) => {
 //         const IconComponent = dept.icon;
 //         const delay = index * 50;
 //         const pieColors = ['#2FA19A', '#18276c', '#20B2AA', '#4682B4', '#5F9EA0'];
@@ -616,7 +611,7 @@
 //                                             startAngle={90}
 //                                             endAngle={-270}
 //                                         >
-//                                             <RadialBar background clockWise dataKey="value" cornerRadius={50} />
+//                                             {/* <RadialBar background clockWise dataKey="value" cornerRadius={50} /> */}
 //                                         </RadialBarChart>
 //                                     </ResponsiveContainer>
 
@@ -732,7 +727,7 @@
 //                                                 strokeWidth={2}
 //                                                 fill={`url(#colorGradient${dept.id})`}
 //                                                 animationDuration={2500}
-//                                                 animationDelay={delay + 500}
+//                                                 // animationDelay={delay + 500}
 //                                             />
 //                                         </AreaChart>
 //                                     </ResponsiveContainer>
@@ -763,9 +758,9 @@
 //                                                     paddingAngle={4}
 //                                                     dataKey="count"
 //                                                     animationDuration={2500}
-//                                                     animationDelay={delay + 200}
+//                                                     // animationDelay={delay + 200}
 //                                                 >
-//                                                     {dept.reviews.map((entry, index) => (
+//                                                     {dept.reviews.map((_, index) => (
 //                                                         <Cell
 //                                                             key={`cell-${index}`}
 //                                                             fill={pieColors[index % pieColors.length]}
@@ -871,21 +866,11 @@
 //         <div className="bg-[#c9f4ec] pb-10 ">
 //             {/* Header */}
 //             <div className="text-center py-6 sm:py-8 md:py-12 px-4">
-//                 <h1
-//                     className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight6"
-//                     style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
-//                 >
+//                 <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight6">
 //                     Department Analytics
 //                 </h1>
-//                 {/* <div className="relative mt-4 h-1 w-20 mx-auto mb-0 overflow-hidden rounded-full shadow-lg">
-//                     <div
-//                         className="absolute inset-0 bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c]"
-//                         style={{
-//                             animation: 'premium-underline 3s ease-in-out infinite',
-//                         }}
-//                     ></div>
-//                 </div> */}
 //             </div>
+
 //             {/* Content */}
 //             <div className="px-4 sm:px-6 md:px-8">
 //                 <div className="max-w-7xl mx-auto">
@@ -905,6 +890,7 @@
 //                                     </div>
 //                                 ))}
 //                             </div>
+
 //                             {/* Indicators with Buttons */}
 //                             <div className="flex items-center justify-between mt-8 space-x-4">
 //                                 {/* Left Button */}
@@ -912,7 +898,7 @@
 //                                     onClick={() => scrollToCard('prev')}
 //                                     className="w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
 //                                     rounded-full flex items-center justify-center shadow-md 
-//                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-gray-400"
+//                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-white"
 //                                 >
 //                                     <ChevronLeft className="w-5 h-4" />
 //                                 </button>
@@ -934,7 +920,7 @@
 //                                     onClick={() => scrollToCard('next')}
 //                                     className="w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
 //                                     rounded-full flex items-center justify-center shadow-md 
-//                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-gray-400"
+//                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-white"
 //                                 >
 //                                     <ChevronRight className="w-4 h-4" />
 //                                 </button>
@@ -968,22 +954,19 @@
 //             </div>
 
 //             {/* Floating Action Button */}
-//             {/* <div className="fixed  bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
-//                 <AnimatedButton />
-//             </div> */}
-//             {/* <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
+//             <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
 //                 <button
 //                     className="px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 bg-[#2FA19A]  
-//                     transform hover:scale-110 transition-all duration-500 animate-bounce 
-//                      text-sm sm:text-sm md:text-base lg:text-lg  tracking-wide 
-//                     text-[#fff] rounded-full shadow-xl hover:shadow-2xl 
+//                     transform hover:scale-105 transition-transform duration-300 ease-in-out
+//                     text-sm sm:text-sm md:text-base lg:text-lg tracking-wide 
+//                     text-white rounded-full shadow-xl hover:shadow-2xl 
 //                     border border-white/20 hover:border-white/40"
 //                 >
 //                     Book Appointment
 //                 </button>
 //             </div>
 
-//             <style jsx>{`
+//             <style>{`
 //                 @keyframes slideInUp {
 //                     from {
 //                         opacity: 0;
@@ -1014,18 +997,7 @@
 //                 .scrollbar-hide::-webkit-scrollbar {
 //                     display: none;
 //                 }
-//             `}</style> */}
-//             <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
-//                 <button
-//                     className="px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 bg-[#2FA19A]  
-//     transform hover:scale-105 transition-transform duration-300 ease-in-out
-//     text-sm sm:text-sm md:text-base lg:text-lg tracking-wide 
-//     text-white rounded-full shadow-xl hover:shadow-2xl 
-//     border border-white/20 hover:border-white/40"
-//                 >
-//                     Book Appointment
-//                 </button>
-//             </div>
+//             `}</style>
 //         </div>
 //     );
 // };
@@ -1033,20 +1005,8 @@
 // export default DepartmentGraphs;
 
 
-
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    XAxis,
-    YAxis,
-    ResponsiveContainer,
-    Tooltip,
-    Area,
-    AreaChart,
-    PieChart,
-    Pie,
-    Cell,
-    RadialBarChart,
-} from 'recharts';
+import { XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart, PieChart, Pie, Cell, RadialBarChart } from 'recharts';
 import {
     TrendingUp,
     TrendingDown,
@@ -1062,20 +1022,14 @@ import {
     MoreVertical,
     ArrowUp,
     ArrowDown,
-    // ChevronDown,
     Pill,
     HandHelping,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react'; 
+import type { LucideIcon } from 'lucide-react';
 
 // Type Definitions
-// interface DropdownOption {
-//     value: string;
-//     label: string;
-// }
-
 interface Review {
     rating: number;
     count: number;
@@ -1124,84 +1078,6 @@ interface CustomPieTooltipProps {
     }>;
 }
 
-// Custom Dropdown Component
-// interface CustomDropdownProps {
-//     value: string;
-//     onChange: (value: string) => void;
-//     options: DropdownOption[];
-//     placeholder?: string;
-//     className?: string;
-// }
-
-// const CustomDropdown: React.FC<CustomDropdownProps> = ({ 
-//     value, 
-//     onChange, 
-//     options, 
-//     placeholder = 'Select...', 
-//     className = '' 
-// }) => {
-//     const [isOpen, setIsOpen] = useState<boolean>(false);
-//     const dropdownRef = useRef<HTMLDivElement>(null);
-
-//     useEffect(() => {
-//         const handleClickOutside = (event: MouseEvent) => {
-//             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-//                 setIsOpen(false);
-//             }
-//         };
-//         document.addEventListener('mousedown', handleClickOutside);
-//         return () => document.removeEventListener('mousedown', handleClickOutside);
-//     }, []);
-
-//     const selectedOption = options.find((option) => option.value === value);
-
-//     return (
-//         <div className={`relative ${className}`} ref={dropdownRef}>
-//             <button
-//                 type="button"
-//                 onClick={() => setIsOpen(!isOpen)}
-//                 className="w-full px-3 py-2 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl 
-//                          focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300 
-//                          text-xs whitespace-nowrap text-center flex items-center justify-between"
-//             >
-//                 <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
-//                     {selectedOption ? selectedOption.label : placeholder}
-//                 </span>
-//                 <ChevronDown
-//                     className={`w-4 h-4 ml-2 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-//                 />
-//             </button>
-
-//             {isOpen && (
-//                 <div
-//                     className="absolute top-full left-0 right-0 mt-1 bg-white/95 backdrop-blur-sm border border-white/20 
-//                                rounded-xl shadow-lg z-50 max-h-60 overflow-auto"
-//                 >
-//                     {options.map((option) => (
-//                         <button
-//                             key={option.value}
-//                             type="button"
-//                             onClick={() => {
-//                                 onChange(option.value);
-//                                 setIsOpen(false);
-//                             }}
-//                             className={`w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-white/50 
-//                                        transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl 
-//                                        ${
-//                                            value === option.value
-//                                                ? 'bg-white/30 text-gray-900 font-medium'
-//                                                : 'text-gray-700'
-//                                        }`}
-//                         >
-//                             {option.label}
-//                         </button>
-//                     ))}
-//                 </div>
-//             )}
-//         </div>
-//     );
-// };
-
 // Counter Animation Hook
 const useCounterAnimation = (end: number, duration: number = 2000, start: number = 0): number => {
     const [count, setCount] = useState<number>(start);
@@ -1241,12 +1117,7 @@ interface AnimatedCounterProps {
     suffix?: string;
 }
 
-const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ 
-    end, 
-    duration = 2000, 
-    decimals = 0, 
-    suffix = '' 
-}) => {
+const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, duration = 2000, decimals = 0, suffix = '' }) => {
     const count = useCounterAnimation(end, duration);
     const displayValue = decimals > 0 ? count.toFixed(decimals) : Math.floor(count);
 
@@ -1264,7 +1135,6 @@ const DepartmentGraphs: React.FC = () => {
     const [filterCriteria] = useState<string>('all');
     const [animatedData, setAnimatedData] = useState<Department[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    // const [ setHoveredDept] = useState<number | null>(null);
     const [sortBy] = useState<string>('satisfaction');
     const [sortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -1438,11 +1308,24 @@ const DepartmentGraphs: React.FC = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Auto-scroll cards every 5 seconds
+    useEffect(() => {
+        let timer: ReturnType<typeof setInterval>;
+
+        if (filteredData.length > 0) {
+            timer = setInterval(() => {
+                scrollToCard('next');
+            }, 5000);
+        }
+
+        return () => clearInterval(timer);
+    }, [filteredData]);
+
     const scrollToCard = (direction: 'next' | 'prev'): void => {
         if (!scrollContainerRef.current) return;
 
         const container = scrollContainerRef.current;
-        const cardWidth = 400; // Approximate card width + gap
+        const cardWidth = 400;
 
         if (direction === 'next') {
             setCurrentIndex((prev) => (prev + 1) % filteredData.length);
@@ -1501,20 +1384,35 @@ const DepartmentGraphs: React.FC = () => {
                     animationDelay: `${delay}ms`,
                     animation: 'slideInUp 0.8s ease-out forwards',
                 }}
-                // onMouseEnter={() => setHoveredDept(dept.id)}
-                // onMouseLeave={() => setHoveredDept(null)}
             >
                 {/* Header Section */}
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <div className="flex items-center space-x-3 sm:space-x-4">
-                        <div
-                            className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl sm:rounded-2xl 
-                                      bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c]
-                                      flex items-center justify-center shadow-lg sm:shadow-2xl 
-                                      transform group-hover:rotate-12 group-hover:scale-110 
-                                      transition-all duration-500 border-2 border-white/20"
-                        >
-                            <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
+                        <div className="icon-container w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c] flex items-center justify-center shadow-lg sm:shadow-2xl border-2 border-white/20 relative overflow-visible">
+                            {/* Rotating Ring 1 */}
+                            <div className="rotating-ring-1 absolute inset-0 w-full h-full border-2 border-[#2FA19A]/40 rounded-xl sm:rounded-2xl"></div>
+
+                            {/* Rotating Ring 2 */}
+                            <div className="rotating-ring-2 absolute inset-0 w-full h-full border-2 border-[#18276c]/30 rounded-xl sm:rounded-2xl"></div>
+
+                            {/* Orbital Particles */}
+                            <div className="orbital-container absolute inset-0 w-full h-full">
+                                <div className="orbital-particle particle-1 absolute w-1 h-1 bg-[#2FA19A] rounded-full"></div>
+                                <div className="orbital-particle particle-2 absolute w-1 h-1 bg-[#18276c] rounded-full"></div>
+                                <div className="orbital-particle particle-3 absolute w-1 h-1 bg-[#2FA19A]/70 rounded-full"></div>
+                                <div className="orbital-particle particle-4 absolute w-1 h-1 bg-[#18276c]/70 rounded-full"></div>
+                            </div>
+
+                            {/* Pulsing Glow */}
+                            <div className="pulsing-glow absolute inset-0 bg-gradient-to-r from-[#2FA19A]/30 to-[#18276c]/30 rounded-xl sm:rounded-2xl"></div>
+
+                            {/* Main Icon */}
+                            <IconComponent className="icon-main w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white relative z-20" />
+
+                            {/* Energy Waves */}
+                            <div className="energy-wave wave-1 absolute inset-0 border border-[#2FA19A]/20 rounded-xl sm:rounded-2xl"></div>
+                            <div className="energy-wave wave-2 absolute inset-0 border border-[#18276c]/20 rounded-xl sm:rounded-2xl"></div>
+                            <div className="energy-wave wave-3 absolute inset-0 border border-[#2FA19A]/15 rounded-xl sm:rounded-2xl"></div>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-900 text-base sm:text-lg md:text-xl lg:text-2xl">
@@ -1525,7 +1423,9 @@ const DepartmentGraphs: React.FC = () => {
                             </p>
                         </div>
                     </div>
-                    <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-[#18276c]/50 group-hover:text-[#2FA19A]" />
+                    <div className="more-icon-wrapper">
+                        <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-[#18276c]/50 group-hover:text-[#2FA19A] transition-colors duration-300" />
+                    </div>
                 </div>
 
                 {/* Satisfaction Display */}
@@ -1535,7 +1435,9 @@ const DepartmentGraphs: React.FC = () => {
                             <span className="text-sm sm:text-sm font-semibold text-[#18276c]/80 uppercase">
                                 Satisfaction Rate
                             </span>
-                            <ArrowRight className="w-4 h-4 text-[#18276c]/80" />
+                            <div className="arrow-icon-wrapper">
+                                <ArrowRight className="w-4 h-4 text-[#18276c]/80" />
+                            </div>
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -1547,11 +1449,13 @@ const DepartmentGraphs: React.FC = () => {
                                     dept.trend > 0 ? 'text-[#2FA19A] bg-[#2FA19A]/20' : 'text-red-600 bg-red-100/80'
                                 }`}
                             >
-                                {dept.trend > 0 ? (
-                                    <ArrowUp className="w-3 h-3 mr-1" />
-                                ) : (
-                                    <ArrowDown className="w-3 h-3 mr-1" />
-                                )}
+                                <div className="trend-arrow-wrapper">
+                                    {dept.trend > 0 ? (
+                                        <ArrowUp className="w-3 h-3 mr-1" />
+                                    ) : (
+                                        <ArrowDown className="w-3 h-3 mr-1" />
+                                    )}
+                                </div>
                                 <AnimatedCounter end={Math.abs(dept.trend)} decimals={1} suffix="%" />
                             </div>
                         </div>
@@ -1560,24 +1464,22 @@ const DepartmentGraphs: React.FC = () => {
 
                 {/* Rating Grid */}
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    <div
-                        className="text-center p-3 sm:p-4 bg-gradient-to-br from-white/60 to-white/40 
-                                  backdrop-blur-md rounded-xl border border-white/30"
-                    >
+                    <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-white/60 to-white/40 backdrop-blur-md rounded-xl border border-white/30">
                         <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
-                            <Star className="w-4 h-4 sm:w-5 sm:h-5 text-[#2FA19A] fill-current" />
+                            <div className="star-icon-wrapper">
+                                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-[#2FA19A] fill-current" />
+                            </div>
                             <span className="text-lg sm:text-xl font-black text-[#18276c]">
                                 <AnimatedCounter end={dept.avgRating} decimals={1} />
                             </span>
                         </div>
                         <p className="text-xs text-[#18276c]/70 font-semibold uppercase">Rating</p>
                     </div>
-                    <div
-                        className="text-center p-3 sm:p-4 bg-gradient-to-br from-white/60 to-white/40 
-                                  backdrop-blur-md rounded-xl border border-white/30"
-                    >
+                    <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-white/60 to-white/40 backdrop-blur-md rounded-xl border border-white/30">
                         <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
-                            <Users className="w-5 h-5 text-[#2FA19A] " />
+                            <div className="users-icon-wrapper">
+                                <Users className="w-5 h-5 text-[#2FA19A]" />
+                            </div>
                             <span className="text-lg sm:text-xl font-black text-[#18276c]">
                                 <AnimatedCounter end={dept.nps} />
                             </span>
@@ -1599,7 +1501,6 @@ const DepartmentGraphs: React.FC = () => {
                                 paddingAngle={3}
                                 dataKey="count"
                                 animationDuration={2000}
-                                // animationDelay={delay}
                             >
                                 {dept.reviews.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
@@ -1612,28 +1513,19 @@ const DepartmentGraphs: React.FC = () => {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3 text-xs">
-                    <div
-                        className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#2FA19A]/20 to-[#2FA19A]/10 
-                                  backdrop-blur-md rounded-lg sm:rounded-xl border border-[#2FA19A]/20"
-                    >
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#2FA19A]/20 to-[#2FA19A]/10 backdrop-blur-md rounded-lg sm:rounded-xl border border-[#2FA19A]/20">
                         <div className="font-black text-[#18276c] text-sm sm:text-base">
                             <AnimatedCounter end={dept.responseRate} suffix="%" />
                         </div>
                         <div className="text-[#18276c]/70 font-semibold uppercase text-xs">Response</div>
                     </div>
-                    <div
-                        className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#18276c]/20 to-[#18276c]/10 
-                                  backdrop-blur-md rounded-lg sm:rounded-xl border border-[#18276c]/20"
-                    >
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#18276c]/20 to-[#18276c]/10 backdrop-blur-md rounded-lg sm:rounded-xl border border-[#18276c]/20">
                         <div className="font-black text-[#18276c] text-sm sm:text-base">
                             <AnimatedCounter end={dept.waitTime} suffix="m" />
                         </div>
                         <div className="text-[#18276c]/70 font-semibold uppercase text-xs">Wait</div>
                     </div>
-                    <div
-                        className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#2FA19A]/20 to-[#2FA19A]/10 
-                                  backdrop-blur-md rounded-lg sm:rounded-xl border border-[#2FA19A]/20"
-                    >
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-[#2FA19A]/20 to-[#2FA19A]/10 backdrop-blur-md rounded-lg sm:rounded-xl border border-[#2FA19A]/20">
                         <div className="font-black text-[#18276c] text-sm sm:text-base">
                             <AnimatedCounter end={dept.staffRating} decimals={1} />
                         </div>
@@ -1651,23 +1543,38 @@ const DepartmentGraphs: React.FC = () => {
 
         return (
             <div
-                className="group bg-gradient-to-br from-white/80 via-[#2FA19A]/5 to-[#18276c]/10 
-                          rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-[#2FA19A]/20 
-                          backdrop-blur-lg overflow-hidden transform transition-all duration-700 
-                          hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2"
+                className="group bg-gradient-to-br from-white/80 via-[#2FA19A]/5 to-[#18276c]/10 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-[#2FA19A]/20 backdrop-blur-lg overflow-hidden transform transition-all duration-700 hover:shadow-2xl hover:-translate-y-1 sm:hover:-translate-y-2"
                 style={{ animationDelay: `${delay}ms`, animation: 'slideInLeft 0.6s ease-out forwards' }}
             >
                 <div className="p-4 sm:p-6 md:p-8">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                         <div className="flex items-center space-x-4 sm:space-x-6">
-                            <div
-                                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl sm:rounded-3xl 
-                                          bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c] 
-                                          flex items-center justify-center shadow-xl transform group-hover:scale-110 
-                                          group-hover:rotate-12 transition-all duration-500 border-2 border-white/30"
-                            >
-                                <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
+                            <div className="icon-container w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#18276c] via-[#2FA19A] to-[#18276c] flex items-center justify-center shadow-xl border-2 border-white/30 relative overflow-visible">
+                                {/* Rotating Rings */}
+                                <div className="rotating-ring-1 absolute inset-0 w-full h-full border-2 border-[#2FA19A]/50 rounded-2xl sm:rounded-3xl"></div>
+                                <div className="rotating-ring-2 absolute inset-0 w-full h-full border-2 border-[#18276c]/40 rounded-2xl sm:rounded-3xl"></div>
+
+                                {/* Orbital Particles */}
+                                <div className="orbital-container absolute inset-0 w-full h-full">
+                                    <div className="orbital-particle particle-1 absolute w-1.5 h-1.5 bg-[#2FA19A] rounded-full"></div>
+                                    <div className="orbital-particle particle-2 absolute w-1.5 h-1.5 bg-[#18276c] rounded-full"></div>
+                                    <div className="orbital-particle particle-3 absolute w-1 h-1 bg-[#2FA19A]/80 rounded-full"></div>
+                                    <div className="orbital-particle particle-4 absolute w-1 h-1 bg-[#18276c]/80 rounded-full"></div>
+                                    <div className="orbital-particle particle-5 absolute w-0.5 h-0.5 bg-[#2FA19A]/60 rounded-full"></div>
+                                    <div className="orbital-particle particle-6 absolute w-0.5 h-0.5 bg-[#18276c]/60 rounded-full"></div>
+                                </div>
+
+                                {/* Pulsing Glow */}
+                                <div className="pulsing-glow absolute inset-0 bg-gradient-to-r from-[#2FA19A]/30 to-[#18276c]/30 rounded-2xl sm:rounded-3xl"></div>
+
+                                {/* Main Icon */}
+                                <IconComponent className="icon-main w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white relative z-20" />
+
+                                {/* Energy Waves */}
+                                <div className="energy-wave wave-1 absolute inset-0 border border-[#2FA19A]/25 rounded-2xl sm:rounded-3xl"></div>
+                                <div className="energy-wave wave-2 absolute inset-0 border border-[#18276c]/25 rounded-2xl sm:rounded-3xl"></div>
+                                <div className="energy-wave wave-3 absolute inset-0 border border-[#2FA19A]/20 rounded-2xl sm:rounded-3xl"></div>
                             </div>
                             <div>
                                 <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#18276c]">{dept.name}</h3>
@@ -1677,18 +1584,19 @@ const DepartmentGraphs: React.FC = () => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl 
-                                       text-xs sm:text-sm font-bold ${
-                                           dept.trend > 0
-                                               ? 'text-[#2FA19A] bg-[#2FA19A]/20 border border-[#2FA19A]/30'
-                                               : 'text-red-600 bg-red-100/80 border border-red-200'
-                                       }`}
+                            className={`flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold ${
+                                dept.trend > 0
+                                    ? 'text-[#2FA19A] bg-[#2FA19A]/20 border border-[#2FA19A]/30'
+                                    : 'text-red-600 bg-red-100/80 border border-red-200'
+                            }`}
                         >
-                            {dept.trend > 0 ? (
-                                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                            ) : (
-                                <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                            )}
+                            <div className="trend-icon-wrapper">
+                                {dept.trend > 0 ? (
+                                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                                ) : (
+                                    <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                                )}
+                            </div>
                             <AnimatedCounter end={Math.abs(dept.trend)} decimals={1} suffix="%" />
                         </div>
                     </div>
@@ -1711,9 +1619,7 @@ const DepartmentGraphs: React.FC = () => {
                                             ]}
                                             startAngle={90}
                                             endAngle={-270}
-                                        >
-                                            {/* <RadialBar background clockWise dataKey="value" cornerRadius={50} /> */}
-                                        </RadialBarChart>
+                                        ></RadialBarChart>
                                     </ResponsiveContainer>
 
                                     <div className="absolute inset-0 flex items-center justify-center">
@@ -1733,29 +1639,25 @@ const DepartmentGraphs: React.FC = () => {
                         {/* Middle: Stats Cards */}
                         <div className="lg:col-span-1 space-y-4 sm:space-y-6">
                             <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                <div
-                                    className="bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 
-             backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2FA19A]/20"
-                                >
+                                <div className="bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2FA19A]/20">
                                     <div className="flex items-center space-x-2 mb-2">
                                         <span className="text-xs sm:text-sm font-bold text-[#18276c]/80 uppercase">
                                             Rating
                                         </span>
                                     </div>
-
-                                    {/* Number + Star */}
                                     <div className="flex items-center space-x-2 text-xl sm:text-2xl font-black text-[#18276c]">
                                         <AnimatedCounter end={dept.avgRating} decimals={1} />
-                                        <Star className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                                        <div className="star-icon-wrapper">
+                                            <Star className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div
-                                    className="bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 
-                                              backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#18276c]/20"
-                                >
+                                <div className="bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#18276c]/20">
                                     <div className="flex items-center space-x-2 mb-2">
-                                        <Award className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                        <div className="award-icon-wrapper">
+                                            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                        </div>
                                         <span className="text-xs sm:text-sm font-bold text-[#18276c]/80 uppercase">
                                             NPS
                                         </span>
@@ -1765,12 +1667,11 @@ const DepartmentGraphs: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div
-                                    className="bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 
-                                              backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2FA19A]/20"
-                                >
+                                <div className="bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2FA19A]/20">
                                     <div className="flex items-center space-x-2 mb-2">
-                                        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#18276c]" />
+                                        <div className="users-icon-wrapper">
+                                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#18276c]" />
+                                        </div>
                                         <span className="text-xs sm:text-sm font-bold text-[#18276c]/80 uppercase">
                                             Response
                                         </span>
@@ -1780,12 +1681,11 @@ const DepartmentGraphs: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div
-                                    className="bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 
-                                              backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#18276c]/20"
-                                >
+                                <div className="bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#18276c]/20">
                                     <div className="flex items-center space-x-2 mb-2">
-                                        <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-[#2FA19A]" />
+                                        <div className="activity-icon-wrapper">
+                                            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-[#2FA19A]" />
+                                        </div>
                                         <span className="text-xs sm:text-sm font-bold text-[#18276c]/80 uppercase">
                                             Wait
                                         </span>
@@ -1797,10 +1697,7 @@ const DepartmentGraphs: React.FC = () => {
                             </div>
 
                             {/* Trend Chart */}
-                            <div
-                                className="bg-gradient-to-br from-white/70 via-[#2FA19A]/5 to-white/50 
-                                          backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/30"
-                            >
+                            <div className="bg-gradient-to-br from-white/70 via-[#2FA19A]/5 to-white/50 backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/30">
                                 <h4 className="text-base sm:text-lg font-black text-[#18276c] mb-3 sm:mb-4 uppercase">
                                     Monthly Trend
                                 </h4>
@@ -1828,7 +1725,6 @@ const DepartmentGraphs: React.FC = () => {
                                                 strokeWidth={2}
                                                 fill={`url(#colorGradient${dept.id})`}
                                                 animationDuration={2500}
-                                                // animationDelay={delay + 500}
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
@@ -1840,10 +1736,7 @@ const DepartmentGraphs: React.FC = () => {
                         <div className="lg:col-span-1">
                             <div className="space-y-4 sm:space-y-6">
                                 {/* Donut Chart */}
-                                <div
-                                    className="bg-gradient-to-br from-white/70 via-[#18276c]/5 to-white/50 
-                                                backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/30"
-                                >
+                                <div className="bg-gradient-to-br from-white/70 via-[#18276c]/5 to-white/50 backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/30">
                                     <h4 className="text-base sm:text-lg font-black text-[#18276c] mb-3 sm:mb-4 uppercase">
                                         Reviews
                                     </h4>
@@ -1859,7 +1752,6 @@ const DepartmentGraphs: React.FC = () => {
                                                     paddingAngle={4}
                                                     dataKey="count"
                                                     animationDuration={2500}
-                                                    // animationDelay={delay + 200}
                                                 >
                                                     {dept.reviews.map((_, index) => (
                                                         <Cell
@@ -1883,7 +1775,9 @@ const DepartmentGraphs: React.FC = () => {
                                                 <span className="text-xs sm:text-sm font-bold text-[#18276c]">
                                                     {review.rating}
                                                 </span>
-                                                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
+                                                <div className="star-icon-wrapper">
+                                                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
+                                                </div>
                                             </div>
                                             <div className="flex-1 bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
                                                 <div
@@ -1912,28 +1806,19 @@ const DepartmentGraphs: React.FC = () => {
 
                     {/* Bottom Stats */}
                     <div className="mt-6 sm:mt-8 grid grid-cols-3 gap-4 sm:gap-6">
-                        <div
-                            className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 
-                                        backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#2FA19A]/20"
-                        >
+                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#2FA19A]/20">
                             <div className="text-lg sm:text-xl md:text-2xl font-black text-[#18276c]">
                                 <AnimatedCounter end={dept.staffRating} decimals={1} />
                             </div>
                             <div className="text-xs sm:text-sm text-[#18276c]/70 font-bold uppercase">Staff</div>
                         </div>
-                        <div
-                            className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 
-                                        backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#18276c]/20"
-                        >
+                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#18276c]/20 via-white/60 to-[#18276c]/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#18276c]/20">
                             <div className="text-lg sm:text-xl md:text-2xl font-black text-[#18276c]">
                                 <AnimatedCounter end={dept.facilityRating} decimals={1} />
                             </div>
                             <div className="text-xs sm:text-sm text-[#18276c]/70 font-bold uppercase">Facility</div>
                         </div>
-                        <div
-                            className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 
-                                        backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#2FA19A]/20"
-                        >
+                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-[#2FA19A]/20 via-white/60 to-[#2FA19A]/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-[#2FA19A]/20">
                             <div className="text-lg sm:text-xl md:text-2xl font-black text-[#18276c]">
                                 <AnimatedCounter end={dept.treatmentRating} decimals={1} />
                             </div>
@@ -1967,13 +1852,11 @@ const DepartmentGraphs: React.FC = () => {
         <div className="bg-[#c9f4ec] pb-10 ">
             {/* Header */}
             <div className="text-center py-6 sm:py-8 md:py-12 px-4">
-                <h1
-                    className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight6"
-                >
+                <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight6">
                     Department Analytics
                 </h1>
             </div>
-            
+
             {/* Content */}
             <div className="px-4 sm:px-6 md:px-8">
                 <div className="max-w-7xl mx-auto">
@@ -1993,13 +1876,13 @@ const DepartmentGraphs: React.FC = () => {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             {/* Indicators with Buttons */}
                             <div className="flex items-center justify-between mt-8 space-x-4">
                                 {/* Left Button */}
                                 <button
                                     onClick={() => scrollToCard('prev')}
-                                    className="w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
+                                    className="nav-button w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
                                     rounded-full flex items-center justify-center shadow-md 
                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-white"
                                 >
@@ -2011,7 +1894,7 @@ const DepartmentGraphs: React.FC = () => {
                                     {filteredData.map((_, index) => (
                                         <div
                                             key={index}
-                                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                            className={`indicator w-2 h-2 rounded-full transition-all duration-300 ${
                                                 index === currentIndex ? 'bg-[#2FA19A] scale-125' : 'bg-[#18276c]/30'
                                             }`}
                                         />
@@ -2021,7 +1904,7 @@ const DepartmentGraphs: React.FC = () => {
                                 {/* Right Button */}
                                 <button
                                     onClick={() => scrollToCard('next')}
-                                    className="w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
+                                    className="nav-button w-6 h-6 bg-gradient-to-r from-[#18276c] to-[#2FA19A] 
                                     rounded-full flex items-center justify-center shadow-md 
                                     hover:shadow-lg hover:scale-110 transition-all duration-300 text-white"
                                 >
@@ -2039,11 +1922,10 @@ const DepartmentGraphs: React.FC = () => {
 
                     {filteredData.length === 0 && (
                         <div className="text-center py-12 sm:py-16">
-                            <div
-                                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#2FA19A]/20 to-[#18276c]/20 
-                                            rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6"
-                            >
-                                <Search className="w-8 h-8 sm:w-10 sm:h-10 md:w-16 md:h-16 text-[#18276c]/60" />
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#2FA19A]/20 to-[#18276c]/20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                                <div className="search-icon-wrapper">
+                                    <Search className="w-8 h-8 sm:w-10 sm:h-10 md:w-16 md:h-16 text-[#18276c]/60" />
+                                </div>
                             </div>
                             <h3 className="text-xl sm:text-2xl font-black text-[#18276c] mb-2 sm:mb-3">
                                 No departments found
@@ -2058,13 +1940,7 @@ const DepartmentGraphs: React.FC = () => {
 
             {/* Floating Action Button */}
             <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
-                <button
-                    className="px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 bg-[#2FA19A]  
-                    transform hover:scale-105 transition-transform duration-300 ease-in-out
-                    text-sm sm:text-sm md:text-base lg:text-lg tracking-wide 
-                    text-white rounded-full shadow-xl hover:shadow-2xl 
-                    border border-white/20 hover:border-white/40"
-                >
+                <button className="cta-button px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 bg-[#2FA19A] transform hover:scale-105 transition-transform duration-300 ease-in-out text-sm sm:text-sm md:text-base lg:text-lg tracking-wide text-white rounded-full shadow-xl hover:shadow-2xl border border-white/20 hover:border-white/40">
                     Book Appointment
                 </button>
             </div>
@@ -2092,6 +1968,354 @@ const DepartmentGraphs: React.FC = () => {
                     }
                 }
 
+                /* 3D ICON ANIMATIONS WITH ORBITAL EFFECTS */
+                
+                /* Rotating Rings Around Icons */
+                @keyframes rotateRing1 {
+                    0% { transform: perspective(300px) rotateZ(0deg) rotateX(15deg); }
+                    100% { transform: perspective(300px) rotateZ(360deg) rotateX(15deg); }
+                }
+                
+                @keyframes rotateRing2 {
+                    0% { transform: perspective(300px) rotateZ(0deg) rotateX(-15deg); }
+                    100% { transform: perspective(300px) rotateZ(-360deg) rotateX(-15deg); }
+                }
+                
+                .rotating-ring-1 {
+                    animation: rotateRing1 4s linear infinite;
+                    transform-origin: center;
+                    transform-style: preserve-3d;
+                }
+                
+                .rotating-ring-2 {
+                    animation: rotateRing2 6s linear infinite;
+                    transform-origin: center;
+                    transform-style: preserve-3d;
+                }
+                
+                /* Orbital Particles */
+                @keyframes orbitParticle1 {
+                    0% { transform: perspective(200px) rotateZ(0deg) translateX(25px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(360deg) translateX(25px) rotateZ(-360deg); }
+                }
+                
+                @keyframes orbitParticle2 {
+                    0% { transform: perspective(200px) rotateZ(120deg) translateX(20px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(480deg) translateX(20px) rotateZ(-360deg); }
+                }
+                
+                @keyframes orbitParticle3 {
+                    0% { transform: perspective(200px) rotateZ(240deg) translateX(30px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(600deg) translateX(30px) rotateZ(-360deg); }
+                }
+                
+                @keyframes orbitParticle4 {
+                    0% { transform: perspective(200px) rotateZ(60deg) translateX(18px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(-300deg) translateX(18px) rotateZ(360deg); }
+                }
+                
+                @keyframes orbitParticle5 {
+                    0% { transform: perspective(200px) rotateZ(180deg) translateX(35px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(-180deg) translateX(35px) rotateZ(360deg); }
+                }
+                
+                @keyframes orbitParticle6 {
+                    0% { transform: perspective(200px) rotateZ(300deg) translateX(15px) rotateZ(0deg); }
+                    100% { transform: perspective(200px) rotateZ(660deg) translateX(15px) rotateZ(-360deg); }
+                }
+                
+                .particle-1 {
+                    animation: orbitParticle1 3s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 6px rgba(47, 161, 154, 0.8);
+                }
+                
+                .particle-2 {
+                    animation: orbitParticle2 4s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 4px rgba(24, 39, 108, 0.8);
+                }
+                
+                .particle-3 {
+                    animation: orbitParticle3 2.5s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 4px rgba(47, 161, 154, 0.6);
+                }
+                
+                .particle-4 {
+                    animation: orbitParticle4 5s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 3px rgba(24, 39, 108, 0.6);
+                }
+                
+                .particle-5 {
+                    animation: orbitParticle5 3.5s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 2px rgba(47, 161, 154, 0.4);
+                }
+                
+                .particle-6 {
+                    animation: orbitParticle6 4.5s linear infinite;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center;
+                    box-shadow: 0 0 2px rgba(24, 39, 108, 0.4);
+                }
+                
+                /* Pulsing Glow Effect */
+                @keyframes pulsingGlow {
+                    0%, 100% { 
+                        opacity: 0.3;
+                        transform: scale(1);
+                        box-shadow: 0 0 20px rgba(47, 161, 154, 0.3);
+                    }
+                    50% { 
+                        opacity: 0.6;
+                        transform: scale(1.05);
+                        box-shadow: 0 0 30px rgba(47, 161, 154, 0.5);
+                    }
+                }
+                
+                .pulsing-glow {
+                    animation: pulsingGlow 2s ease-in-out infinite;
+                }
+                
+                /* Energy Waves */
+                @keyframes energyWave1 {
+                    0% { 
+                        transform: scale(1);
+                        opacity: 0.5;
+                    }
+                    50% { 
+                        transform: scale(1.2);
+                        opacity: 0.2;
+                    }
+                    100% { 
+                        transform: scale(1.4);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes energyWave2 {
+                    0% { 
+                        transform: scale(1);
+                        opacity: 0.4;
+                    }
+                    50% { 
+                        transform: scale(1.3);
+                        opacity: 0.2;
+                    }
+                    100% { 
+                        transform: scale(1.6);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes energyWave3 {
+                    0% { 
+                        transform: scale(1);
+                        opacity: 0.3;
+                    }
+                    50% { 
+                        transform: scale(1.4);
+                        opacity: 0.1;
+                    }
+                    100% { 
+                        transform: scale(1.8);
+                        opacity: 0;
+                    }
+                }
+                
+                .wave-1 {
+                    animation: energyWave1 2s ease-out infinite;
+                    animation-delay: 0s;
+                }
+                
+                .wave-2 {
+                    animation: energyWave2 2s ease-out infinite;
+                    animation-delay: 0.3s;
+                }
+                
+                .wave-3 {
+                    animation: energyWave3 2s ease-out infinite;
+                    animation-delay: 0.6s;
+                }
+                
+                /* Enhanced Icon Container */
+                .icon-container {
+                    perspective: 400px;
+                    transform-style: preserve-3d;
+                    position: relative;
+                }
+                
+                /* Enhanced Main Icon Animation */
+                @keyframes icon3DFloatEnhanced {
+                    0%, 100% {
+                        transform: perspective(300px) rotateX(0deg) rotateY(0deg) translateZ(5px) scale(1);
+                    }
+                    25% {
+                        transform: perspective(300px) rotateX(5deg) rotateY(-5deg) translateZ(12px) scale(1.05);
+                    }
+                    50% {
+                        transform: perspective(300px) rotateX(0deg) rotateY(10deg) translateZ(15px) scale(1.1);
+                    }
+                    75% {
+                        transform: perspective(300px) rotateX(-5deg) rotateY(5deg) translateZ(12px) scale(1.05);
+                    }
+                }
+                
+                @keyframes iconPulseGlow {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 10px rgba(47, 161, 154, 0.5)) 
+                                drop-shadow(0 0 15px rgba(47, 161, 154, 0.3));
+                    }
+                    50% {
+                        filter: drop-shadow(0 0 20px rgba(47, 161, 154, 0.8)) 
+                                drop-shadow(0 0 30px rgba(47, 161, 154, 0.5));
+                    }
+                }
+                
+                .icon-main {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    animation: iconPulseGlow 3s ease-in-out infinite;
+                }
+                
+                .group:hover .icon-main {
+                    animation: icon3DFloatEnhanced 2s ease-in-out infinite, iconPulseGlow 2s ease-in-out infinite;
+                }
+                
+                /* Hover Effects for Enhanced Container */
+                .group:hover .icon-container {
+                    transform: scale(1.05);
+                }
+                
+                .group:hover .rotating-ring-1 {
+                    animation-duration: 2s;
+                    border-color: rgba(47, 161, 154, 0.8);
+                }
+                
+                .group:hover .rotating-ring-2 {
+                    animation-duration: 3s;
+                    border-color: rgba(24, 39, 108, 0.6);
+                }
+                
+                .group:hover .orbital-particle {
+                    animation-duration: 1.5s;
+                }
+                
+                .group:hover .pulsing-glow {
+                    animation-duration: 1s;
+                }
+                
+                .group:hover .energy-wave {
+                    animation-duration: 1s;
+                }
+
+                /* 3D Icon Animations for Secondary Icons */
+                @keyframes icon3DPulse {
+                    0%, 100% {
+                        transform: perspective(200px) scale3d(1, 1, 1) rotateZ(0deg);
+                    }
+                    50% {
+                        transform: perspective(200px) scale3d(1.15, 1.15, 1.15) rotateZ(2deg);
+                    }
+                }
+
+                @keyframes icon3DSpin {
+                    0% {
+                        transform: perspective(200px) rotateY(0deg) rotateX(0deg);
+                    }
+                    25% {
+                        transform: perspective(200px) rotateY(90deg) rotateX(10deg);
+                    }
+                    50% {
+                        transform: perspective(200px) rotateY(180deg) rotateX(0deg);
+                    }
+                    75% {
+                        transform: perspective(200px) rotateY(270deg) rotateX(-10deg);
+                    }
+                    100% {
+                        transform: perspective(200px) rotateY(360deg) rotateX(0deg);
+                    }
+                }
+
+                @keyframes icon3DWobble {
+                    0%, 100% {
+                        transform: perspective(200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+                    }
+                    15% {
+                        transform: perspective(200px) rotateX(-25deg) rotateY(5deg) rotateZ(-5deg);
+                    }
+                    30% {
+                        transform: perspective(200px) rotateX(15deg) rotateY(-5deg) rotateZ(3deg);
+                    }
+                    45% {
+                        transform: perspective(200px) rotateX(-15deg) rotateY(3deg) rotateZ(-3deg);
+                    }
+                    60% {
+                        transform: perspective(200px) rotateX(10deg) rotateY(-2deg) rotateZ(2deg);
+                    }
+                    75% {
+                        transform: perspective(200px) rotateX(-5deg) rotateY(1deg) rotateZ(-1deg);
+                    }
+                }
+
+                @keyframes icon3DFlip {
+                    0% {
+                        transform: perspective(400px) rotateY(0deg) scale3d(1, 1, 1);
+                    }
+                    50% {
+                        transform: perspective(400px) rotateY(180deg) scale3d(1.1, 1.1, 1);
+                    }
+                    100% {
+                        transform: perspective(400px) rotateY(360deg) scale3d(1, 1, 1);
+                    }
+                }
+
+                @keyframes icon3DBounce {
+                    0%, 100% {
+                        transform: perspective(200px) translateZ(0px) rotateX(0deg);
+                    }
+                    25% {
+                        transform: perspective(200px) translateZ(15px) rotateX(-10deg);
+                    }
+                    50% {
+                        transform: perspective(200px) translateZ(25px) rotateX(-20deg);
+                    }
+                    75% {
+                        transform: perspective(200px) translateZ(15px) rotateX(-10deg);
+                    }
+                }
+
+                @keyframes icon3DTilt {
+                    0%, 100% {
+                        transform: perspective(300px) rotateX(0deg) rotateY(0deg);
+                    }
+                    50% {
+                        transform: perspective(300px) rotateX(15deg) rotateY(15deg);
+                    }
+                }
+
+                @keyframes icon3DGlow {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 5px rgba(47, 161, 154, 0.5)) drop-shadow(0 0 10px rgba(47, 161, 154, 0.3));
+                    }
+                    50% {
+                        filter: drop-shadow(0 0 15px rgba(47, 161, 154, 0.8)) drop-shadow(0 0 25px rgba(47, 161, 154, 0.5));
+                    }
+                }
+
                 .scrollbar-hide {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
@@ -2099,6 +2323,231 @@ const DepartmentGraphs: React.FC = () => {
 
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
+                }
+
+                /* Star Icons - 3D Pulse */
+                .star-icon-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .star-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    backface-visibility: hidden;
+                }
+
+                .star-icon-wrapper:hover .lucide {
+                    animation: icon3DPulse 1.2s ease-in-out infinite, icon3DGlow 2s ease-in-out infinite;
+                }
+
+                /* Users Icons - 3D Spin */
+                .users-icon-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .users-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s ease;
+                    backface-visibility: hidden;
+                }
+
+                .users-icon-wrapper:hover .lucide {
+                    animation: icon3DSpin 1.5s ease-in-out infinite;
+                }
+
+                /* Award Icons - 3D Flip */
+                .award-icon-wrapper {
+                    perspective: 400px;
+                    transform-style: preserve-3d;
+                }
+
+                .award-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s ease;
+                    backface-visibility: hidden;
+                }
+
+                .award-icon-wrapper:hover .lucide {
+                    animation: icon3DFlip 1s ease-in-out infinite;
+                }
+
+                /* Activity Icons - 3D Bounce */
+                .activity-icon-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .activity-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.3s ease;
+                    backface-visibility: hidden;
+                }
+
+                .activity-icon-wrapper:hover .lucide {
+                    animation: icon3DBounce 1s ease-in-out infinite;
+                }
+
+                /* Trend Icons - 3D Tilt */
+                .trend-icon-wrapper {
+                    perspective: 300px;
+                    transform-style: preserve-3d;
+                }
+
+                .trend-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.3s ease;
+                    backface-visibility: hidden;
+                }
+
+                .trend-icon-wrapper:hover .lucide {
+                    animation: icon3DTilt 1.5s ease-in-out infinite;
+                }
+
+                /* Arrow Icons - 3D Push Effect */
+                .arrow-icon-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .arrow-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    backface-visibility: hidden;
+                }
+
+                .arrow-icon-wrapper:hover .lucide {
+                    transform: perspective(200px) translateX(4px) translateZ(10px) rotateY(15deg);
+                    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+                }
+
+                /* Trend Arrow - Enhanced 3D */
+                .trend-arrow-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .trend-arrow-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.3s ease;
+                    backface-visibility: hidden;
+                }
+
+                .trend-arrow-wrapper:hover .lucide {
+                    transform: perspective(200px) translateY(-3px) translateZ(8px) rotateX(10deg);
+                    animation: icon3DGlow 1.5s ease-in-out infinite;
+                }
+
+                /* More Icons - 3D Rotate */
+                .more-icon-wrapper {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                }
+
+                .more-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                    backface-visibility: hidden;
+                }
+
+                .more-icon-wrapper:hover .lucide {
+                    transform: perspective(200px) rotateZ(90deg) rotateY(180deg) scale3d(1.2, 1.2, 1);
+                    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+                }
+
+                /* Search Icons - 3D Magnify */
+                .search-icon-wrapper {
+                    perspective: 300px;
+                    transform-style: preserve-3d;
+                }
+
+                .search-icon-wrapper .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.4s ease;
+                    backface-visibility: hidden;
+                }
+
+                .search-icon-wrapper:hover .lucide {
+                    transform: perspective(300px) scale3d(1.3, 1.3, 1.3) rotateY(360deg);
+                    animation: icon3DGlow 2s ease-in-out infinite;
+                }
+
+                /* Navigation Buttons - 3D Press Effect */
+                .nav-button {
+                    perspective: 150px;
+                    transform-style: preserve-3d;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .nav-button .lucide {
+                    transform-style: preserve-3d;
+                    transition: all 0.2s ease;
+                    backface-visibility: hidden;
+                }
+
+                .nav-button:hover {
+                    transform: perspective(150px) translateZ(5px) scale(1.1);
+                    box-shadow: 0 8px 20px rgba(47, 161, 154, 0.4);
+                }
+
+                .nav-button:hover .lucide {
+                    transform: perspective(150px) translateZ(3px);
+                }
+
+                .nav-button:active {
+                    transform: perspective(150px) translateZ(-2px) scale(0.98);
+                }
+
+                /* Indicators - 3D Lift */
+                .indicator {
+                    perspective: 100px;
+                    transform-style: preserve-3d;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .indicator:hover {
+                    transform: perspective(100px) translateZ(5px) scale(1.4);
+                    box-shadow: 0 4px 8px rgba(47, 161, 154, 0.5);
+                }
+
+                /* CTA Button - 3D Elevation */
+                .cta-button {
+                    perspective: 200px;
+                    transform-style: preserve-3d;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: visible;
+                }
+
+                .cta-button:hover {
+                    transform: perspective(200px) translateZ(8px) translateY(-2px) scale(1.05);
+                    box-shadow: 0 12px 30px rgba(47, 161, 154, 0.4);
+                    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+                }
+
+                .cta-button:active {
+                    transform: perspective(200px) translateZ(2px) translateY(-1px) scale(1.02);
+                }
+
+                /* Performance optimizations */
+                .icon-container,
+                .icon-main,
+                .star-icon-wrapper,
+                .users-icon-wrapper,
+                .award-icon-wrapper,
+                .activity-icon-wrapper,
+                .trend-icon-wrapper,
+                .arrow-icon-wrapper,
+                .trend-arrow-wrapper,
+                .more-icon-wrapper,
+                .search-icon-wrapper,
+                .orbital-particle,
+                .rotating-ring-1,
+                .rotating-ring-2,
+                .pulsing-glow,
+                .energy-wave {
+                    will-change: transform;
                 }
             `}</style>
         </div>
