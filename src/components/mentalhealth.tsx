@@ -50,11 +50,11 @@
 // export default MentalHealthCard;
 
 import React from 'react';
-import sampleImage from '../assets/Mental-wellness-month.png'; // replace with your image path
+import sampleVideo  from '../assets/mental-wellness.mp4'; // replace with your image path
 
 const MentalHealthCard: React.FC = () => {
     return (
-        <div className="flex flex-col items-center w-full h-full bg-[#def2ff] text-center px-6 pt-14 pb-14">
+        <div className="flex flex-col items-center w-full h-full bg-[#d7efff] text-center px-6 pt-14 pb-14">
             {/* Image with SVG blob shape */}
             {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
                 <defs>
@@ -74,9 +74,14 @@ const MentalHealthCard: React.FC = () => {
                     clipPath="url(#blobClip1)"
                 />
             </svg> */}
-            <div>
-                <img src={sampleImage} alt="Mental Health" className="w-full h-full object-cover" />
-            </div>
+            <video
+                src={sampleVideo} // import your .mp4 file like you did with image
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+            />
             {/* Title */}
             <h2
                 className="mt-6  text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
