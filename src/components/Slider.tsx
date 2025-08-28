@@ -75,7 +75,7 @@ const PremiumSlider = () => {
 
     return (
         <div
-            className="relative w-full h-[70vh] overflow-hidden bg-black"
+            className="relative w-full h-screen overflow-hidden bg-black"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)} // fixed: resume on leave
         >
