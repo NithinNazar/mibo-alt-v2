@@ -1,5 +1,4 @@
-import sample from '../assets/Banner_2.jpg';
-import wavePng from '../assets/wave.jpg'; // Add your wave PNG import here
+import sampleVideo from '../assets/therapy and psychatry.mp4'
 
 const OfferingsAndTherapy = () => {
     return (
@@ -18,11 +17,41 @@ const OfferingsAndTherapy = () => {
 
             <div className="flex flex-col items-center text-center px-4 pb-4 pt-0 mt-0 relative">
                 {/* Wave PNG positioned near SVG */}
-                <div className="absolute top-0 left-0 w-full z-0">
+                {/* <div className="absolute top-0 left-0 w-full z-0">
                     <img src={wavePng} alt="Wave decoration" className="w-full h-auto object-cover opacity-70" />
                 </div>
                 <div>
                     <img src={sample} alt="Mental Health" className="w-full h-full object-cover" />
+                </div> */}
+                {/* <div className="w-[400px] h-[500px] overflow-hidden rounded-lg">
+                    <video
+                        src={sampleVideo} // import your .mp4 file
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                    />
+                </div> */}
+                {/* <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black">
+                    <video
+                        src={sampleVideo} // import your .mp4 file
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover rounded-full"
+                    />
+                </div> */}
+                <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black animate-fadeIn">
+                    <video
+                        src={sampleVideo} // import your .mp4 file
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover rounded-full"
+                    />
                 </div>
 
                 {/* SVG Blob Image */}
@@ -47,7 +76,7 @@ const OfferingsAndTherapy = () => {
             </div>
 
             {/* Second Section - Therapy & Psychiatry */}
-            <div className="px-8 pb-6">
+            <div className="px-8 pb-6 pt-6">
                 <h2 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-4">Therapy & Psychiatry</h2>
 
                 <div className="space-y-6">
