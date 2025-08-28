@@ -183,7 +183,7 @@ const App = () => {
             {/* Header */}
             <Header /> {/* ✅ No extra fixed wrapper needed */}
             {/* Content */}
-            <div className="w-full h-screen overflow-y-auto">
+            <div className="w-full overflow-y-auto">
                 {/* ⬆ add padding-top so content doesn't go under header 
                      (adjust 80px to your header height) */}
                 {isMobile ? (

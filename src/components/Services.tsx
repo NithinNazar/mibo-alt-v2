@@ -357,7 +357,7 @@ const MentalHealthServices = () => {
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] ">Mental Health Services</h1>
-                    <p className="text-[10px] sm:text-[10px] text-slate-600  mx-auto leading-relaxed">
+                    <p className="text-[12px] sm:text-[12px] text-slate-600  mx-auto leading-relaxed">
                         Comprehensive care for your mental wellbeing
                     </p>
                 </div>
