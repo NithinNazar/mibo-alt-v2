@@ -4,7 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
     font-family: "Quicksand", sans-serif;
     font-optical-sizing: auto;
+} */
+
+html, body {
+  font-family: "Quicksand", sans-serif;
+  font-optical-sizing: auto;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; 
+  box-sizing: border-box;
 }

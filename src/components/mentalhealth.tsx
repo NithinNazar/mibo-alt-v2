@@ -92,7 +92,7 @@ const MentalHealthCard: React.FC = () => {
 
             {/* Subtitle */}
             <p
-                className="mt-4 text-[0.8rem] text-[rgb(76, 76, 76)] text-center max-w-md mx-auto"
+                className="mt-4 text-[0.875rem] text-[rgb(76, 76, 76)] text-center max-w-md mx-auto"
                 style={{ fontFamily: 'Quicksand, sans-serif' }}
             >
                 Our mission is simple: to help you feel better, get better and stay better.
@@ -100,7 +100,7 @@ const MentalHealthCard: React.FC = () => {
 
             {/* Body text */}
             <p
-                className="mt-4 text-[rgb(76, 76, 76)] text-[0.8rem] text-center"
+                className="mt-4 text-[rgb(76, 76, 76)] text-[0.875rem] text-center"
                 style={{ fontFamily: 'Quicksand, sans-serif' }}
             >
                 We bring together self-care, support from qualified therapists and psychiatrists, as well as community
