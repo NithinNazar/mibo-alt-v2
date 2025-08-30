@@ -266,7 +266,7 @@ const LocationCardsSlider = () => {
                 <h1 className="mt-6  mb-4 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug">
                     Care and support near you
                 </h1>
-                <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.8rem] text-center">
+                <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center">
                     Our centres across Bangalore, Mumbai, and Delhi bring expert care to your neighbourhood so support is
                     always within reach.
                 </p>

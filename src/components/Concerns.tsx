@@ -175,7 +175,7 @@ const MentalHealthCards = () => {
                 <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug pt-4">
                     Mental health concerns we care for
                 </h1>
-                <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.8rem] text-center">
+                <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
                     Mibo offers support for 30+ mental health conditions. Explore some of the most common ones below to see
                     how we approach care.
                 </p>

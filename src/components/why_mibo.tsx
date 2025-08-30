@@ -28,7 +28,7 @@ const MiboCarousel = () => {
         <div className="w-full max-w-md mx-auto bg-[#2FA19A] p-8 text-white text-center">
             {/* Fixed Header */}
             <h2 className="text-2xl font-semibold mb-4">Why Mibo?</h2>
-            <p className="text-green-100 text-sm  leading-relaxed ">
+            <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
                 Our platform is built by psychiatrists, therapists and mental health experts with immense global experience.
             </p>
 
@@ -90,11 +90,11 @@ const MiboCarousel = () => {
 
                                 {/* Content */}
                                 <div className="text-center">
-                                    <h3 className="text-[0.8rem] text-[rgb(255, 255, 255] font-[700] mb-2">
+                                    <h3 className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
                                         {slide.title}
                                     </h3>
                                     <p
-                                        className="text-green-100 text-sm font-[500] leading-relaxed"
+                                        className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold"
                                         style={{ lineHeight: '20px' }}
                                     >
                                         {slide.description}
