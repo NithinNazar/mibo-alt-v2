@@ -8,7 +8,7 @@ const OfferingsAndTherapy = () => {
                 <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight">
                     Our mental healthcare offerings
                 </h1>
-                <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
+                <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
                     We are a mental health ecosystem that brings together multiple treatment options to create an experience
                     that makes getting help easy and seamless. From assessment to treatment, we're with you every step of
                     the way.
@@ -80,13 +80,13 @@ const OfferingsAndTherapy = () => {
                 <h2 className="text-[1.563rem]  text-center font-[700] text-[rgb(76,76,76)] mb-4">Therapy & Psychiatry</h2>
 
                 <div className="space-y-6">
-                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
+                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
                         Our professionals are highly qualified and trained to deliver quality and compassionate clinical
                         treatment across ages through therapy, psychiatry, mental health support for your child and couples
                         therapy.
                     </p>
 
-                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[1rem] text-center font-semibold">
+                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
                         They follow proprietary protocols & undergo peer supervision to ensure you get exceptional care, now
                         in person too. Meet your mental health expert today.
                     </p>
