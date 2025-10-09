@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { ChevronRight, ChevronDown, User, Users, Monitor } from "lucide-react";
 import inPatientImg from "../assets/In-patient.jpg";
-import inPersonImg from "../assets/in-person.jpg";
+import inPersonImg from "../assets/In-person.jpg";
 import onlineImg from "../assets/online.jpg";
 
 type Service = {
