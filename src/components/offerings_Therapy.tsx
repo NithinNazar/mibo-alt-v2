@@ -1,29 +1,30 @@
-import sampleVideo from '../assets/therapy and psychatry.mp4'
+import sampleVideo from "../assets/therapy and psychatry.mp4";
 
 const OfferingsAndTherapy = () => {
-    return (
-        <div className="max-w-md mx-auto bg-white pb-14">
-            {/* First Section - Our mental healthcare offerings */}
-            <div className="text-center px-8 pt-16 pb-6">
-                <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight">
-                    Our mental healthcare offerings
-                </h1>
-                <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
-                    We are a mental health ecosystem that brings together multiple treatment options to create an experience
-                    that makes getting help easy and seamless. From assessment to treatment, we're with you every step of
-                    the way.
-                </p>
-            </div>
+  return (
+    <div className="max-w-md mx-auto bg-white pb-14">
+      {/* First Section - Our mental healthcare offerings */}
+      <div className="text-center px-8 pt-16 pb-6">
+        <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight">
+          Our mental healthcare offerings
+        </h1>
+        <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold">
+          We are a mental health ecosystem that brings together multiple
+          treatment options to create an experience that makes getting help easy
+          and seamless. From assessment to treatment, we're with you every step
+          of the way.
+        </p>
+      </div>
 
-            <div className="flex flex-col items-center text-center px-4 pb-4 pt-16 mt-0 relative">
-                {/* Wave PNG positioned near SVG */}
-                {/* <div className="absolute top-0 left-0 w-full z-0">
+      <div className="flex flex-col items-center text-center px-4 pb-4 pt-16 mt-0 relative">
+        {/* Wave PNG positioned near SVG */}
+        {/* <div className="absolute top-0 left-0 w-full z-0">
                     <img src={wavePng} alt="Wave decoration" className="w-full h-auto object-cover opacity-70" />
                 </div>
                 <div>
                     <img src={sample} alt="Mental Health" className="w-full h-full object-cover" />
                 </div> */}
-                {/* <div className="w-[400px] h-[500px] overflow-hidden rounded-lg">
+        {/* <div className="w-[400px] h-[500px] overflow-hidden rounded-lg">
                     <video
                         src={sampleVideo} // import your .mp4 file
                         autoPlay
@@ -33,7 +34,7 @@ const OfferingsAndTherapy = () => {
                         className="w-full h-full object-cover"
                     />
                 </div> */}
-                {/* <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black">
+        {/* <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black">
                     <video
                         src={sampleVideo} // import your .mp4 file
                         autoPlay
@@ -43,19 +44,19 @@ const OfferingsAndTherapy = () => {
                         className="w-full h-full object-cover rounded-full"
                     />
                 </div> */}
-                <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black animate-fadeIn">
-                    <video
-                        src={sampleVideo} // import your .mp4 file
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover rounded-full"
-                    />
-                </div>
+        <div className="w-80 h-80 rounded-full overflow-hidden flex items-center justify-center bg-black animate-fadeIn">
+          <video
+            src={sampleVideo} // import your .mp4 file
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover rounded-full"
+          />
+        </div>
 
-                {/* SVG Blob Image */}
-                {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
+        {/* SVG Blob Image */}
+        {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
                     <defs>
                         <clipPath id="blobClip">
                             <path
@@ -73,34 +74,38 @@ const OfferingsAndTherapy = () => {
                         clipPath="url(#blobClip)"
                     />
                 </svg> */}
-            </div>
+      </div>
 
-            {/* Second Section - Therapy & Psychiatry */}
-            <div className="px-8 pb-16 pt-16">
-                <h2 className="text-[1.563rem]  text-center font-[700] text-[rgb(76,76,76)] mb-4">Therapy & Psychiatry</h2>
+      {/* Second Section - Therapy & Psychiatry */}
+      <div className="px-8 pb-16 pt-16">
+        <h2 className="text-[1.563rem]  text-center font-[700] text-[rgb(76,76,76)] mb-4">
+          Therapy & Psychiatry
+        </h2>
 
-                <div className="space-y-6">
-                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
-                        Our professionals are highly qualified and trained to deliver quality and compassionate clinical
-                        treatment across ages through therapy, psychiatry, mental health support for your child and couples
-                        therapy.
-                    </p>
+        <div className="space-y-6">
+          <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold">
+            Our professionals are highly qualified and trained to deliver
+            quality and compassionate clinical treatment across ages through
+            therapy, psychiatry, mental health support for your child and
+            couples therapy.
+          </p>
 
-                    <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.9rem] text-center font-semibold">
-                        They follow proprietary protocols & undergo peer supervision to ensure you get exceptional care, now
-                        in person too. Meet your mental health expert today.
-                    </p>
-                </div>
-
-                {/* CTA Button */}
-                <div className="mt-8">
-                    <button className="w-full bg-[#18356C] hover:bg-[#2FA19A] text-white font-semibold py-4 px-6 rounded-full text-base transition-colors duration-200 uppercase tracking-wide">
-                        EXPLORE EXPERTS
-                    </button>
-                </div>
-            </div>
+          <p className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold">
+            They follow proprietary protocols & undergo peer supervision to
+            ensure you get exceptional care, now in person too. Meet your mental
+            health expert today.
+          </p>
         </div>
-    );
+
+        {/* CTA Button */}
+        <div className="mt-8">
+          <button className="w-full bg-[#18356C] hover:bg-[#2FA19A] text-white font-semibold py-4 px-6 rounded-full text-base transition-colors duration-200 uppercase tracking-wide">
+            EXPLORE EXPERTS
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default OfferingsAndTherapy;

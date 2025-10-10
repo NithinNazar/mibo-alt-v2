@@ -29,10 +29,10 @@ export default function SupportServices() {
           loop={true}
         />
 
-        <h2 className="text-lg font-semibold text-[#3c493f] mb-3">
+        <h2 className="text-xl font-semibold text-[#3c493f] mb-3">
           Support shaped around you
         </h2>
-        <p className="text-gray-600 text-[0.9rem] leading-relaxed">
+        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
           We look at your needs and experiences to connect you with someone who
           understands where you're coming from and what support looks like.
         </p>
@@ -44,10 +44,10 @@ export default function SupportServices() {
           <img src={heartIcon} alt="Heart" className="w-6 h-6" />
           {/* <img src={heartIcon} alt="Heart" className="w-5 h-5" /> */}
         </div>
-        <h2 className="text-lg font-semibold text-[#3c493f] mb-3">
+        <h2 className="text-xl font-semibold text-[#3c493f] mb-3">
           Supporting those who support you
         </h2>
-        <p className="text-gray-600 text-[0.9rem] leading-relaxed">
+        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
           We bring your loved ones into the process through joint sessions when
           needed, updates and resources that show them what to expect and how to
           help without over-stepping.
@@ -65,10 +65,10 @@ export default function SupportServices() {
                         </div> */}
           </div>
         </div>
-        <h2 className="text-lg font-semibold text-[#3c493f] mb-3 leading-tight">
+        <h2 className="text-xl font-semibold text-[#3c493f] mb-3 leading-tight">
           Care in your language, and for your context
         </h2>
-        <p className="text-gray-600 text-[0.9rem] leading-relaxed">
+        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
           With fluency across 15+ Indian languages, our experts understand your
           cultural context so you don't have to over-explain and nothing is lost
           in translation.

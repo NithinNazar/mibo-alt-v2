@@ -9,7 +9,7 @@ export default function CareServiceComponent() {
           <div className="space-y-8">
             {/* Main Heading */}
             <div className="space-y-6">
-              <h1 className="text-4xl lg:text-5xl ml-4 font-bold text-gray-900 leading-tight">
+              <h1 className="text-2xl lg:text-5xl ml-4 font-bold text-gray-900 leading-tight">
                 Real care adapts to your
                 <span className="text-[#2FA19A] ">
                   {" "}
@@ -17,7 +17,7 @@ export default function CareServiceComponent() {
                 </span>
               </h1>
 
-              <p className="text-[0.8rem] font-500 ml-4 text-gray-600 leading-relaxed max-w-lg">
+              <p className="text-[0.9rem] font-500 ml-4 text-gray-600 leading-relaxed max-w-lg font-semibold">
                 Care doesn't happen in isolation. It works when it's rooted in
                 your everyday life. We practice care that speaks your language
                 and sees your world.
