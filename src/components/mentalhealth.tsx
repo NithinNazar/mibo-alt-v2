@@ -1,46 +1,46 @@
 import React from "react";
-import sampleVideo from "../assets/mental-wellness.mp4";
+import sampleVideo from "../assets/mental-wellness.mp4"; // replace with your video path
 import { motion } from "framer-motion";
 
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.6, // delay between each child
+    },
+  },
+} as const;
+
+const fadeIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1] }, // slow and smooth
+  },
+} as const;
+
 const MentalHealthCard: React.FC = () => {
-  // Parent container for stagger
-  const container = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.4,
-      },
-    },
-  } as const;
-
-  // Individual fade-in in place
-  const fadeIn = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.8, ease: [0.42, 0, 0.58, 1] },
-    },
-  } as const;
-
   return (
     <motion.div
       className="flex flex-col items-center w-full h-full bg-[#d7efff] text-center px-6 pt-14 pb-14"
-      variants={container}
+      variants={containerVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
     >
+      {/* Video */}
       <motion.video
         src={sampleVideo}
         autoPlay
         loop
         muted
         playsInline
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover rounded-lg"
         variants={fadeIn}
       />
 
+      {/* Title */}
       <motion.h2
         className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
         style={{ fontFamily: "Quicksand, sans-serif" }}
@@ -49,6 +49,7 @@ const MentalHealthCard: React.FC = () => {
         Trust Mibo with your <br /> mental health
       </motion.h2>
 
+      {/* Subtitle */}
       <motion.p
         className="mt-4 text-[0.95rem] text-[rgb(76, 76, 76)] text-center max-w-md mx-auto font-semibold"
         style={{ fontFamily: "Quicksand, sans-serif" }}
@@ -58,8 +59,9 @@ const MentalHealthCard: React.FC = () => {
         better.
       </motion.p>
 
+      {/* Body text */}
       <motion.p
-        className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold"
+        className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold max-w-lg"
         style={{ fontFamily: "Quicksand, sans-serif" }}
         variants={fadeIn}
       >
@@ -68,6 +70,7 @@ const MentalHealthCard: React.FC = () => {
         mental healthcare for your needs.
       </motion.p>
 
+      {/* Button */}
       <motion.div className="mt-6 flex justify-center" variants={fadeIn}>
         <button
           className="px-10 py-3 bg-[#18356C] text-white font-bold rounded-full text-sm tracking-wider shadow-md hover:opacity-90 transition"
