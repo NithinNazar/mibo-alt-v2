@@ -1,108 +1,109 @@
-// import userIcon from '../assets/internet.png'; // replace with your actual file
-import heartIcon from "../assets/solidarity.png"; // replace with your actual file
-import messageIcon from "../assets/arabic.png"; // replace with your actual file
+import heartIcon from "../assets/solidarity.png";
+import messageIcon from "../assets/arabic.png";
 import animationData from "../assets/wired-lineal-981-consultation-in-reveal.json";
 import Lottie from "lottie-react";
+import { motion, type Variants } from "framer-motion";
 
 export default function SupportServices() {
+  // Parent container variant to stagger sections
+  const containerVariants: Variants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.5, // sections appear one after another
+      },
+    },
+  };
+
+  // Section children variant to fade in individually
+  const childVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 1, ease: "easeOut" },
+    },
+  };
+
   return (
-    <div className="max-w-md mx-auto space-y-8 p-6 pt-14 pb-14">
-      {/* Support shaped around you */}
-      {/* <div className="animate-fade-in opacity-0 animation-delay-100">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="flex gap-1">
-                        <img src={userIcon} alt="Users" className="w-6 h-6" />
-
-                    </div>
-                </div>
-                <h2 className="text-lg font-semibold text-[#3c493f] mb-3">Support shaped around you</h2>
-                <p className="text-gray-600 text-[0.875rem] leading-relaxed">
-                    We look at your needs and experiences to connect you with someone who understands where you're coming
-                    from and what support looks like.
-                </p>
-            </div> */}
-      <div className="animate-fade-in opacity-0 animation-delay-100 relative">
-        {/* Lottie animation moved slightly to the left */}
-        <Lottie
-          animationData={animationData}
-          className="w-20 h-20 relative left-[-10px]"
-          loop={true}
-        />
-
-        <h2 className="text-xl font-semibold text-[#3c493f] mb-3">
+    <motion.div
+      className="max-w-md mx-auto space-y-16 p-6 pt-14 pb-14"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+    >
+      {/* Section 1 */}
+      <motion.div className="flex flex-col items-center space-y-4">
+        <motion.div variants={childVariants}>
+          <Lottie
+            animationData={animationData}
+            className="w-20 h-20 relative left-[-10px]"
+            loop={true}
+          />
+        </motion.div>
+        <motion.h2
+          className="text-xl font-semibold text-[#3c493f] text-center"
+          variants={childVariants}
+        >
           Support shaped around you
-        </h2>
-        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
+        </motion.h2>
+        <motion.p
+          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          variants={childVariants}
+        >
           We look at your needs and experiences to connect you with someone who
           understands where you're coming from and what support looks like.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      {/* Supporting those who support you */}
-      <div className="animate-fade-in opacity-0 animation-delay-300">
-        <div className="flex items-center gap-3 mb-4">
+      {/* Section 2 */}
+      <motion.div className="flex flex-col items-center space-y-4">
+        <motion.div
+          variants={childVariants}
+          className="flex items-center gap-3"
+        >
           <img src={heartIcon} alt="Heart" className="w-6 h-6" />
-          {/* <img src={heartIcon} alt="Heart" className="w-5 h-5" /> */}
-        </div>
-        <h2 className="text-xl font-semibold text-[#3c493f] mb-3">
+        </motion.div>
+        <motion.h2
+          className="text-xl font-semibold text-[#3c493f] text-center"
+          variants={childVariants}
+        >
           Supporting those who support you
-        </h2>
-        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
+        </motion.h2>
+        <motion.p
+          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          variants={childVariants}
+        >
           We bring your loved ones into the process through joint sessions when
           needed, updates and resources that show them what to expect and how to
           help without over-stepping.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      {/* Care in your language */}
-      <div className="animate-fade-in opacity-0 animation-delay-500">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="relative">
-            <img src={messageIcon} alt="Message" className="w-6 h-6 mb-1" />
-            {/* Optional badge */}
-            {/* <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded text-white text-xs flex items-center justify-center font-bold">
-                            15+
-                        </div> */}
-          </div>
-        </div>
-        <h2 className="text-xl font-semibold text-[#3c493f] mb-3 leading-tight">
+      {/* Section 3 */}
+      <motion.div className="flex flex-col items-center space-y-4">
+        <motion.div
+          variants={childVariants}
+          className="flex items-center gap-3"
+        >
+          <img src={messageIcon} alt="Message" className="w-6 h-6" />
+        </motion.div>
+        <motion.h2
+          className="text-xl font-semibold text-[#3c493f] text-center"
+          variants={childVariants}
+        >
           Care in your language, and for your context
-        </h2>
-        <p className="text-gray-900 text-[0.9rem] leading-relaxed">
+        </motion.h2>
+        <motion.p
+          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          variants={childVariants}
+        >
           With fluency across 15+ Indian languages, our experts understand your
           cultural context so you don't have to over-explain and nothing is lost
           in translation.
-        </p>
-      </div>
-
-      <style>{`
-                @keyframes fade-in {
-                    from {
-                        opacity: 0;
-                        transform: translateY(20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                .animate-fade-in {
-                    animation: fade-in 0.8s ease-out forwards;
-                }
-
-                .animation-delay-100 {
-                    animation-delay: 0.1s;
-                }
-
-                .animation-delay-300 {
-                    animation-delay: 0.3s;
-                }
-
-                .animation-delay-500 {
-                    animation-delay: 0.5s;
-                }
-            `}</style>
-    </div>
+        </motion.p>
+      </motion.div>
+    </motion.div>
   );
 }

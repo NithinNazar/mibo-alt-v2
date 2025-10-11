@@ -17,65 +17,60 @@ const Home = () => {
   defineElement(lottie.loadAnimation);
 
   return (
-    <div className="flex flex-col w-full overflow-hidden bg-[#F8FCFB] text-[#1C3D3A]">
-      {/* --- Header Section --- */}
-      <ScrollRevealWrapper>
+    <div className="flex flex-col w-full overflow-hidden bg-white">
+      <ScrollRevealWrapper direction="fade" delay={400}>
         <Header />
       </ScrollRevealWrapper>
 
-      {/* --- Mental Health Section --- */}
       <div className="relative bg-gradient-to-br from-[#D7EFFF] via-[#BCE1EC]/70 to-[#A5C8D7]/90 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.35),transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.2),transparent_60%)] pointer-events-none" />
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="right" delay={500} cascade>
           <MentalHealthServices />
         </ScrollRevealWrapper>
       </div>
 
-      {/* --- Why Mibo Section --- */}
-      <div className="relative bg-gradient-to-tr from-[#276C72] via-[#3D8B8A]/85 to-white overflow-hidden">
+      <div className="relative bg-gradient-to-tr from-[#276C72] via-[#3D8B8A]/85 to-white overflow-hidden text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none" />
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="left" delay={500} cascade>
           <MiboCarousel />
         </ScrollRevealWrapper>
       </div>
 
-      {/* --- Offerings / Department Graphs --- */}
       <div className="bg-gradient-to-t from-[#FFFFFF] via-[#E3F7F1]/70 to-[#E3F7F1]">
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="top" delay={500} cascade>
           <OfferingsAndTherapy />
         </ScrollRevealWrapper>
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="bottom" delay={600} cascade>
           <DepartmentGraphs />
         </ScrollRevealWrapper>
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="right" delay={700} cascade>
           <CorporateLanding />
         </ScrollRevealWrapper>
       </div>
 
-      {/* --- Support / Features Section (added bottom padding) --- */}
       <div className="bg-gradient-to-bl from-[#E3F7F1] via-[#D7EFFF]/70 to-[#D7EFFF] pb-20 sm:pb-24">
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="fade" delay={500} cascade>
           <MentalHealthConcerns />
         </ScrollRevealWrapper>
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="left" delay={600} cascade>
           <CareServiceComponent />
         </ScrollRevealWrapper>
-        <ScrollRevealWrapper>
+        <ScrollRevealWrapper direction="right" delay={700} cascade>
           <SupportServices />
         </ScrollRevealWrapper>
       </div>
 
-      {/* --- Location Section --- */}
-      <div className="bg-gradient-to-t from-[#D7EFFF] via-[#B9E6EC]/70 to-[#E3F7F1]/90 pt-12 sm:pt-16 pb-16">
-        <ScrollRevealWrapper>
+      <div className="bg-gradient-to-t from-[#D7EFFF] via-[#B9E6EC]/70 to-[#E3F7F1]/90 pt-12 sm:pt-16">
+        <ScrollRevealWrapper direction="bottom" delay={600} cascade>
           <Location />
         </ScrollRevealWrapper>
       </div>
 
-      {/* --- Footer Section (Two-column structure from Footer.tsx) --- */}
-      <Footer />
+      <ScrollRevealWrapper direction="fade" delay={700} cascade>
+        <Footer />
+      </ScrollRevealWrapper>
     </div>
   );
 };
@@ -92,6 +87,7 @@ export default Home;
 // import CareServiceComponent from "../components/Features";
 // import SupportServices from "../components/Mibo_Supports";
 // import Location from "../components/Location";
+// import Footer from "../components/Footer";
 // import ScrollRevealWrapper from "../components/ScrollRevealWrapper";
 // import lottie from "lottie-web";
 // import { defineElement } from "lord-icon-element";
@@ -100,62 +96,67 @@ export default Home;
 //   defineElement(lottie.loadAnimation);
 
 //   return (
-//     <div className="flex flex-col w-full overflow-hidden">
+//     <div className="flex flex-col w-full overflow-hidden bg-white">
 //       {/* --- Header Section --- */}
-//       <ScrollRevealWrapper>
+//       <ScrollRevealWrapper direction="fade" delay={300}>
 //         <Header />
 //       </ScrollRevealWrapper>
 
-//       {/* --- Mental Health Section with shimmer overlay --- */}
+//       {/* --- Mental Health Services Section (Right to Left) --- */}
 //       <div className="relative bg-gradient-to-br from-[#D7EFFF] via-[#BCE1EC]/70 to-[#A5C8D7]/90 overflow-hidden">
 //         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.35),transparent_70%)] pointer-events-none" />
 //         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.2),transparent_60%)] pointer-events-none" />
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="right" delay={400}>
 //           <MentalHealthServices />
 //         </ScrollRevealWrapper>
 //       </div>
 
-//       {/* --- Why Mibo Section with shimmer overlay --- */}
-//       <div className="relative bg-gradient-to-tr from-[#276C72] via-[#3D8B8A]/85 to-white overflow-hidden">
+//       {/* --- Why Mibo Carousel --- */}
+//       <div className="relative bg-gradient-to-tr from-[#276C72] via-[#3D8B8A]/85 to-white overflow-hidden text-white">
 //         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
 //         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none" />
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="left" delay={500}>
 //           <MiboCarousel />
 //         </ScrollRevealWrapper>
 //       </div>
 
 //       {/* --- Offerings / Department Graphs --- */}
 //       <div className="bg-gradient-to-t from-[#FFFFFF] via-[#E3F7F1]/70 to-[#E3F7F1]">
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="top" delay={400}>
 //           <OfferingsAndTherapy />
 //         </ScrollRevealWrapper>
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="bottom" delay={500}>
 //           <DepartmentGraphs />
 //         </ScrollRevealWrapper>
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="right" delay={600}>
 //           <CorporateLanding />
 //         </ScrollRevealWrapper>
 //       </div>
 
-//       {/* --- Support / Features Section (added bottom padding) --- */}
+//       {/* --- Support / Features Section --- */}
 //       <div className="bg-gradient-to-bl from-[#E3F7F1] via-[#D7EFFF]/70 to-[#D7EFFF] pb-20 sm:pb-24">
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="fade" delay={400}>
 //           <MentalHealthConcerns />
 //         </ScrollRevealWrapper>
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="left" delay={500}>
 //           <CareServiceComponent />
 //         </ScrollRevealWrapper>
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="right" delay={600}>
 //           <SupportServices />
 //         </ScrollRevealWrapper>
 //       </div>
 
-//       {/* --- Location Section / Footer --- */}
+//       {/* --- Location Section --- */}
 //       <div className="bg-gradient-to-t from-[#D7EFFF] via-[#B9E6EC]/70 to-[#E3F7F1]/90 pt-12 sm:pt-16">
-//         <ScrollRevealWrapper>
+//         <ScrollRevealWrapper direction="bottom" delay={500}>
 //           <Location />
 //         </ScrollRevealWrapper>
 //       </div>
+
+//       {/* --- Footer Section --- */}
+//       <ScrollRevealWrapper direction="fade" delay={600}>
+//         <Footer />
+//       </ScrollRevealWrapper>
 //     </div>
 //   );
 // };
