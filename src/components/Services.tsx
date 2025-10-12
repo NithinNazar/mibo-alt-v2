@@ -6,7 +6,10 @@ import inPersonImg from "../assets/In-person.jpg";
 import onlineImg from "../assets/online.jpg";
 
 const MentalHealthServices: React.FC = () => {
-  const [expandedService, setExpandedService] = useState<string | null>(null);
+  // const [expandedService, setExpandedService] = useState<string | null>(null);
+  const [expandedService, setExpandedService] = useState<string | null>(
+    "in-patient"
+  );
 
   const getServiceImage = (serviceId: string) => {
     const images = {
