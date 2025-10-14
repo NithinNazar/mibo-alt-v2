@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import sampleVideo from "../assets/therapy and psychatry.mp4";
 
 const OfferingsAndTherapy = () => {
+  const navigate = useNavigate();
   // Animation variants
   const containerVariant: Variants = {
     hidden: {},
@@ -81,7 +83,10 @@ const OfferingsAndTherapy = () => {
 
         {/* CTA Button */}
         <motion.div variants={itemVariant} className="mt-8">
-          <button className="w-full bg-[#18356C] hover:bg-[#2FA19A] text-white font-semibold py-4 px-6 rounded-full text-base transition-colors duration-200 uppercase tracking-wide">
+          <button
+            onClick={() => navigate("/experts")}
+            className="w-full bg-[#18356C] hover:bg-[#2FA19A] text-white font-semibold py-4 px-6 rounded-full text-base transition-colors duration-200 uppercase tracking-wide"
+          >
             EXPLORE EXPERTS
           </button>
         </motion.div>
