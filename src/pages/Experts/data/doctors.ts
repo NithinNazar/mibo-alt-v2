@@ -1,4 +1,13 @@
 // src/pages/Experts/data/doctors.ts
+import doctor1 from "../assets/doctor-dp-1.png";
+import doctor2 from "../assets/doctor-dp-2.png";
+import doctor3 from "../assets/doctor-dp-3.png";
+import doctor4 from "../assets/doctor-dp-4.png";
+import doctor5 from "../assets/doctor-dp-5.png";
+import doctor6 from "../assets/doctor-dp-6.png";
+import doctor7 from "../assets/doctor-dp-7.png";
+import doctor8 from "../assets/doctor-dp-8.png";
+
 export interface Doctor {
   id: number;
   name: string;
@@ -17,7 +26,7 @@ export const doctors: Doctor[] = [
     designation: "Senior Therapist",
     experience: "10+ years",
     expertise: ["Anxiety", "Depression", "Work Stress", "Relationships"],
-    image: "doctor_dp_1",
+    image: doctor1,
   },
   {
     id: 2,
@@ -26,7 +35,7 @@ export const doctors: Doctor[] = [
     designation: "Consultant Psychiatrist",
     experience: "8+ years",
     expertise: ["Bipolar Disorder", "Sleep Issues", "Addiction"],
-    image: "doctor_dp_2",
+    image: doctor2,
   },
   {
     id: 3,
@@ -35,7 +44,7 @@ export const doctors: Doctor[] = [
     designation: "Clinical Psychologist",
     experience: "7+ years",
     expertise: ["Trauma", "Family Therapy", "Adolescents"],
-    image: "doctor_dp_3",
+    image: doctor3,
   },
   {
     id: 4,
@@ -44,7 +53,7 @@ export const doctors: Doctor[] = [
     designation: "Lead Psychiatrist",
     experience: "12+ years",
     expertise: ["OCD", "Mood Disorders", "Schizophrenia"],
-    image: "doctor_dp_4",
+    image: doctor4,
   },
   {
     id: 5,
@@ -53,7 +62,7 @@ export const doctors: Doctor[] = [
     designation: "Therapist",
     experience: "6+ years",
     expertise: ["Self-esteem", "Stress", "Cognitive Therapy"],
-    image: "doctor_dp_5",
+    image: doctor5,
   },
   {
     id: 6,
@@ -62,7 +71,7 @@ export const doctors: Doctor[] = [
     designation: "Consultant Psychiatrist",
     experience: "9+ years",
     expertise: ["PTSD", "ADHD", "Personality Disorders"],
-    image: "doctor_dp_6",
+    image: doctor6,
   },
   {
     id: 7,
@@ -71,7 +80,7 @@ export const doctors: Doctor[] = [
     designation: "Therapist",
     experience: "5+ years",
     expertise: ["Mindfulness", "Anger", "Behavioral Issues"],
-    image: "doctor_dp_7",
+    image: doctor7,
   },
   {
     id: 8,
@@ -80,6 +89,6 @@ export const doctors: Doctor[] = [
     designation: "Senior Consultant",
     experience: "11+ years",
     expertise: ["Anxiety", "Mood Disorders", "Sleep Disorders"],
-    image: "doctor_dp_8",
+    image: doctor8,
   },
 ];

@@ -15,7 +15,7 @@ export default function DoctorCard({ doctor }: Props) {
       className="bg-[#d0f7e9]/60 border border-[#a7c4f2]/40 rounded-2xl p-4 w-[280px] flex-shrink-0 hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
     >
       <img
-        src={`/assets/${doctor.image}.jpg`}
+        src={doctor.image}
         alt={doctor.name}
         className="rounded-xl w-full h-48 object-cover mb-4"
       />
