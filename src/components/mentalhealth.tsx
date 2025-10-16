@@ -1,6 +1,7 @@
 import React from "react";
-import sampleVideo from "../assets/mental-wellness.mp4"; // replace with your video path
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import sampleVideo from "../assets/mental-wellness.mp4"; // ✅ update if you rename the video
 
 const containerVariants = {
   hidden: {},
@@ -16,11 +17,13 @@ const fadeIn = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1] }, // slow and smooth
+    transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1] }, // smooth, slow ease
   },
 } as const;
 
 const MentalHealthCard: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       className="flex flex-col items-center w-full h-full bg-[#d7efff] text-center px-6 pt-14 pb-14"
@@ -29,29 +32,29 @@ const MentalHealthCard: React.FC = () => {
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
     >
-      {/* Video */}
+      {/* 🎥 Video */}
       <motion.video
         src={sampleVideo}
         autoPlay
         loop
         muted
         playsInline
-        className="w-full h-full object-cover rounded-lg"
+        className="w-full max-w-5xl rounded-2xl shadow-lg object-cover"
         variants={fadeIn}
       />
 
-      {/* Title */}
+      {/* 🩵 Title */}
       <motion.h2
-        className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
+        className="mt-8 text-[1.8rem] md:text-3xl font-bold text-[#4c4c4c] leading-snug"
         style={{ fontFamily: "Quicksand, sans-serif" }}
         variants={fadeIn}
       >
         Trust Mibo with your <br /> mental health
       </motion.h2>
 
-      {/* Subtitle */}
+      {/* 💬 Subtitle */}
       <motion.p
-        className="mt-4 text-[0.95rem] text-[rgb(76, 76, 76)] text-center max-w-md mx-auto font-semibold"
+        className="mt-4 text-[1rem] text-[#4c4c4c] max-w-md mx-auto font-semibold"
         style={{ fontFamily: "Quicksand, sans-serif" }}
         variants={fadeIn}
       >
@@ -59,9 +62,9 @@ const MentalHealthCard: React.FC = () => {
         better.
       </motion.p>
 
-      {/* Body text */}
+      {/* 📘 Description */}
       <motion.p
-        className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold max-w-lg"
+        className="mt-4 text-[#4c4c4c] text-[1rem] text-center font-semibold max-w-2xl"
         style={{ fontFamily: "Quicksand, sans-serif" }}
         variants={fadeIn}
       >
@@ -70,13 +73,14 @@ const MentalHealthCard: React.FC = () => {
         mental healthcare for your needs.
       </motion.p>
 
-      {/* Button */}
-      <motion.div className="mt-6 flex justify-center" variants={fadeIn}>
+      {/* 🔘 Button */}
+      <motion.div className="mt-8 flex justify-center" variants={fadeIn}>
         <button
+          onClick={() => navigate("/about")}
           className="px-10 py-3 bg-[#18356C] text-white font-bold rounded-full text-sm tracking-wider shadow-md hover:opacity-90 transition"
           style={{ fontFamily: "Quicksand, sans-serif" }}
         >
-          SEE MORE
+          SEE MORE ABOUT US
         </button>
       </motion.div>
     </motion.div>
@@ -86,75 +90,88 @@ const MentalHealthCard: React.FC = () => {
 export default MentalHealthCard;
 
 // import React from "react";
-// import sampleVideo from "../assets/mental-wellness.mp4"; // replace with your image path
+// import { useNavigate } from "react-router-dom";
+// import sampleVideo from "../assets/mental-wellness.mp4"; // replace with your video path
+// import { motion } from "framer-motion";
+
+// const containerVariants = {
+//   hidden: {},
+//   visible: {
+//     transition: {
+//       staggerChildren: 0.6, // delay between each child
+//     },
+//   },
+// } as const;
+
+// const fadeIn = {
+//   hidden: { opacity: 0, scale: 0.95 },
+//   visible: {
+//     opacity: 1,
+//     scale: 1,
+//     transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1] }, // slow and smooth
+//   },
+// } as const;
 
 // const MentalHealthCard: React.FC = () => {
 //   return (
-//     <div className="flex flex-col items-center w-full h-full bg-[#d7efff] text-center px-6 pt-14 pb-14">
-//       {/* Image with SVG blob shape */}
-//       {/* <svg viewBox="0 0 400 400" className="w-180 h-180  overflow-hidden">
-//                 <defs>
-//                     <clipPath id="blobClip1">
-//                         <path
-//                             d="M43.5,-69.4C54.3,-60.8,59.5,-45.2,67.4,-30.1C75.3,-15,85.9,-0.6,85,12.9C84.1,26.3,71.6,38.8,59.9,51.4C48.2,64.1,37.3,76.9,24.3,79.2C11.2,81.5,-3.9,73.2,-18.1,66.7C-32.2,60.2,-45.4,55.5,-53,46.2C-60.6,37,-62.6,23.1,-67.1,8.1C-71.5,-6.8,-78.5,-22.9,-74.6,-35.1C-70.7,-47.3,-55.8,-55.5,-41.6,-62.5C-27.3,-69.5,-13.7,-75.2,1.4,-77.3C16.4,-79.4,32.8,-78,43.5,-69.4Z"
-//                             transform="translate(200 200) scale(0.9)"
-//                         />
-//                     </clipPath>
-//                 </defs>
-
-//                 <image
-//                     href={sampleImage}
-//                     width="100%"
-//                     height="100%"
-//                     preserveAspectRatio="xMidYMid meet"
-//                     clipPath="url(#blobClip1)"
-//                 />
-//             </svg> */}
-//       <video
-//         src={sampleVideo} // import your .mp4 file like you did with image
+//     <motion.div
+//       className="flex flex-col items-center w-full h-full bg-[#d7efff] text-center px-6 pt-14 pb-14"
+//       variants={containerVariants}
+//       initial="hidden"
+//       whileInView="visible"
+//       viewport={{ once: true, amount: 0.2 }}
+//     >
+//       {/* Video */}
+//       <motion.video
+//         src={sampleVideo}
 //         autoPlay
 //         loop
 //         muted
 //         playsInline
-//         className="w-full h-full object-cover"
+//         className="w-full h-full object-cover rounded-lg"
+//         variants={fadeIn}
 //       />
+
 //       {/* Title */}
-//       <h2
-//         className="mt-6  text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
+//       <motion.h2
+//         className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] text-center leading-snug"
 //         style={{ fontFamily: "Quicksand, sans-serif" }}
+//         variants={fadeIn}
 //       >
 //         Trust Mibo with your <br /> mental health
-//       </h2>
+//       </motion.h2>
 
 //       {/* Subtitle */}
-//       <p
+//       <motion.p
 //         className="mt-4 text-[0.95rem] text-[rgb(76, 76, 76)] text-center max-w-md mx-auto font-semibold"
 //         style={{ fontFamily: "Quicksand, sans-serif" }}
+//         variants={fadeIn}
 //       >
 //         Our mission is simple: to help you feel better, get better and stay
 //         better.
-//       </p>
+//       </motion.p>
 
 //       {/* Body text */}
-//       <p
-//         className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold"
+//       <motion.p
+//         className="mt-4 text-[rgb(76, 76, 76)] text-[0.95rem] text-center font-semibold max-w-lg"
 //         style={{ fontFamily: "Quicksand, sans-serif" }}
+//         variants={fadeIn}
 //       >
 //         We bring together self-care, support from qualified therapists and
 //         psychiatrists, as well as community access to deliver the best quality
 //         mental healthcare for your needs.
-//       </p>
+//       </motion.p>
 
 //       {/* Button */}
-//       <div className="mt-6 flex justify-center">
+//       <motion.div className="mt-6 flex justify-center" variants={fadeIn}>
 //         <button
 //           className="px-10 py-3 bg-[#18356C] text-white font-bold rounded-full text-sm tracking-wider shadow-md hover:opacity-90 transition"
 //           style={{ fontFamily: "Quicksand, sans-serif" }}
 //         >
-//           SEE MORE
+//           SEE MORE ABOUT US
 //         </button>
-//       </div>
-//     </div>
+//       </motion.div>
+//     </motion.div>
 //   );
 // };
 
