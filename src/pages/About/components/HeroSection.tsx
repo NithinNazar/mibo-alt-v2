@@ -12,19 +12,19 @@ const HeroSection: React.FC = () => {
         className="absolute inset-0 w-full h-full object-cover"
         fallbackColor="#cce3de"
       />
-      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-10"></div>
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 2 }} // ⬅️ increased from 1 to 2 seconds
         viewport={{ once: true }}
         className="relative z-10 text-center text-white px-6"
       >
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 1 }}
+          transition={{ delay: 0.3, duration: 2 }} // ⬅️ slower fade-in
           className="text-4xl md:text-5xl font-bold mb-4 font-[Quicksand]"
         >
           About Mibo
@@ -32,7 +32,7 @@ const HeroSection: React.FC = () => {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 1 }}
+          transition={{ delay: 0.6, duration: 2 }} // ⬅️ slower fade-in
           className="text-lg md:text-xl max-w-2xl mx-auto font-[Quicksand]"
         >
           Redefining premium mental healthcare with compassion, science, and
