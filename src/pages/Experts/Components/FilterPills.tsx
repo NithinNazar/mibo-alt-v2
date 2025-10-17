@@ -102,7 +102,7 @@ export default function FilterPills() {
     if (btn) {
       const rect = btn.getBoundingClientRect();
       let left = rect.left + window.scrollX;
-      const width = rect.width;
+      // const width = rect.width;
 
       // ✅ prevent overflow right
       const dropdownWidth = 288; // approx w-72
