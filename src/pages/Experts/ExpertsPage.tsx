@@ -18,7 +18,7 @@ export default function ExpertsPage() {
   }, []);
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-[#edf7f6] text-[#034B44]">
+    <div className="flex flex-col w-full min-h-screen bg-[#e9f6f4] text-[#034B44]">
       <ExpertsHeader />
 
       {/* Hero Section */}
