@@ -1,6 +1,7 @@
 // src/components/ExpertsHeader.tsx
 import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import miboIcon from "../../../assets/logo1.png";
 
 const ExpertsHeader = () => {
@@ -11,6 +12,28 @@ const ExpertsHeader = () => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  const navItems = [
+    { label: "ABOUT US", path: "/about" },
+    {
+      label: "SERVICES",
+      dropdown: [
+        { label: "In-Patient", path: "/services/in-patient" },
+        { label: "In-Person", path: "/services/in-person" },
+        { label: "Online", path: "/services/online" },
+      ],
+    },
+    { label: "EXPERTS", path: "/experts" },
+    {
+      label: "LOCATIONS",
+      dropdown: [
+        { label: "Bengaluru", path: "/centres/bengaluru" },
+        { label: "Kochi", path: "/centres/kochi" },
+        { label: "Mumbai", path: "/centres/mumbai" },
+      ],
+    },
+    { label: "BLOG", path: "/blog" },
+  ];
 
   return (
     <header
@@ -28,11 +51,13 @@ const ExpertsHeader = () => {
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
           }`}
         >
-          <img
-            src={miboIcon}
-            alt="Mibo Icon"
-            className="w-12 h-12 md:w-14 md:h-14"
-          />
+          <Link to="/">
+            <img
+              src={miboIcon}
+              alt="Mibo Icon"
+              className="w-12 h-12 md:w-14 md:h-14"
+            />
+          </Link>
         </div>
 
         {/* Mobile Menu */}
@@ -58,17 +83,36 @@ const ExpertsHeader = () => {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          {["ABOUT US", "SERVICES", "EXPERTS", "LOCATIONS", "BLOG"].map(
-            (item, index) => (
-              <span
-                key={item}
-                className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300"
-                style={{ transitionDelay: `${600 + index * 100}ms` }}
-              >
-                {item}
-              </span>
-            )
-          )}
+          {navItems.map((item) => (
+            <div key={item.label} className="relative group">
+              {item.path ? (
+                <Link
+                  to={item.path}
+                  className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300">
+                  {item.label} ▾
+                </span>
+              )}
+
+              {item.dropdown && (
+                <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+                  {item.dropdown.map((drop) => (
+                    <Link
+                      key={drop.label}
+                      to={drop.path}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {drop.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </nav>
 
         {/* Desktop Actions */}
@@ -83,12 +127,24 @@ const ExpertsHeader = () => {
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600">
             <MessageCircle size={18} />
           </button>
-          <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
-            SIGN UP
-          </button>
-          <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
-            SIGN IN
-          </button>
+
+          {/* New Book Appointment Button */}
+          <Link to="/book-appointment">
+            <button className="bg-[#34b9a5] text-white px-6 py-2 rounded-full hover:bg-[#2fa18f] font-semibold text-sm">
+              BOOK APPOINTMENT
+            </button>
+          </Link>
+
+          <Link to="/signup">
+            <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
+              SIGN UP
+            </button>
+          </Link>
+          <Link to="/signin">
+            <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
+              SIGN IN
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -96,16 +152,44 @@ const ExpertsHeader = () => {
       {menuOpen && (
         <div className="lg:hidden px-4 py-6 bg-[#C2D3E4] border-t border-white/20">
           <nav className="flex flex-col gap-4 text-[#18276c] font-medium">
-            {["ABOUT US", "SERVICES", "EXPERTS", "LOCATIONS", "BLOG"].map(
-              (item) => (
-                <span
-                  key={item}
-                  className="hover:text-[#34b9a5] cursor-pointer transition-colors duration-300 py-2 border-b border-white/10 hover:border-[#34b9a5]/30"
-                >
-                  {item}
-                </span>
-              )
-            )}
+            {navItems.map((item) => (
+              <div key={item.label}>
+                {item.path ? (
+                  <Link
+                    to={item.path}
+                    className="hover:text-[#34b9a5] cursor-pointer transition-colors duration-300 py-2 border-b border-white/10 hover:border-[#34b9a5]/30 block"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span className="hover:text-[#34b9a5] cursor-pointer transition-colors duration-300 py-2 border-b border-white/10 hover:border-[#34b9a5]/30 block">
+                    {item.label}
+                  </span>
+                )}
+
+                {item.dropdown &&
+                  item.dropdown.map((drop) => (
+                    <Link
+                      key={drop.label}
+                      to={drop.path}
+                      className="block pl-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {drop.label}
+                    </Link>
+                  ))}
+              </div>
+            ))}
+
+            {/* Mobile Book Appointment Button */}
+            <Link
+              to="/book-appointment"
+              onClick={() => setMenuOpen(false)}
+              className="bg-[#34b9a5] text-white px-6 py-3 mt-2 rounded-full text-center font-semibold hover:bg-[#2fa18f]"
+            >
+              Book Appointment
+            </Link>
           </nav>
         </div>
       )}
