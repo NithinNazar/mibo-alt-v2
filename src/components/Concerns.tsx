@@ -174,11 +174,11 @@ const MentalHealthCards = () => {
               className={`absolute inset-0 flex flex-col bg-[#FAFDFF] border border-[#bfd1e5] rounded-2xl p-4 sm:p-6`}
             >
               {/* Icon */}
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-3 sm:mb-4">
                 <img
                   src={currentCondition.icon}
                   alt={currentCondition.name}
-                  className="w-10 h-10 sm:w-18 sm:h-18 object-contain"
+                  className="w-20 h-20 sm:w-28 sm:h-28 object-contain"
                 />
               </div>
 
