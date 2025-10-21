@@ -35,16 +35,12 @@ const Home = () => {
         </div>
       </div>
 
-      {/* --- WHY MIBO SECTION --- */}
-      <div className="relative bg-gradient-to-tr from-[#5FAFAE] via-[#7EC7C4]/70 to-[#E9F6F4] py-24 overflow-hidden text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.25),transparent_60%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(255,255,255,0.2),transparent_60%)] pointer-events-none" />
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <ScrollRevealWrapper direction="left" delay={500} cascade>
-            <MiboCarousel />
-          </ScrollRevealWrapper>
-        </div>
-      </div>
+      {/* --- WHY MIBO SECTION (Full Width, Adjusted Spacing & Matching Color) --- */}
+      <section className="w-full bg-[#2FA19A] py-14 overflow-hidden">
+        <ScrollRevealWrapper direction="left" delay={500} cascade>
+          <MiboCarousel />
+        </ScrollRevealWrapper>
+      </section>
 
       {/* --- IMPACT SECTION (Full Width, Responsive Grid Fix) --- */}
       <section className="relative w-full overflow-hidden">
