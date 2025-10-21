@@ -36,7 +36,7 @@ const Home = () => {
       </div>
 
       {/* --- WHY MIBO SECTION (Full Width, Adjusted Spacing & Matching Color) --- */}
-      <section className="w-full bg-[#2FA19A] py-14 overflow-hidden">
+      <section className="w-full bg-[#040a47] py-14 overflow-hidden">
         <ScrollRevealWrapper direction="left" delay={500} cascade>
           <MiboCarousel />
         </ScrollRevealWrapper>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, User, Users, Monitor } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import Lottie from "lottie-react";
-import screeningAnimation from "../assets/animations/ScreeningDiagnosis.json";
+import screeningAnimation from "../assets/animations/MedicalAdd.json";
 
 import inPatientImg from "../assets/In-patient.jpg";
 import inPersonImg from "../assets/In-person.jpg";
@@ -73,9 +73,9 @@ const MentalHealthServices: React.FC = () => {
       whileInView="visible"
       viewport={{ once: true, amount: 0.15 }}
       variants={containerVariant}
-      className="relative bg-[#E9F6F4] overflow-hidden pt-16 pb-20"
+      className="relative bg-[#E9F6F4] overflow-hidden pt-28 pb-20"
     >
-      <div className="absolute top-[-20px] left-1/2 transform -translate-x-1/2 w-30 h-30 z-0 opacity-50">
+      <div className="absolute top-[20px] left-1/2 transform -translate-x-1/2 w-30 h-30 z-0 opacity-70">
         <Lottie animationData={screeningAnimation} loop={true} />
       </div>
 

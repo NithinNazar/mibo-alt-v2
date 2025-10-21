@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import Lottie from "lottie-react";
 import sampleVideo from "../assets/therapy and psychatry.mp4";
-import offeringsAnimation from "../assets/animations/Recharge.json";
+import offeringsAnimation from "../assets/animations/healthinsurance.json";
 
 const OfferingsAndTherapy = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const OfferingsAndTherapy = () => {
       className="max-w-md mx-auto bg-white pb-14 relative"
     >
       {/* Decorative Animated Icon at Top Middle */}
-      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-80 h-50 z-0 opacity-20">
+      <div className="absolute -top-26 left-1/2 transform -translate-x-1/2 w-64 h-40 z-0 opacity-75">
         <Lottie
           animationData={offeringsAnimation}
           loop={true}
@@ -41,7 +41,7 @@ const OfferingsAndTherapy = () => {
       {/* First Section - Our mental healthcare offerings */}
       <motion.div
         variants={itemVariant}
-        className="text-center px-8 pt-16 pb-6 relative z-10"
+        className="text-center px-8 pt-32 pb-6 relative z-10"
       >
         <h1 className="text-[1.563rem] font-[700] text-[rgb(76,76,76)] mb-6 leading-tight">
           Our mental healthcare offerings
