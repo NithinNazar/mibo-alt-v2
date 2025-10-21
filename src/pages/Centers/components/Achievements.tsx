@@ -25,28 +25,3 @@ const Achievements: React.FC = () => (
 );
 
 export default Achievements;
-
-// import React from "react";
-// import { Award, Users, Heart } from "lucide-react";
-
-// const stats = [
-//   { icon: Award, label: "Expert Clinicians", value: "50+" },
-//   { icon: Users, label: "Clients Supported", value: "10K+" },
-//   { icon: Heart, label: "Years of Care", value: "8+" },
-// ];
-
-// const Achievements: React.FC = () => (
-//   <section className="py-8 md:py-12 bg-mibo-teal text-white text-center">
-//     <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 px-4">
-//       {stats.map((s, i) => (
-//         <div key={i}>
-//           <s.icon className="w-10 h-10 mx-auto mb-4" />
-//           <h3 className="text-2xl font-bold">{s.value}</h3>
-//           <p className="text-sm mt-1">{s.label}</p>
-//         </div>
-//       ))}
-//     </div>
-//   </section>
-// );
-
-// export default Achievements;

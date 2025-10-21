@@ -14,6 +14,9 @@ import Bangalore from "./pages/Centers/Bangalore";
 import Kochi from "./pages/Centers/Kochi";
 import Mumbai from "./pages/Centers/Mumbai";
 
+import BookAppointmentPage from "./pages/BookAppointment/BookAppointmentPage";
+import AppointmentConfirmation from "./pages/BookAppointment/AppointmentConfirmation";
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -35,6 +38,11 @@ const App = () => {
           <Route path="/centres/bengaluru" element={<Bangalore />} />
           <Route path="/centres/kochi" element={<Kochi />} />
           <Route path="/centres/mumbai" element={<Mumbai />} />
+          <Route path="/book-appointment" element={<BookAppointmentPage />} />
+          <Route
+            path="/appointment-confirmation"
+            element={<AppointmentConfirmation />}
+          />
         </Routes>
       </Router>
     </StrictMode>
