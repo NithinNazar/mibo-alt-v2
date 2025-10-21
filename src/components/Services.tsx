@@ -75,7 +75,7 @@ const MentalHealthServices: React.FC = () => {
       variants={containerVariant}
       className="relative bg-[#E9F6F4] overflow-hidden pt-16 pb-20"
     >
-      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-30 h-30 z-0 opacity-50">
+      <div className="absolute top-[-20px] left-1/2 transform -translate-x-1/2 w-30 h-30 z-0 opacity-50">
         <Lottie animationData={screeningAnimation} loop={true} />
       </div>
 
