@@ -969,7 +969,7 @@ const DepartmentGraphs: React.FC = () => {
               >
                 {filteredData.map((dept, index) => (
                   <div key={dept.id} className="snap-center flex-shrink-0">
-                    <DepartmentCard dept={dept} index={index} />
+                    <DepartmentCard key={dept.id} dept={dept} index={index} />
                   </div>
                 ))}
               </div>

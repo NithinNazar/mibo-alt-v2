@@ -5,6 +5,7 @@ import CategoryScroll from "./Components/CategoryScroll";
 import FilterPills from "./Components/FilterPills";
 import DoctorCard from "./Components/DoctorCard";
 import Testimonials from "./Components/Testimonials";
+import CompStatContact from "./Components/CompStatContact";
 import ExpertsFooter from "./Components/ExpertsFooter";
 import { doctors } from "./data/doctors";
 
@@ -44,36 +45,35 @@ export default function ExpertsPage() {
       <CategoryScroll />
       <FilterPills />
 
-      {/* --- DOCTOR CARDS (VERTICAL CENTERED SCROLL) --- */}
-      <section className="relative px-4 mt-4 flex justify-center">
-        {/* Centered scrollable area */}
-        <div className="relative w-full max-w-[700px] flex justify-center">
-          {/* Fade overlay - top */}
-          <div className="pointer-events-none absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-[#e9f6f4] to-transparent z-10" />
+      {/* --- DOCTOR CARDS (HORIZONTAL SCROLL) --- */}
+      <section className="relative px-6 mt-6">
+        <h2 className="text-center text-2xl font-semibold mb-6">
+          Our Specialists
+        </h2>
 
-          {/* Scrollable doctor cards */}
-          <div className="flex flex-col items-center gap-8 overflow-y-auto no-scrollbar max-h-[75vh] pb-8 w-full">
-            {doctors.map((doc, index) => (
-              <motion.div
-                key={doc.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="w-full max-w-[420px]"
-              >
-                <DoctorCard doctor={doc} />
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Fade overlay - bottom */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#e9f6f4] to-transparent z-10" />
+        <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 snap-x snap-mandatory">
+          {doctors.map((doc, index) => (
+            <motion.div
+              key={doc.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="snap-start flex-shrink-0"
+            >
+              <DoctorCard doctor={doc} />
+            </motion.div>
+          ))}
         </div>
+
+        {/* subtle gradient overlays for scroll hint */}
+        <div className="pointer-events-none absolute top-0 left-0 w-16 h-full bg-gradient-to-r from-[#e9f6f4] to-transparent z-10" />
+        <div className="pointer-events-none absolute top-0 right-0 w-16 h-full bg-gradient-to-l from-[#e9f6f4] to-transparent z-10" />
       </section>
 
       {/* --- TESTIMONIALS & FOOTER --- */}
       <Testimonials />
+      <CompStatContact />
       <ExpertsFooter />
     </motion.div>
   );
