@@ -30,7 +30,7 @@ const OfferingsAndTherapy = () => {
       className="max-w-md mx-auto bg-white pb-14 relative"
     >
       {/* Decorative Animated Icon at Top Middle */}
-      <div className="absolute -top-26 left-1/2 transform -translate-x-1/2 w-64 h-40 z-0 opacity-75">
+      <div className="absolute -top-26 left-1/2 transform -translate-x-1/2 w-40 h-28 z-0 opacity-75">
         <Lottie
           animationData={offeringsAnimation}
           loop={true}
