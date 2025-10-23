@@ -42,34 +42,3 @@ const HeroSection: React.FC<HeroProps> = ({ title, description, image }) => (
 );
 
 export default HeroSection;
-
-// import React from "react";
-// import { motion } from "framer-motion";
-
-// interface HeroProps {
-//   title: string;
-//   description: string;
-// }
-
-// const HeroSection: React.FC<HeroProps> = ({ title, description }) => (
-//   <section className="bg-mibo-teal-light py-16 px-6 text-center">
-//     <motion.h1
-//       className="text-3xl md:text-4xl font-bold text-mibo-green mb-4"
-//       initial={{ opacity: 0, y: 20 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.6 }}
-//     >
-//       {title}
-//     </motion.h1>
-//     <motion.p
-//       className="text-gray-700 max-w-2xl mx-auto"
-//       initial={{ opacity: 0 }}
-//       animate={{ opacity: 1 }}
-//       transition={{ delay: 0.3 }}
-//     >
-//       {description}
-//     </motion.p>
-//   </section>
-// );
-
-// export default HeroSection;

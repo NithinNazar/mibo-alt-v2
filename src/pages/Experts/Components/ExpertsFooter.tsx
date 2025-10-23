@@ -188,24 +188,3 @@ const ExpertsFooter = () => {
 };
 
 export default ExpertsFooter;
-
-// // src/components/ExpertsFooter.tsx
-// import React from "react";
-
-// const ExpertsFooter = () => {
-//   return (
-//     <footer className="bg-[#E3F7F1] text-[#1C3D3A] py-12 px-6 sm:px-12 lg:px-20">
-//       <div className="max-w-7xl mx-auto border-t border-[#C1DFDA] pt-10">
-//         {/* --- Footer Grid --- */}
-//         {/* Keep same structure as your Footer */}
-//         ...
-//         <div className="mt-10 pt-6 text-sm text-center text-[#2A5752]/80">
-//           © {new Date().getFullYear()}{" "}
-//           <span className="font-semibold">Mibo Care</span>. All rights reserved.
-//         </div>
-//       </div>
-//     </footer>
-//   );
-// };
-
-// export default ExpertsFooter;
