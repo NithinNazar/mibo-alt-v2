@@ -8,6 +8,8 @@ import ExpertsPage from "./pages/Experts/ExpertsPage";
 import AboutPage from "./pages/About/AboutPage";
 import PremiumSplashScreen from "./components/Spalshscreen.tsx";
 import ScrollToTop from "./components/ScrollToTop";
+import PatientDashboard from "./pages/profileDashboard/PatientDashboard";
+import PatientAuth from "./pages/auth/PatientAuth";
 
 // 👉 Centres pages
 import Bangalore from "./pages/Centers/Bangalore";
@@ -43,6 +45,9 @@ const App = () => {
             path="/appointment-confirmation"
             element={<AppointmentConfirmation />}
           />
+          <Route path="/patientAuth" element={<PatientAuth />} />
+
+          <Route path="/profileDashboard" element={<PatientDashboard />} />
         </Routes>
       </Router>
     </StrictMode>

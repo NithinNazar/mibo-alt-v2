@@ -1,0 +1,105 @@
+// src/pages/profileDashboard/feedData.tsx
+
+export const expertiseList = [
+  "Depression",
+  "Anxiety",
+  "Stress Management",
+  "Sleep Disorders",
+  "Bipolar Disorder",
+  "PTSD",
+  "OCD",
+  "Anger Issues",
+  "Relationship Counselling",
+  "Burnout",
+  "Substance Abuse",
+  "Child Psychology",
+  "ADHD",
+  "Autism Spectrum",
+  "Family Therapy",
+];
+
+export const clinicians = [
+  {
+    id: "c1",
+    name: "Dr. Anita Rao",
+    city_id: 1, // Bangalore
+    expertise: [
+      "Depression",
+      "Anxiety",
+      "Stress Management",
+      "Sleep Disorders",
+      "Bipolar Disorder",
+      "PTSD",
+      "OCD",
+      "Anger Issues",
+      "Relationship Counselling",
+      "Burnout",
+      "Substance Abuse",
+      "Child Psychology",
+      "ADHD",
+      "Autism Spectrum",
+      "Family Therapy",
+    ],
+    hourly_rate: 1500,
+  },
+  {
+    id: "c2",
+    name: "Dr. Sandeep Menon",
+    city_id: 2, // Kochi
+    expertise: ["Bipolar Disorder", "PTSD", "OCD", "Anger Issues"],
+    hourly_rate: 1500,
+  },
+  {
+    id: "c3",
+    name: "Dr. Aisha Khan",
+    city_id: 3, // Mumbai
+    expertise: [
+      "Depression",
+      "Anxiety",
+      "Stress Management",
+      "Sleep Disorders",
+      "Bipolar Disorder",
+      "PTSD",
+      "OCD",
+      "Anger Issues",
+      "Relationship Counselling",
+      "Burnout",
+      "Substance Abuse",
+      "Child Psychology",
+      "ADHD",
+      "Autism Spectrum",
+      "Family Therapy",
+    ],
+    hourly_rate: 1500,
+  },
+  {
+    id: "c4",
+    name: "Dr. Rohan Deshpande",
+    city_id: 1, // Bangalore
+    expertise: ["Depression", "Substance Abuse", "Bipolar Disorder"],
+    hourly_rate: 1500,
+  },
+  {
+    id: "c5",
+    name: "Dr. Meera Iyer",
+    city_id: 2, // Kochi
+    expertise: [
+      "Depression",
+      "Anxiety",
+      "Stress Management",
+      "Sleep Disorders",
+      "Bipolar Disorder",
+      "PTSD",
+      "OCD",
+      "Anger Issues",
+      "Relationship Counselling",
+      "Burnout",
+      "Substance Abuse",
+      "Child Psychology",
+      "ADHD",
+      "Autism Spectrum",
+      "Family Therapy",
+    ],
+    hourly_rate: 1500,
+  },
+];
