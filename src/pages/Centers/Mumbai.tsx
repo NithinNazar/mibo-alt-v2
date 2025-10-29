@@ -12,8 +12,14 @@ import Testimonials from "./components/Testimonials";
 import Achievements from "./components/Achievements";
 import AddressSection from "./components/AddressSection";
 import BookAppointmentButton from "./components/BookAppointmentButton";
+import { useNavigate } from "react-router-dom";
 
 const Mumbai: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleBookAppointment = () => {
+    navigate("/patientAuth"); // ✅ Redirect to your login/signup page
+  };
   return (
     <div className="bg-mibo-offwhite min-h-screen">
       {/* Header */}
@@ -40,9 +46,7 @@ const Mumbai: React.FC = () => {
       {/* Top Rated Psychiatrists & Therapists */}
       <TopPsychiatrists city="Mumbai" />
       <TopTherapists city="Mumbai" />
-      <BookAppointmentButton
-        onClick={() => alert("Redirect to booking page")}
-      />
+      <BookAppointmentButton onClick={handleBookAppointment} />
 
       {/* Testimonials & Achievements */}
       <Testimonials />

@@ -1,11 +1,18 @@
 import type { Doctor } from "../data/doctors";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   doctor: Doctor;
 }
 
 export default function DoctorCard({ doctor }: Props) {
+  const navigate = useNavigate();
+
+  const handleBook = () => {
+    navigate("/patientAuth"); // ✅ matches your SIGN UP button route
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,7 +44,10 @@ export default function DoctorCard({ doctor }: Props) {
         ))}
       </div>
 
-      <button className="mt-3 w-full bg-[#a7c4f2] hover:bg-[#81b2f0] text-[#034B44] font-semibold py-1.5 rounded-full transition text-sm">
+      <button
+        onClick={handleBook}
+        className="mt-3 w-full bg-[#a7c4f2] hover:bg-[#81b2f0] text-[#034B44] font-semibold py-1.5 rounded-full transition text-sm"
+      >
         Book
       </button>
     </motion.div>

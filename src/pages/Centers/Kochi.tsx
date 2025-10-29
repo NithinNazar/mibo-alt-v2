@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
 import CentersHeader from "./components/CentersHeader";
 import ExpertsFooter from "./components/CentersFooter";
 
@@ -14,6 +16,12 @@ import AddressSection from "./components/AddressSection";
 import BookAppointmentButton from "./components/BookAppointmentButton";
 
 const Kochi: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleBookAppointment = () => {
+    navigate("/patientAuth"); // ✅ Redirect to your login/signup page
+  };
+
   return (
     <div className="bg-mibo-offwhite min-h-screen">
       {/* Header */}
@@ -41,9 +49,7 @@ const Kochi: React.FC = () => {
       <TopPsychiatrists city="Kochi" />
       <TopTherapists city="Kochi" />
       {/* Book Appointment Button */}
-      <BookAppointmentButton
-        onClick={() => alert("Redirect to booking page")}
-      />
+      <BookAppointmentButton onClick={handleBookAppointment} />
 
       {/* Testimonials & Achievements */}
       <Testimonials />
