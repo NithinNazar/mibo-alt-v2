@@ -1,9 +1,17 @@
 // src/pages/BookAppointment/Step1SessionDetails.tsx
-import type { Doctor } from "../Experts/data/doctors"; // <-- type-only import
+import type { Doctor } from "../Experts/data/doctors";
 import { useState } from "react";
+import {
+  MapPin,
+  Video,
+  Phone,
+  Clock,
+  CalendarDays,
+  Clock4,
+} from "lucide-react";
 
 interface Props {
-  doctor: Doctor; // used value passed from index.tsx
+  doctor: Doctor;
   bookingData: any;
   setBookingData: (data: any) => void;
   onContinue: () => void;
@@ -29,7 +37,6 @@ export default function Step1SessionDetails({
     { label: "30 mins", price: 1500 },
     { label: "60 mins", price: 2500 },
   ];
-  // small demo lists — replace with dynamic later
   const dates = ["Today", "Fri 31 Oct", "Sat 01 Nov", "Sun 02 Nov"];
   const times = ["10:00 AM", "1:00 PM", "5:00 PM"];
 
@@ -57,6 +64,7 @@ export default function Step1SessionDetails({
         <div className="w-6" />
       </div>
 
+      {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
         {/* Doctor quick info */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -77,61 +85,81 @@ export default function Step1SessionDetails({
         <div>
           <h3 className="font-semibold mb-2">Mode of Session</h3>
           <div className="flex gap-3">
-            {modes.map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setSelectedMode(mode)}
-                className={`flex-1 p-3 rounded-xl border transition-all ${
-                  selectedMode === mode
-                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44]"
-                    : "bg-white border-gray-300 text-gray-500"
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
+            {modes.map((mode) => {
+              const Icon =
+                mode === "In-person"
+                  ? MapPin
+                  : mode === "Video call"
+                  ? Video
+                  : Phone;
+              const isSelected = selectedMode === mode;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setSelectedMode(mode)}
+                  className={`flex-1 p-4 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 shadow-md ${
+                    isSelected
+                      ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg"
+                      : "bg-white border-gray-300 text-gray-500 hover:shadow-lg"
+                  }`}
+                >
+                  <Icon className="w-7 h-7 mb-1" />
+                  <span className="text-sm font-medium">{mode}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Location (hardcoded for now) */}
-        <div>
-          <h3 className="font-semibold mb-2">Location</h3>
+        {/* Location */}
+        <div className="bg-white rounded-xl p-4 shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="w-5 h-5 text-[#034B44]" />
+            <h3 className="font-semibold">Location</h3>
+          </div>
           <p className="text-sm text-gray-700">
             Mibo Mental Health Centre — {doctor.name.split(" ")[1] ?? "City"}
           </p>
         </div>
 
         {/* Duration */}
-        <div>
-          <h3 className="font-semibold mb-2">Session Duration</h3>
+        <div className="bg-white rounded-xl p-4 shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="w-5 h-5 text-[#034B44]" />
+            <h3 className="font-semibold">Session Duration</h3>
+          </div>
           <div className="flex gap-3">
             {durations.map((dur) => (
               <button
                 key={dur.label}
                 onClick={() => setSelectedDuration(dur.label)}
-                className={`flex-1 p-3 rounded-xl border transition-all ${
+                className={`flex-1 p-4 rounded-xl border transition-all flex flex-col items-center justify-center gap-1 shadow-md hover:shadow-lg ${
                   selectedDuration === dur.label
-                    ? "bg-[#b3ffff] border-[#034B44]"
+                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
               >
-                {dur.label} — ₹{dur.price}
+                <span className="text-sm font-medium">{dur.label}</span>
+                <span className="text-xs">₹{dur.price}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Date */}
-        <div>
-          <h3 className="font-semibold mb-2">Select Date</h3>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+        <div className="bg-white rounded-xl p-4 shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarDays className="w-5 h-5 text-[#034B44]" />
+            <h3 className="font-semibold">Select Date</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
             {dates.map((d) => (
               <button
                 key={d}
                 onClick={() => setSelectedDate(d)}
-                className={`px-4 py-2 rounded-lg border whitespace-nowrap ${
+                className={`px-4 py-2 rounded-lg border whitespace-nowrap transition-all shadow-md hover:shadow-lg ${
                   selectedDate === d
-                    ? "bg-[#b3ffff] border-[#034B44]"
+                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
               >
@@ -142,16 +170,19 @@ export default function Step1SessionDetails({
         </div>
 
         {/* Time */}
-        <div>
-          <h3 className="font-semibold mb-2">Select Time</h3>
-          <div className="flex gap-3">
+        <div className="bg-white rounded-xl p-4 shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock4 className="w-5 h-5 text-[#034B44]" />
+            <h3 className="font-semibold">Select Time</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
             {times.map((t) => (
               <button
                 key={t}
                 onClick={() => setSelectedTime(t)}
-                className={`flex-1 py-2 rounded-lg border ${
+                className={`flex-1 py-2 rounded-lg border transition-all shadow-md hover:shadow-lg ${
                   selectedTime === t
-                    ? "bg-[#b3ffff] border-[#034B44]"
+                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
               >
@@ -162,12 +193,12 @@ export default function Step1SessionDetails({
         </div>
       </div>
 
-      {/* Continue Button fixed bottom */}
+      {/* Continue Button */}
       <div className="p-4 sticky bottom-0 bg-white border-t">
         <button
           onClick={handleContinue}
           disabled={!selectedDate || !selectedTime}
-          className="w-full py-3 bg-[#0e0a73] text-white font-semibold rounded-full"
+          className="w-full py-3 bg-[#0e0a73] text-white font-semibold rounded-full disabled:opacity-60"
         >
           Continue
         </button>
