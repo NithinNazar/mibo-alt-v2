@@ -80,7 +80,7 @@ export default function Step3ConfirmBooking({
       <div className="p-4 border-t border-[#a7c4f2]/30 bg-white">
         <button
           onClick={handlePayment}
-          className="w-full py-3 bg-[#034B44] text-white font-semibold rounded-full hover:bg-[#046e63] transition-all"
+          className="w-full py-3 bg-[#081470] text-white font-semibold rounded-full hover:bg-[#046e63] transition-all"
         >
           Make Payment
         </button>
