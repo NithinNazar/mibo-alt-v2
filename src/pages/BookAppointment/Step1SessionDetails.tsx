@@ -147,19 +147,19 @@ export default function Step1SessionDetails({
         </div>
 
         {/* Date */}
-        <div className="bg-white rounded-xl p-4 shadow-md">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="bg-white rounded-xl p-5 shadow-md overflow-visible">
+          <div className="flex items-center gap-2 mb-3">
             <CalendarDays className="w-5 h-5 text-[#034B44]" />
             <h3 className="font-semibold">Select Date</h3>
           </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {dates.map((d) => (
               <button
                 key={d}
                 onClick={() => setSelectedDate(d)}
                 className={`px-4 py-2 rounded-lg border whitespace-nowrap transition-all shadow-md hover:shadow-lg ${
                   selectedDate === d
-                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
+                    ? "bg-[#d2fafa] border-[#d2fafa] text-[#034B44] shadow-lg scale-[1.02]"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
               >
@@ -170,19 +170,19 @@ export default function Step1SessionDetails({
         </div>
 
         {/* Time */}
-        <div className="bg-white rounded-xl p-4 shadow-md">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="bg-white rounded-xl p-5 shadow-md overflow-visible">
+          <div className="flex items-center gap-2 mb-3">
             <Clock4 className="w-5 h-5 text-[#034B44]" />
             <h3 className="font-semibold">Select Time</h3>
           </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {times.map((t) => (
               <button
                 key={t}
                 onClick={() => setSelectedTime(t)}
-                className={`flex-1 py-2 rounded-lg border transition-all shadow-md hover:shadow-lg ${
+                className={`px-4 py-2 rounded-lg border whitespace-nowrap transition-all shadow-md hover:shadow-lg ${
                   selectedTime === t
-                    ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
+                    ? "bg-[#d2fafa] border-[#d2fafa] text-[#034B44] shadow-lg scale-[1.02]"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
               >
@@ -198,7 +198,7 @@ export default function Step1SessionDetails({
         <button
           onClick={handleContinue}
           disabled={!selectedDate || !selectedTime}
-          className="w-full py-3 bg-[#0e0a73] text-white font-semibold rounded-full disabled:opacity-60"
+          className="w-full py-3 bg-[#0e0a73] text-white font-semibold rounded-full disabled:opacity-10"
         >
           Continue
         </button>
