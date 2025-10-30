@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, MessageCircle, ChevronDown } from "lucide-react";
+import { MessageCircle, ChevronDown } from "lucide-react";
+// import { Menu, X, MessageCircle, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import miboIcon from "../../assets/logo1.png";
 
@@ -108,12 +109,12 @@ const ProfileHeader = () => {
           )}
 
           {/* Hamburger */}
-          <button
+          {/* <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-[#18356C] hover:text-[#34b9a5] text-3xl transition-colors duration-300"
           >
             {menuOpen ? <X size={32} /> : <Menu size={32} />}
-          </button>
+          </button> */}
         </div>
 
         {/* Desktop Placeholder */}
