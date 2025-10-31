@@ -9,6 +9,8 @@ import MentalHealthConcerns from "../components/Concerns";
 import CareServiceComponent from "../components/Features";
 import SupportServices from "../components/Mibo_Supports";
 import Location from "../components/Location";
+import ContactSection from "../components/ContactSection";
+
 import Footer from "../components/Footer";
 import ScrollRevealWrapper from "../components/ScrollRevealWrapper";
 import lottie from "lottie-web";
@@ -99,6 +101,7 @@ const Home = () => {
           </ScrollRevealWrapper>
         </div>
       </div>
+      <ContactSection />
 
       {/* --- FOOTER --- */}
       <div className="bg-gradient-to-b from-[#E3F7F1] via-[#D7EFFF]/60 to-[#CFEAE5] py-16">
