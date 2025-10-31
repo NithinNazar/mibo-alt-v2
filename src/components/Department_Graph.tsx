@@ -1044,7 +1044,7 @@ const DepartmentGraphs: React.FC = () => {
         {/* Floating Action Button */}
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
           <button
-            onClick={() => navigate("/book-appointment")} // ✅ Navigate to booking page
+            onClick={() => navigate("/experts")} // ✅ Navigate to booking page
             className="cta-button px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 bg-[#2FA19A] transform hover:scale-105 transition-transform duration-300 ease-in-out text-sm sm:text-sm md:text-base lg:text-lg tracking-wide text-white rounded-full shadow-xl hover:shadow-2xl border border-white/20 hover:border-white/40"
           >
             Book Appointment

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="bg-[#E3F7F1] text-[#1C3D3A] py-12 px-6 sm:px-12 lg:px-20">
@@ -13,9 +15,9 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link to="/about" className="hover:text-[#276C72] transition">
                     About Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a href="#" className="hover:text-[#276C72] transition">
@@ -28,12 +30,25 @@ const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
                     For Therapists
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("contact");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Contact Us
                   </a>
                 </li>
@@ -52,17 +67,48 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("services");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Adult Therapy
                   </a>
                 </li>
+
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("services");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Adult Psychiatry
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("services");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Mental Health Hospital
                   </a>
                 </li>
@@ -82,7 +128,18 @@ const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#support-services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section =
+                        document.getElementById("support-services");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Community
                   </a>
                 </li>
@@ -104,42 +161,123 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Depression
                   </a>
                 </li>
+
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Anxiety
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Bipolar Disorder
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     OCD
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     ADHD
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Social Anxiety
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Women’s Mental Health
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <a
+                    href="#concerns"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const section = document.getElementById("concerns");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="hover:text-[#276C72] transition cursor-pointer"
+                  >
                     Addiction
                   </a>
                 </li>
@@ -152,25 +290,32 @@ const Footer = () => {
                 Professionals
               </h3>
               <ul className="space-y-2 text-sm">
+                <Link to="/experts" className="hover:text-[#276C72] transition">
+                  Therapists
+                </Link>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
-                    Therapists
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
                     Psychiatrists
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
                     Child & Youth Experts
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
                     Couples Therapists
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

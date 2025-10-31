@@ -27,6 +27,7 @@ export default function SupportServices() {
 
   return (
     <motion.div
+      id="support-services"
       className="max-w-md mx-auto space-y-16 p-6 pt-14 pb-14"
       variants={containerVariants}
       initial="hidden"

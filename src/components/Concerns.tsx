@@ -142,7 +142,7 @@ const MentalHealthCards = () => {
   }, []);
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-[#E0F2FF] pb-16">
+    <div id="concerns" className="max-w-md mx-auto p-6 bg-[#E0F2FF] pb-16">
       {/* Header */}
       <div className="mb-8 text-center">
         <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] leading-snug pt-4">

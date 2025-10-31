@@ -32,7 +32,7 @@ const ContactSection = () => {
   }, [offices.length]);
 
   return (
-    <section className="w-full bg-[#0a0a7a] text-white py-12 px-4">
+    <section id="contact" className="w-full bg-[#0a0a7a] text-white py-12 px-4">
       <div className="max-w-4xl mx-auto text-center space-y-6">
         {/* Header */}
         <div>
