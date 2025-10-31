@@ -7,6 +7,7 @@ import "./index.css";
 import Home from "./pages/Home";
 import ExpertsPage from "./pages/Experts/ExpertsPage";
 import AboutPage from "./pages/About/AboutPage";
+import Blogpage from "./pages/Blog/Blogpage";
 
 // --- Shared components ---
 import PremiumSplashScreen from "./components/Spalshscreen";
@@ -45,25 +46,22 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/experts" element={<ExpertsPage />} />
           <Route path="/about" element={<AboutPage />} />
-
+          <Route path="/blog" element={<Blogpage />} />{" "}
+          {/* 📰 Blog page added */}
           {/* 🏥 Centres */}
           <Route path="/centres/bengaluru" element={<Bangalore />} />
           <Route path="/centres/kochi" element={<Kochi />} />
           <Route path="/centres/mumbai" element={<Mumbai />} />
-
           {/* 👤 Auth & Profile */}
           <Route path="/patientAuth" element={<PatientAuth />} />
           <Route path="/profileDashboard" element={<PatientDashboard />} />
-
           {/* 💬 Booking Flow (book for a specific doctor) */}
           <Route
             path="/book-appointment/:doctorId"
             element={<BookAppointment />}
           />
-
           {/* ✅ Payment success page (Step 4) */}
           <Route path="/payment-success" element={<Step4PaymentSuccess />} />
-
           {/* Fallback */}
           <Route
             path="*"
