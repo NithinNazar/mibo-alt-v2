@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import ExpertsPage from "./pages/Experts/ExpertsPage";
 import AboutPage from "./pages/About/AboutPage";
 import Blogpage from "./pages/Blog/Blogpage";
+import WhyMiboPage from "./pages/WhyMibo/WhyMibo";
+import WhoItsForPage from "./pages/WhoItsFor/WhoItsForPage";
 
 // --- Shared components ---
 import PremiumSplashScreen from "./components/Spalshscreen";
@@ -47,6 +49,9 @@ const App = () => {
           <Route path="/experts" element={<ExpertsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<Blogpage />} />{" "}
+          <Route path="/why-mibo" element={<WhyMiboPage />} />{" "}
+          <Route path="/who-its-for" element={<WhoItsForPage />} />
+          {/* ✅ Why Mibo page */}
           {/* 📰 Blog page added */}
           {/* 🏥 Centres */}
           <Route path="/centres/bengaluru" element={<Bangalore />} />

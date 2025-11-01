@@ -1,8 +1,45 @@
 // src/pages/Centers/components/CentersFooter.tsx
+import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"; //  Modern imports
+
 const CentersFooter = () => {
   return (
     <footer className="bg-[#E3F7F1] text-[#1C3D3A] py-12 px-6 sm:px-12 lg:px-20">
       <div className="max-w-7xl mx-auto border-t border-[#C1DFDA] pt-10">
+        {/* --- 🌐 Social Icons Row --- */}
+        <div className="flex justify-center items-center gap-8 mb-10 text-gray-400">
+          <a
+            href="https://twitter.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#0b1180] transition-transform transform hover:scale-110"
+          >
+            <Twitter className="w-5 h-5" />
+          </a>
+          <a
+            href="https://linkedin.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#0b1180] transition-transform transform hover:scale-110"
+          >
+            <Linkedin className="w-5 h-5" />
+          </a>
+          <a
+            href="https://facebook.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#0b1180] transition-transform transform hover:scale-110"
+          >
+            <Facebook className="w-5 h-5" />
+          </a>
+          <a
+            href="https://instagram.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#0b1180] transition-transform transform hover:scale-110"
+          >
+            <Instagram className="w-5 h-5" />
+          </a>
+        </div>
         {/* --- Footer Grid --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
           {/* --- Left Column --- */}
