@@ -10,6 +10,8 @@ import AboutPage from "./pages/About/AboutPage";
 import Blogpage from "./pages/Blog/Blogpage";
 import WhyMiboPage from "./pages/WhyMibo/WhyMibo";
 import WhoItsForPage from "./pages/WhoItsFor/WhoItsForPage";
+import InPatientPage from "./pages/Services/Inpatient/InPatientPage";
+import InPersonPage from "./pages/Services/Inperson/InPersonPage";
 
 // --- Shared components ---
 import PremiumSplashScreen from "./components/Spalshscreen";
@@ -29,6 +31,7 @@ import BookAppointment from "./pages/BookAppointment";
 
 // --- Payment success (Step 4) ---
 import Step4PaymentSuccess from "./pages/BookAppointment/Step4PaymentSuccess";
+import OnlinePage from "./pages/Services/Online/OnlinePage";
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -51,6 +54,9 @@ const App = () => {
           <Route path="/blog" element={<Blogpage />} />{" "}
           <Route path="/why-mibo" element={<WhyMiboPage />} />{" "}
           <Route path="/who-its-for" element={<WhoItsForPage />} />
+          <Route path="/services/in-patient" element={<InPatientPage />} />
+          <Route path="/services/in-person" element={<InPersonPage />} />
+          <Route path="/services/online" element={<OnlinePage />} />
           {/* ✅ Why Mibo page */}
           {/* 📰 Blog page added */}
           {/* 🏥 Centres */}
