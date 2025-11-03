@@ -17,7 +17,7 @@ const Bangalore: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBookAppointment = () => {
-    navigate("/patientAuth"); // ✅ Redirect to your login/signup page
+    navigate("/patientAuth"); //  Redirect to your login/signup page
   };
 
   return (

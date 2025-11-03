@@ -53,7 +53,7 @@ const PremiumSplashScreen = ({ onComplete }: PremiumSplashScreenProps) => {
 
       {/* Center content */}
       <div className="relative flex flex-col items-center text-center space-y-6">
-        {/* ✅ Logo with animated circular ring */}
+        {/*  Logo with animated circular ring */}
         <div className="relative flex items-center justify-center">
           {/* Rotating circular gradient ring */}
           <div className="absolute w-48 h-48 rounded-full border-4 border-transparent animate-spin-slow">

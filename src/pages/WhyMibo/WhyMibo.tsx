@@ -106,7 +106,7 @@ const WhyMibo = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate("/experts")} // ✅ navigate to experts page
+          onClick={() => navigate("/experts")} //  navigate to experts page
           className="bg-[#0b1180] text-white px-8 py-3 rounded-xl shadow-md hover:bg-[#94edf7] transition"
         >
           {closing.cta}

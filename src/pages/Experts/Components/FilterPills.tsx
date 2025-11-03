@@ -105,7 +105,7 @@ export default function FilterPills() {
       const rect = btn.getBoundingClientRect();
       let left = rect.left + window.scrollX;
 
-      // ✅ prevent overflow right
+      //  prevent overflow right
       const dropdownWidth = 288; // approx w-72
       const viewportWidth = window.innerWidth;
       if (left + dropdownWidth > viewportWidth - 10) {
@@ -134,7 +134,7 @@ export default function FilterPills() {
     });
   };
 
-  // ✅ close on click outside both pill buttons AND dropdown
+  //  close on click outside both pill buttons AND dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;

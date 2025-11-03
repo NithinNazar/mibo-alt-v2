@@ -33,7 +33,7 @@ export default function Step2PhoneVerification({
       const updated = { ...bookingData, phone };
       setBookingData(updated);
 
-      // ✅ Create a local user profile
+      //  Create a local user profile
       localStorage.setItem("mibo_user", JSON.stringify(updated));
 
       onContinue();

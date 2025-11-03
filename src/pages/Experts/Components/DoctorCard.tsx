@@ -66,7 +66,7 @@ export default function DoctorCard({ doctor }: Props) {
 //   const navigate = useNavigate();
 
 //   const handleBook = () => {
-//     navigate("/patientAuth"); // ✅ matches your SIGN UP button route
+//     navigate("/patientAuth"); //  matches your SIGN UP button route
 //   };
 
 //   return (

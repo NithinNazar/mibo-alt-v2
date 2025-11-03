@@ -42,7 +42,7 @@ export default function Step3ConfirmBooking({
       </div>
 
       <div className="flex-1 p-6 space-y-6">
-        {/* ✅ New Profile Created text */}
+        {/* New Profile Created text */}
         <div className="bg-white border border-[#a7c4f2]/40 rounded-xl p-4 text-center shadow-sm">
           <h3 className="text-xl font-semibold text-[#034B44]">
             🎉 New Profile Created

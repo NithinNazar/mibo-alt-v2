@@ -11,7 +11,7 @@ const ProfileHeader = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // ✅ Mock user (replace later with auth context)
+  //  Mock user (replace later with auth context)
   const [user, setUser] = useState<{ name: string; email: string } | null>({
     name: "Nithin",
     email: "nithin@example.com",
@@ -38,7 +38,7 @@ const ProfileHeader = () => {
   const handleLogout = () => {
     setUser(null);
     setProfileMenuOpen(false);
-    navigate("/"); // ✅ Redirect to home
+    navigate("/"); //  Redirect to home
   };
 
   return (
