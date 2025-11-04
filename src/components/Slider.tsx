@@ -10,9 +10,10 @@ const PremiumSlider = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // refs for touch events
+  // refs for touch events + pause timeout
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const pauseTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const slides = [
     {
@@ -48,7 +49,7 @@ const PremiumSlider = () => {
     },
   ];
 
-  // Auto slide + progress animation
+  // --- Auto slide + progress animation ---
   useEffect(() => {
     if (!isPaused) {
       const slideInterval = setInterval(() => {
@@ -67,6 +68,7 @@ const PremiumSlider = () => {
     }
   }, [isPaused, slides.length]);
 
+  // --- Navigation ---
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
     setProgress(0);
@@ -77,7 +79,14 @@ const PremiumSlider = () => {
     setProgress(0);
   };
 
-  // --- TOUCH HANDLERS (for swipe) ---
+  // --- Pause helper ---
+  const pauseTemporarily = (duration = 5000) => {
+    setIsPaused(true);
+    if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+    pauseTimeout.current = setTimeout(() => setIsPaused(false), duration);
+  };
+
+  // --- Touch Handlers (swipe) ---
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -90,16 +99,14 @@ const PremiumSlider = () => {
     if (touchStartX.current === null || touchEndX.current === null) return;
 
     const deltaX = touchStartX.current - touchEndX.current;
-
-    // Sensitivity threshold (you can tweak this)
-    const swipeThreshold = 50;
+    const swipeThreshold = 50; // sensitivity
 
     if (Math.abs(deltaX) > swipeThreshold) {
       if (deltaX > 0) nextSlide(); // swipe left → next
       else prevSlide(); // swipe right → previous
+      pauseTemporarily(); // pause auto-scroll after swipe
     }
 
-    // reset values
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -160,14 +167,20 @@ const PremiumSlider = () => {
 
       {/* Navigation Arrows */}
       <button
-        onClick={prevSlide}
+        onClick={() => {
+          prevSlide();
+          pauseTemporarily();
+        }}
         className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-black/60 hover:scale-110 transition-all duration-300 shadow-lg"
       >
         <ChevronLeft size={24} />
       </button>
 
       <button
-        onClick={nextSlide}
+        onClick={() => {
+          nextSlide();
+          pauseTemporarily();
+        }}
         className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-black/60 hover:scale-110 transition-all duration-300 shadow-lg"
       >
         <ChevronRight size={24} />
@@ -181,6 +194,7 @@ const PremiumSlider = () => {
             onClick={() => {
               setCurrentSlide(index);
               setProgress(0);
+              pauseTemporarily();
             }}
             className={`transition-all duration-300 ${
               index === currentSlide
