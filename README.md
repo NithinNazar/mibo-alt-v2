@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Mibo Mental Health - Patient Booking Portal
 
 A modern, user-friendly web application for booking mental health consultations at Mibo Mental Health centres across India. Built with React, TypeScript, and Vite.
@@ -274,3 +275,11 @@ For support, please contact the Mibo Mental Health technical team.
 ---
 
 Built with ❤️ by the Mibo Mental Health Team
+=======
+# Link To Images to be used on the website.
+
+https://drive.google.com/drive/folders/1NTfy3dLW24RzAKVglWL9BaDsX3VaQRyS?usp=sharing
+
+
+# !!!!! Currently Dummy Images are used in the code base, use the images from gdrive link!!!!!!!!!!!
+>>>>>>> f607f2ec4f42eb552a1946b9555cffb22423016a
