@@ -1,0 +1,489 @@
+### Mibo Mental Hospital API - REST Client Collection
+### Import this file into Postman, Insomnia, or use with VS Code REST Client extension
+
+@baseUrl = http://localhost:3000
+@token = your-jwt-token-here
+
+###############################################
+# AUTHENTICATION
+###############################################
+
+### 1. Login with Phone + OTP (Step 1: Request OTP)
+POST {{baseUrl}}/api/auth/send-otp
+Content-Type: application/json
+
+{
+  "phone": "+919876543210"
+}
+
+### 2. Login with Phone + OTP (Step 2: Verify OTP)
+POST {{baseUrl}}/api/auth/login/phone-otp
+Content-Type: application/json
+
+{
+  "phone": "+919876543210",
+  "otp": "123456"
+}
+
+### 3. Login with Phone + Password
+POST {{baseUrl}}/api/auth/login/phone-password
+Content-Type: application/json
+
+{
+  "phone": "+919876543210",
+  "password": "password123"
+}
+
+### 4. Login with Username + Password
+POST {{baseUrl}}/api/auth/login/username-password
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password123"
+}
+
+### 5. Refresh Token
+POST {{baseUrl}}/api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "your-refresh-token"
+}
+
+### 6. Logout
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{token}}
+
+###############################################
+# APPOINTMENTS
+###############################################
+
+### 7. List Appointments (Role-filtered)
+GET {{baseUrl}}/api/appointments
+Authorization: Bearer {{token}}
+
+### 8. List Appointments with Filters
+GET {{baseUrl}}/api/appointments?centreId=1&clinicianId=2&date=2024-12-15&status=BOOKED
+Authorization: Bearer {{token}}
+
+### 9. Create Appointment (Patient)
+POST {{baseUrl}}/api/appointments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clinician_id": 1,
+  "centre_id": 1,
+  "appointment_type": "IN_PERSON",
+  "scheduled_start_at": "2024-12-20T10:00:00Z",
+  "duration_minutes": 30,
+  "notes": "First consultation"
+}
+
+### 10. Create Online Appointment (Auto-generates Meet link)
+POST {{baseUrl}}/api/appointments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clinician_id": 1,
+  "centre_id": 1,
+  "appointment_type": "ONLINE",
+  "scheduled_start_at": "2024-12-20T14:00:00Z",
+  "duration_minutes": 30
+}
+
+
+### 11. Create Appointment (Staff - requires patient_id)
+POST {{baseUrl}}/api/appointments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "patient_id": 5,
+  "clinician_id": 1,
+  "centre_id": 1,
+  "appointment_type": "IN_PERSON",
+  "scheduled_start_at": "2024-12-20T15:00:00Z",
+  "duration_minutes": 30
+}
+
+### 12. Get Appointment by ID
+GET {{baseUrl}}/api/appointments/1
+Authorization: Bearer {{token}}
+
+### 13. Get My Appointments (Doctor Dashboard - CLINICIAN only)
+GET {{baseUrl}}/api/appointments/my-appointments
+Authorization: Bearer {{token}}
+
+### 14. Reschedule Appointment
+PUT {{baseUrl}}/api/appointments/1/reschedule
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "scheduled_start_at": "2024-12-21T10:00:00Z",
+  "duration_minutes": 30
+}
+
+### 15. Update Appointment Status
+PUT {{baseUrl}}/api/appointments/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "new_status": "CONFIRMED",
+  "reason": "Patient confirmed attendance"
+}
+
+### 16. Cancel Appointment
+DELETE {{baseUrl}}/api/appointments/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Patient requested cancellation"
+}
+
+### 17. Check Clinician Availability
+GET {{baseUrl}}/api/appointments/availability?clinicianId=1&centreId=1&date=2024-12-20
+Authorization: Bearer {{token}}
+
+###############################################
+# PAYMENTS
+###############################################
+
+### 18. Send Payment Link
+POST {{baseUrl}}/api/payments/send-payment-link
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "appointmentId": 1,
+  "patientPhone": "+919876543210",
+  "patientName": "John Doe"
+}
+
+### 19. Check Payment Link Status
+GET {{baseUrl}}/api/payments/link-status/plink_abc123
+Authorization: Bearer {{token}}
+
+### 20. Razorpay Webhook (Internal - for testing)
+POST {{baseUrl}}/api/payments/webhook
+Content-Type: application/json
+X-Razorpay-Signature: test-signature
+
+{
+  "event": "payment_link.paid",
+  "payload": {
+    "payment_link": {
+      "entity": {
+        "id": "plink_abc123"
+      }
+    }
+  }
+}
+
+
+###############################################
+# PATIENTS
+###############################################
+
+### 21. List Patients
+GET {{baseUrl}}/api/patients
+Authorization: Bearer {{token}}
+
+### 22. Search Patients
+GET {{baseUrl}}/api/patients?search=john&page=1&limit=20
+Authorization: Bearer {{token}}
+
+### 23. Create Patient
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "John Doe",
+  "phone": "+919876543210",
+  "email": "john@example.com",
+  "date_of_birth": "1990-01-15",
+  "gender": "MALE",
+  "address": "123 Main St, City"
+}
+
+### 24. Get Patient by ID
+GET {{baseUrl}}/api/patients/1
+Authorization: Bearer {{token}}
+
+### 25. Update Patient
+PUT {{baseUrl}}/api/patients/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "John Doe Updated",
+  "email": "john.updated@example.com",
+  "address": "456 New St, City"
+}
+
+### 26. Get Patient Appointments
+GET {{baseUrl}}/api/patients/1/appointments
+Authorization: Bearer {{token}}
+
+### 27. Add Patient Medical Note
+POST {{baseUrl}}/api/patients/1/notes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "note": "Patient shows improvement",
+  "note_type": "PROGRESS"
+}
+
+###############################################
+# STAFF (CLINICIANS)
+###############################################
+
+### 28. List All Clinicians
+GET {{baseUrl}}/api/staff/clinicians
+Authorization: Bearer {{token}}
+
+### 29. Get Clinician by ID
+GET {{baseUrl}}/api/staff/clinicians/1
+Authorization: Bearer {{token}}
+
+### 30. Create Clinician (ADMIN, MANAGER only)
+POST {{baseUrl}}/api/staff/clinicians
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "user_id": 10,
+  "specialization": "Psychiatrist",
+  "qualification": "MD Psychiatry",
+  "years_of_experience": 10,
+  "consultation_fee": 1500,
+  "consultation_modes": ["IN_PERSON", "ONLINE"],
+  "default_consultation_duration_minutes": 30,
+  "bio": "Experienced psychiatrist specializing in anxiety disorders",
+  "profile_picture_url": "https://example.com/photo.jpg"
+}
+
+### 31. Update Clinician (ADMIN, MANAGER only)
+PUT {{baseUrl}}/api/staff/clinicians/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "specialization": "Clinical Psychologist",
+  "consultation_fee": 2000,
+  "years_of_experience": 12
+}
+
+
+### 32. Set Clinician Availability (ADMIN, MANAGER, CLINICIAN)
+POST {{baseUrl}}/api/staff/clinicians/1/availability
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "centre_id": 1,
+  "day_of_week": "MONDAY",
+  "start_time": "09:00",
+  "end_time": "17:00",
+  "slot_duration_minutes": 30,
+  "is_available": true
+}
+
+### 33. Get Clinician Availability
+GET {{baseUrl}}/api/staff/clinicians/1/availability
+Authorization: Bearer {{token}}
+
+### 34. Delete Clinician (Soft delete)
+DELETE {{baseUrl}}/api/staff/clinicians/1
+Authorization: Bearer {{token}}
+
+###############################################
+# CENTRES
+###############################################
+
+### 35. List All Centres
+GET {{baseUrl}}/api/centres
+Authorization: Bearer {{token}}
+
+### 36. Get Centre by ID
+GET {{baseUrl}}/api/centres/1
+Authorization: Bearer {{token}}
+
+### 37. Create Centre (ADMIN, MANAGER only)
+POST {{baseUrl}}/api/centres
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Downtown Mental Health Centre",
+  "address": "123 Health St, Downtown",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "pincode": "400001",
+  "phone": "+912212345678",
+  "email": "downtown@mibo.com",
+  "operating_hours": "Mon-Sat: 9AM-6PM"
+}
+
+### 38. Update Centre (ADMIN, MANAGER only)
+PUT {{baseUrl}}/api/centres/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Downtown Mental Health Centre - Updated",
+  "phone": "+912212345679",
+  "operating_hours": "Mon-Sun: 8AM-8PM"
+}
+
+### 39. Delete Centre (Soft delete)
+DELETE {{baseUrl}}/api/centres/1
+Authorization: Bearer {{token}}
+
+###############################################
+# ANALYTICS (ADMIN, MANAGER only)
+###############################################
+
+### 40. Get Dashboard Metrics
+GET {{baseUrl}}/api/analytics/dashboard
+Authorization: Bearer {{token}}
+
+### 41. Get Dashboard Metrics with Date Range
+GET {{baseUrl}}/api/analytics/dashboard?startDate=2024-12-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### 42. Get Revenue Analytics
+GET {{baseUrl}}/api/analytics/revenue?startDate=2024-12-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### 43. Get Top Clinicians
+GET {{baseUrl}}/api/analytics/top-clinicians?limit=10
+Authorization: Bearer {{token}}
+
+
+###############################################
+# VIDEO CONSULTATIONS
+###############################################
+
+### 44. Generate Google Meet Link (Manual)
+POST {{baseUrl}}/api/video/generate-meet-link
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "appointmentId": 1
+}
+
+### 45. Get Video Link for Appointment
+GET {{baseUrl}}/api/video/appointment/1/link
+Authorization: Bearer {{token}}
+
+###############################################
+# NOTIFICATIONS
+###############################################
+
+### 46. Send WhatsApp Notification
+POST {{baseUrl}}/api/notifications/whatsapp
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "+919876543210",
+  "message": "Your appointment is confirmed for tomorrow at 10 AM"
+}
+
+### 47. Get Notification History
+GET {{baseUrl}}/api/notifications/history?appointmentId=1
+Authorization: Bearer {{token}}
+
+###############################################
+# USERS & ROLES
+###############################################
+
+### 48. List All Users (ADMIN only)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+
+### 49. Get User by ID
+GET {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+
+### 50. Create User (ADMIN only)
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "Jane Smith",
+  "phone": "+919876543211",
+  "email": "jane@example.com",
+  "username": "janesmith",
+  "password": "securePassword123",
+  "user_type": "STAFF"
+}
+
+### 51. Update User
+PUT {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "Jane Smith Updated",
+  "email": "jane.updated@example.com"
+}
+
+### 52. Assign Role to User (ADMIN only)
+POST {{baseUrl}}/api/users/1/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role_name": "MANAGER"
+}
+
+### 53. Remove Role from User (ADMIN only)
+DELETE {{baseUrl}}/api/users/1/roles/MANAGER
+Authorization: Bearer {{token}}
+
+### 54. Get User Roles
+GET {{baseUrl}}/api/users/1/roles
+Authorization: Bearer {{token}}
+
+###############################################
+# HEALTH CHECK
+###############################################
+
+### 55. Health Check
+GET {{baseUrl}}/health
+
+### 56. API Version
+GET {{baseUrl}}/api/version
+
+###############################################
+# TESTING EXAMPLES
+###############################################
+
+### Example: Complete Flow - Book Online Appointment
+# Step 1: Login as patient
+POST {{baseUrl}}/api/auth/login/phone-password
+Content-Type: application/json
+
+{
+  "phone": "+919876543210",
+  "password": "password123"
+}
+
+# Step 2: Check clinician availability
+# GET {{baseUrl}}/api/appointments/availability?clinicianId=1&centreId=1&date=2024-12-20
+
+# Step 3: Book online appointment
+# POST {{baseUrl}}/api/appointments
+# (System auto-generates Meet link and sends notifications)
+
