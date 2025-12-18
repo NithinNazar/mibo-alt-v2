@@ -38,7 +38,7 @@ const App = () => {
 
   return (
     <StrictMode>
-      <Router basename={import.meta.env.VITE_BASE_PATH || "/mibo-alt-v2/"}>
+      <Router >
         <ScrollToTop />
 
         {/* Splash Screen */}
@@ -49,23 +49,28 @@ const App = () => {
         <Routes>
           {/*  Public pages */}
           <Route path="/" element={<Home />} />
+          <Route path="/signin" element={<PatientAuth />} />
+          <Route path="/signup" element={<PatientAuth />} />
           <Route path="/experts" element={<ExpertsPage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about-us" element={<AboutPage />} />
           <Route path="/blog" element={<Blogpage />} />{" "}
           <Route path="/why-mibo" element={<WhyMiboPage />} />{" "}
-          <Route path="/who-its-for" element={<WhoItsForPage />} />
+          <Route path="/who" element={<WhoItsForPage />} />
           <Route path="/services/in-patient" element={<InPatientPage />} />
           <Route path="/services/in-person" element={<InPersonPage />} />
           <Route path="/services/online" element={<OnlinePage />} />
+          <Route path="/book-appointment" element={<ExpertsPage />} />
           {/*  Why Mibo page */}
           {/*  Blog page added */}
           {/*  Centres */}
           <Route path="/centres/bengaluru" element={<Bangalore />} />
           <Route path="/centres/kochi" element={<Kochi />} />
           <Route path="/centres/mumbai" element={<Mumbai />} />
+
           {/* 👤 Auth & Profile */}
           <Route path="/patientAuth" element={<PatientAuth />} />
           <Route path="/profileDashboard" element={<PatientDashboard />} />
+
           {/*  Booking Flow (book for a specific doctor) */}
           <Route
             path="/book-appointment/:doctorId"

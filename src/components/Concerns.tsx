@@ -1,235 +1,421 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+//import {/*  ArrowRight, ArrowLeft, */ ChevronRight, Heart } from "lucide-react";
+import {  motion , type Variants} from "framer-motion";
 import depressionIcon from "../assets/depression.gif";
 import stress from "../assets/anxiety.gif";
 import doubt from "../assets/doubt.gif";
-import bipolar from "../assets/bipolar.gif";
-import adhd from "../assets/adhd.gif";
-import Anxiety from "../assets/anxiety (1).gif";
+import { Link } from "react-router-dom";
+//import bipolar from "../assets/bipolar.gif";
+//import adhd from "../assets/adhd.gif";
+//import Anxiety from "../assets/anxiety (1).gif";
 
-const MentalHealthCards = () => {
+const MentalHealthConcernsSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const cardRef = useRef(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
-  const currentX = useRef(0);
   const isDragging = useRef(false);
 
   const conditions = [
     {
       name: "Depression",
-      description:
-        "Does your life feel impossible & hopeless? You don't have to manage it alone.",
+      description: "Does your life feel impossible & hopeless? You don't have to manage it alone. We offer compassionate care and evidence-based treatments to help you regain hope and find joy again.",
       icon: depressionIcon,
-      color: "from-orange-400 to-orange-600",
+      color: "from-orange-50 to-orange-50",
+      bgColor: "bg-gradient-to-br from-orange-50 to-orange-50",
+      stats: "Affects 280+ million people worldwide",
+      treatments: [/* "Cognitive Behavioral Therapy", */ "Medication Management", "Lifestyle Changes", "Support Groups"]
     },
     {
-      name: "Generalized Anxiety Disorder (GAD)",
-      description:
-        "Chronic feelings of worry and fear about everyday situations affecting your daily life.",
+      name: "Generalized Anxiety Disorder",
+      description: "Chronic feelings of worry and fear about everyday situations affecting your daily life. Our specialized approaches help you manage anxiety and reclaim peace.",
       icon: stress,
-      color: "from-orange-400 to-orange-600",
+      color: "from-blue-50 to-blue-50",
+      bgColor: "bg-gradient-to-br from-blue-50 to-blue-50",
+      stats: "1 in 14 people affected globally",
+      treatments: ["Mindfulness Techniques", "Exposure Therapy", "Relaxation Training", "Stress Management"]
     },
     {
-      name: "Obsessive Compulsive Disorder (OCD)",
-      description:
-        "Repetitive thoughts and behaviors that interfere with your daily routine.",
+      name: "Obsessive Compulsive Disorder",
+      description: "Repetitive thoughts and behaviors that interfere with your daily routine. We provide specialized therapy to break free from compulsive cycles.",
       icon: doubt,
-      color: "from-orange-400 to-orange-600",
+      color: "from-purple-50 to-purple-50",
+      bgColor: "bg-gradient-to-br from-purple-50 to-purple-50",
+      stats: "Affects 2-3% of population",
+      treatments: ["ERP Therapy", "Medication", "Mindfulness", "Habit Reversal"]
     },
-    {
-      name: "Bipolar Disorder",
-      description:
-        "Extreme mood swings including emotional highs and lows affecting your energy.",
-      icon: bipolar,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      name: "Adult ADHD",
-      description:
-        "Difficulty with attention, hyperactivity, and impulse control in adult life.",
-      icon: adhd,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      name: "Social Anxiety",
-      description:
-        "Intense fear of social situations and being judged by others.",
-      icon: Anxiety,
-      color: "from-orange-400 to-orange-600",
-    },
+   
   ];
 
   const nextCard = () => {
     if (isAnimating) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev + 1) % conditions.length);
-    setTimeout(() => setIsAnimating(false), 800); // slower animation
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
+  const prevCard = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + conditions.length) % conditions.length);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+ /*  const goToCard = (index: number) => {
+    if (isAnimating || index === currentIndex) return;
+    setIsAnimating(true);
+    setCurrentIndex(index);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+ */
   // Touch and mouse handlers
   const handleStart = (clientX: number) => {
     if (isAnimating) return;
     startX.current = clientX;
-    currentX.current = clientX;
     isDragging.current = true;
   };
 
-  const handleMove = (clientX: number) => {
+  const handleEnd = (endX: number) => {
     if (!isDragging.current || isAnimating) return;
-    currentX.current = clientX;
-  };
-
-  const handleEnd = () => {
-    if (!isDragging.current || isAnimating) return;
-    const diffX = startX.current - currentX.current;
+    const diffX = startX.current - endX;
     const threshold = 50;
 
     if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        nextCard();
-      } else {
-        setIsAnimating(true);
-        setCurrentIndex(
-          (prev) => (prev - 1 + conditions.length) % conditions.length
-        );
-        setTimeout(() => setIsAnimating(false), 800);
-      }
+      if (diffX > 0) nextCard();
+      else prevCard();
     }
     isDragging.current = false;
   };
 
-  const handleTouchStart = (e: any) => handleStart(e.touches[0].clientX);
-  const handleTouchMove = (e: any) => handleMove(e.touches[0].clientX);
-  const handleTouchEnd = () => handleEnd();
-  const handleMouseDown = (e: any) => handleStart(e.clientX);
-  const handleMouseMove = (e: any) => handleMove(e.clientX);
-  const handleMouseUp = () => handleEnd();
+  const handleTouchStart = (e: React.TouchEvent) => handleStart(e.touches[0].clientX);
+  const handleTouchEnd = (e: React.TouchEvent) => handleEnd(e.changedTouches[0].clientX);
 
-  const goToCard = (index: number) => {
-    if (isAnimating || index === currentIndex) return;
-    setIsAnimating(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsAnimating(false), 800);
-  };
-
-  const currentCondition = conditions[currentIndex];
-
-  // Auto-scroll cards every 5s
+  // Auto-scroll only when not hovering
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (!isDragging.current) {
+    let timer: NodeJS.Timeout;
+    if (!isDragging.current && !isHovering) {
       timer = setInterval(() => nextCard(), 5000);
     }
     return () => clearInterval(timer);
-  }, [isDragging.current]);
+  }, [isDragging.current, isHovering]);
 
-  // Mouse event listeners
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: any) => handleMouseMove(e);
-    const handleGlobalMouseUp = () => handleMouseUp();
-
-    if (isDragging.current) {
-      document.addEventListener("mousemove", handleGlobalMouseMove);
-      document.addEventListener("mouseup", handleGlobalMouseUp);
+  // Card animation variants
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        duration: 0.6,
+        ease: "easeOut"
+      }
     }
-
-    return () => {
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, []);
+  };
 
   return (
-    <div id="concerns" className="max-w-md mx-auto p-6 bg-[#E0F2FF] pb-16">
+    <div 
+      className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] leading-snug pt-4">
-          Mental health concerns we care for
-        </h1>
-        <p className="mt-4 text-[rgb(76,76,76)] text-[0.94rem] font-semibold">
-          Mibo offers support for 30+ mental health conditions. Explore some of
-          the most common ones below to see how we approach care.
-        </p>
+      <div className="text-center mb-12 md:mb-16">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
+        >
+          Mental Health Concerns We Care For
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto"
+        >
+          Mibo offers comprehensive support for 30+ mental health conditions. 
+          Explore some of the most common concerns below to see how we approach care.
+        </motion.p>
       </div>
 
-      {/* Card Container */}
-      <div
-        ref={cardRef}
-        className="relative overflow-hidden rounded-lg cursor-grab active:cursor-grabbing select-none w-full h-80 sm:h-96 mb-6"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-      >
-        <div className="relative w-full h-full">
-          <AnimatePresence mode="wait">
+      {/* Desktop Layout - Grid */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-3 gap-8">
+          {conditions.slice(0, 3).map((condition, index) => (
             <motion.div
-              key={currentIndex} // only content animates
-              initial={{ opacity: 0, x: 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -80 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className={`absolute inset-0 flex flex-col bg-[#FAFDFF] border border-[#bfd1e5] rounded-2xl p-4 sm:p-6`}
+              key={condition.name}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={cardVariants}
+              transition={{ delay: index * 0.1 }}
+              className="group relative"
             >
-              {/* Icon */}
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                <img
-                  src={currentCondition.icon}
-                  alt={currentCondition.name}
-                  className="w-20 h-20 sm:w-28 sm:h-28 object-contain"
-                />
-              </div>
+              <div className={`${condition.bgColor} rounded-3xl overflow-hidden  transition-all duration-500 h-full border border-gray-100 group-hover:border-opacity-30 group-hover:scale-[1.02]`}>
+                {/* Icon Section */}
+                <div className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                   <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${condition.color} p-4 flex items-center justify-center`}>
+  <img
+    src={condition.icon}
+    alt={condition.name}
+    className="w-24 h-24  object-contain"
+  />
+</div>
 
-              {/* Title */}
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2">
-                {currentCondition.name}
-              </h2>
 
-              {/* Description */}
-              <p className="text-gray-600 text-sm sm:text-[0.875rem] leading-relaxed mb-4 sm:mb-6 flex-1 overflow-hidden line-clamp-4">
-                {currentCondition.description}
-              </p>
 
-              {/* Buttons */}
-              <div className="flex items-center justify-between flex-shrink-0">
-                <button className="w-30 h-5 p-4 sm:w-10 sm:h-10 rounded-lg bg-[#A7DAD3] text-[0.75rem] font-500 text-[#4c4c47] flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-                  Learn More
-                </button>
-                <button
-                  onClick={nextCard}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#A7DAD3] text-[#4c4c47] flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{condition.name}</h2>
+                      <p className="text-sm text-gray-500 mt-1">{condition.stats}</p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {condition.description}
+                  </p>
+
+                  {/* Treatments */}
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Treatment Approaches
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {condition.treatments.map((treatment, i) => (
+                        <span
+                          key={i}
+                          className="text-xs bg-white/80 text-gray-700 px-3 py-1.5 rounded-full font-medium border border-gray-200"
+                        >
+                          {treatment}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                 
+                  <div className="flex gap-3">
+                    <Link to={"/experts"}>
+                   <button className="flex-1 bg-white text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-gray-300">
+                      Learn More
+                    </button>
+                    <button className="bg-gradient-to-r from-[#18356C] to-[#040a47] text-white font-semibold py-3 px-6 rounded-xl hover:opacity-90 transition-all duration-300">
+                      Book Consultation
+                    </button>
+                  </Link>
+                  </div>
+                </div>
               </div>
             </motion.div>
-          </AnimatePresence>
+          ))}
+        </div>
+
+        {/* Second Row for Desktop */}
+        <div className="grid grid-cols-3 gap-8 mt-8">
+          {conditions.slice(3, 6).map((condition, index) => (
+            <motion.div
+              key={condition.name}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={cardVariants}
+              transition={{ delay: index * 0.1 + 0.3 }}
+              className="group relative"
+            >
+              <div className={`${condition.bgColor} rounded-3xl overflow-hidden transition-all duration-500 h-full border border-gray-100 group-hover:border-opacity-30 group-hover:scale-[1.02]`}>
+                <div className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                      <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${condition.color} p-4 flex items-center justify-center`}>
+  <img
+    src={condition.icon}
+    alt={condition.name}
+    className="w-16 h-16 object-contain"
+  />
+</div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{condition.name}</h2>
+                      <p className="text-sm text-gray-500 mt-1">{condition.stats}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {condition.description}
+                  </p>
+
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Treatment Approaches
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {condition.treatments.slice(0, 3).map((treatment, i) => (
+                        <span
+                          key={i}
+                          className="text-xs bg-white/80 text-gray-700 px-3 py-1.5 rounded-full font-medium border border-gray-200"
+                        >
+                          {treatment}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 bg-white text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-gray-300">
+                      Learn More
+                    </button>
+                    <button className="bg-gradient-to-r from-[#18356C] to-[#040a47] text-white font-semibold py-3 px-6 rounded-xl hover:opacity-90 transition-all duration-300">
+                      Book Consultation
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* View All Button for Desktop */}
+        {/* <div className="text-center mt-12">
+          <button className="inline-flex items-center gap-2 bg-gradient-to-r from-[#34b9a5] to-[#2FA19A] text-white px-8 py-4 rounded-full font-semibold hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl">
+            <Heart size={20} />
+            <span>View All 30+ Conditions</span>
+            <ChevronRight size={20} />
+          </button>
+        </div> */}
+      </div>
+
+      {/* Mobile & Tablet Layout - Carousel */}
+      <div 
+        className="lg:hidden relative"
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Navigation Buttons */}
+       {/*  <button
+          onClick={prevCard}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 md:-translate-x-4 z-10 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-gray-800 hover:bg-white hover:text-[#34b9a5] transition-all duration-300 shadow-xl hover:shadow-2xl border border-gray-200"
+        >
+          <ArrowLeft size={24} />
+        </button>
+
+        <button
+          onClick={nextCard}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 md:translate-x-4 z-10 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-gray-800 hover:bg-white hover:text-[#34b9a5] transition-all duration-300 shadow-xl hover:shadow-2xl border border-gray-200"
+        >
+          <ArrowRight size={24} />
+        </button> */}
+
+        {/* Carousel Container */}
+        <div className="overflow-hidden px-2">
+          <div
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {conditions.map((condition, index) => (
+              <div
+                key={index}
+                className="min-w-full px-2 md:px-3"
+              >
+                <div className={`${condition.bgColor} rounded-3xl overflow-hidden  border-gray-100 h-full`}>
+                  {/* Card Content */}
+                  <div className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${condition.color} p-4 flex items-center justify-center`}>
+  <img
+    src={condition.icon}
+    alt={condition.name}
+    className="w-24 h-24 object-contain"
+  />
+</div>
+
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900">{condition.name}</h2>
+                        <p className="text-sm text-gray-500 mt-1">{condition.stats}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      {condition.description.length > 150 
+                        ? `${condition.description.substring(0, 150)}...` 
+                        : condition.description
+                      }
+                    </p>
+
+                    <div className="mb-6">
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                        Key Treatments
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {condition.treatments.slice(0, 2).map((treatment, i) => (
+                          <span
+                            key={i}
+                            className="text-xs bg-white/80 text-gray-700 px-3 py-1.5 rounded-full font-medium border border-gray-200"
+                          >
+                            {treatment}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      
+
+                      <Link to={"/experts"}>
+                  <button className="flex-1 bg-white text-gray-800 font-semibold py-3 px-4 rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 text-sm">
+                        Learn More
+                      </button>
+                      <button className="bg-gradient-to-r from-[#18356C] to-[#040a47] text-white font-semibold py-3 px-4 rounded-xl hover:opacity-90 transition-all duration-300 text-sm">
+                        Book Now
+                      </button>
+                  </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center space-x-2 mb-6">
-        {conditions.map((_, index) => (
+      {/* Indicators */}
+    {/*   <div className="flex justify-center items-center mt-8 md:mt-12 space-x-2">
+        {conditions.map((_, idx) => (
           <button
-            key={index}
-            onClick={() => goToCard(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              index === currentIndex
-                ? "bg-[#18276c] w-6"
-                : "bg-gray-300 hover:bg-gray-400"
+            key={idx}
+            onClick={() => goToCard(idx)}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              idx === currentIndex
+                ? "w-12 bg-gradient-to-r from-[#34b9a5] to-[#18356C]"
+                : "w-6 bg-gray-300 hover:bg-gray-400"
             }`}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Counter */}
-      <div className="text-center text-sm text-gray-500">
-        {currentIndex + 1} of {conditions.length}
-      </div>
+     {/*  <div className="text-center mt-4 text-gray-500 font-medium">
+        <span className="text-[#18356C] font-bold">{currentIndex + 1}</span>
+        <span className="mx-2">of</span>
+        <span className="font-bold">{conditions.length}</span>
+        <span className="ml-2">conditions</span>
+      </div> */}
+
+      {/* View All Button for Mobile */}
+     {/*  <div className="lg:hidden text-center mt-8">
+        <button className="inline-flex items-center gap-2 bg-gradient-to-r from-[#34b9a5] to-[#2FA19A] text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all duration-300 shadow-lg">
+          <Heart size={18} />
+          <span>View All Conditions</span>
+          <ChevronRight size={18} />
+        </button>
+      </div> */}
     </div>
   );
 };
 
-export default MentalHealthCards;
+export default MentalHealthConcernsSlider;

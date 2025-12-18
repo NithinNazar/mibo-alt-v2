@@ -11,7 +11,7 @@ export default function Blogpage() {
     <div className="min-h-screen bg-gray-50">
       <ExpertsHeader />
       {/* Hero Image */}
-      <div className="relative w-full h-[50vh] overflow-hidden">
+      <div className="relative w-full h-[50vh] overflow-hidden mt-20">
         <img
           src={groupSession}
           alt="Group therapy session"

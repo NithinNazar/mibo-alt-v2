@@ -17,7 +17,7 @@ const DirectorsNote: React.FC = () => {
           <FallbackImage
             src={director}
             alt="Managing Director"
-            className="w-full rounded-[3rem] object-cover shadow-md"
+            className="w-full rounded-[3rem] object-cover "
             fallbackColor="#cce3de"
           />
         </motion.div>

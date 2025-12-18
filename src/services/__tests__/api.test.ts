@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import MockAdapter from "axios-mock-adapter";
 import apiClient from "../api";
 import { apiCallWithRetry } from "../../utils/apiRetry";
@@ -42,14 +42,14 @@ describe("API Client", () => {
 
     // Mock window.location
     delete (window as any).location;
-    window.location = { ...originalLocation, href: "" } as any;
+    window.location = { ...originalLocation, href: "" } as Location;
   });
 
   afterEach(() => {
     // Restore original localStorage
     Object.assign(localStorage, originalLocalStorage);
     // Restore window.location
-    window.location = originalLocation as any;
+    window.location = originalLocation;
   });
 
   describe("Request Interceptor - Authentication Token", () => {

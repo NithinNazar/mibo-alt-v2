@@ -15,7 +15,7 @@ const WhyMibo = () => {
       <ExpertsHeader />
       {/* --- Hero Section --- */}
       <section
-        className="relative h-[60vh] flex items-center justify-center text-center text-white"
+        className="mt-20 relative h-[60vh] flex items-center justify-center text-center text-white"
         style={{
           backgroundImage: `url(${heroImg})`,
           backgroundSize: "cover",
