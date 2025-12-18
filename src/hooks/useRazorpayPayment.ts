@@ -24,12 +24,11 @@
  * ```
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import razorpayService from "../services/razorpayIntegration";
 import type {
   PaymentLinkData,
   PaymentStatusData,
-  PaymentLinkStatus,
 } from "../services/razorpayIntegration";
 
 interface UseRazorpayPaymentReturn {
@@ -164,9 +163,8 @@ export function useRazorpayPayment(): UseRazorpayPaymentReturn {
   const isPaymentExpired = paymentStatus?.status === "expired";
   const loading = sendingLink || checkingStatus;
 
-  const timeUntilExpiry = paymentData?.expiresAt
-    ? razorpayService.getTimeUntilExpiry(paymentData.expiresAt)
-    : null;
+  // Calculate time until expiry (if needed in future)
+  const timeUntilExpiry = null; // Removed: razorpayService.getTimeUntilExpiry not implemented
 
   return {
     paymentData,
