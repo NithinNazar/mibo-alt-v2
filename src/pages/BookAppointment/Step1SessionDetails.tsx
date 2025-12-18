@@ -5,16 +5,16 @@ import {
   MapPin,
   Video,
   Phone,
-  // Clock,
   CalendarDays,
-  // Clock4,
   Sun,
   Sunrise,
   Moon,
   ChevronLeft,
   ChevronRight,
   X,
+  AlertCircle,
 } from "lucide-react";
+import type { Clinician, Centre, TimeSlot } from "../../types";
 
 interface Props {
   doctor: Doctor;
@@ -103,29 +103,9 @@ function makeMonthAvailability(seedMonth: Date): Record<string, Availability> {
   return map;
 }
 
-/** Slots “feel” dynamic. Unavailable = none; few = shorter lists; available = normal lists */
-function getPeriodsFor(dateKey: string, availability: Availability) {
-  if (availability === "unavailable") return [] as string[];
-  if (availability === "few") {
-    // morning + afternoon OR just afternoon
-    return Math.random() > 0.5 ? ["Morning", "Afternoon"] : ["Afternoon"];
-  }
-  // available
-  const combos = [
-    ["Morning", "Afternoon", "Evening"],
-    ["Morning", "Afternoon"],
-    ["Afternoon", "Evening"],
-  ];
-  return combos[
-    (dateKey.charCodeAt(0) + dateKey.charCodeAt(1)) % combos.length
-  ];
-}
+// Removed getPeriodsFor - now using generateMockSlots for dynamic slot generation
 
-const TIME_SLOTS: Record<"Morning" | "Afternoon" | "Evening", string[]> = {
-  Morning: ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM"],
-  Afternoon: ["02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM"],
-  Evening: ["05:00 PM", "06:00 PM", "07:30 PM"],
-};
+// Removed TIME_SLOTS - now using real API data from availableSlots
 
 export default function Step1SessionDetails({
   doctor,
@@ -134,7 +114,9 @@ export default function Step1SessionDetails({
   onContinue,
   onBack,
 }: Props) {
+  // ========== STATE MANAGEMENT ==========
   const [selectedMode, setSelectedMode] = useState<string>(bookingData.mode);
+
   // Date/time state (preserve previous if any)
   const initialDate = bookingData.date ? new Date(bookingData.date) : null;
   const today = new Date();
@@ -155,13 +137,152 @@ export default function Step1SessionDetails({
     startOfMonth(initialDate ?? new Date())
   );
 
+  // ========== MOCK DATA STATE (No API calls) ==========
+  // Mock centre and clinician - auto-set from doctor
+  const [selectedCentre] = useState<Centre | null>({
+    id: doctor.id,
+    name: `Mibo ${doctor.location}`,
+    city: doctor.location.toLowerCase() as any,
+    address_line_1: `${doctor.location} Centre`,
+    address_line_2: null,
+    pincode: "560001",
+    contact_phone: "+919876543210",
+    is_active: true,
+  });
+
+  const [selectedClinician] = useState<Clinician | null>({
+    id: doctor.id,
+    user_id: doctor.id,
+    full_name: doctor.name,
+    phone: "+919876543210",
+    email: null,
+    primary_centre_id: doctor.id,
+    primary_centre_name: `Mibo ${doctor.location}`,
+    specialization: doctor.designation,
+    registration_number: null,
+    experience_years: parseInt(doctor.experience) || 5,
+    consultation_fee: 1600,
+    bio: null,
+    is_active: true,
+  });
+
   const modes = ["In-person", "Video call", "Phone call"];
 
-  /** Month availability map */
+  // ========== COMPUTED VALUES ==========
+
+  /** Month availability map - for calendar UI */
   const availabilityMap = useMemo(
     () => makeMonthAvailability(calendarMonth),
     [calendarMonth]
   );
+
+  // ========== GENERATE MOCK TIME SLOTS ==========
+  /**
+   * Generate realistic time slots for a selected date
+   * Creates slots that feel dynamic based on date
+   */
+  const generateMockSlots = (date: Date): TimeSlot[] => {
+    const dateKey = toISODateKey(date);
+    const availability = availabilityMap[dateKey] ?? "unavailable";
+
+    if (availability === "unavailable") return [];
+
+    const allSlots: TimeSlot[] = [];
+
+    // Morning slots (9:00 AM - 12:00 PM)
+    const morningSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"];
+
+    // Afternoon slots (2:00 PM - 5:00 PM)
+    const afternoonSlots = [
+      "14:00",
+      "14:30",
+      "15:00",
+      "15:30",
+      "16:00",
+      "16:30",
+    ];
+
+    // Evening slots (6:00 PM - 8:00 PM)
+    const eveningSlots = ["18:00", "18:30", "19:00", "19:30"];
+
+    // Combine all slots
+    const allTimes = [...morningSlots, ...afternoonSlots, ...eveningSlots];
+
+    // For "few" availability, randomly select some slots
+    if (availability === "few") {
+      // Select 4-6 random slots
+      const numSlots = 4 + (date.getDate() % 3);
+      const shuffled = [...allTimes].sort(() => Math.random() - 0.5);
+      const selectedTimes = shuffled.slice(0, numSlots).sort();
+
+      selectedTimes.forEach((time) => {
+        allSlots.push({
+          start_time: time,
+          end_time: time, // Not used in UI
+          available: true,
+        });
+      });
+    } else {
+      // For "available", show most slots
+      allTimes.forEach((time, index) => {
+        // Randomly make some unavailable (10% chance)
+        const isAvailable = (date.getDate() + index) % 10 !== 0;
+        allSlots.push({
+          start_time: time,
+          end_time: time,
+          available: isAvailable,
+        });
+      });
+    }
+
+    return allSlots;
+  };
+
+  /**
+   * Generate mock slots when date is selected
+   */
+  const mockSlots = useMemo(() => {
+    if (!selectedDate) return [];
+    return generateMockSlots(selectedDate);
+  }, [selectedDate, availabilityMap]);
+
+  /**
+   * Group available slots by period (Morning/Afternoon/Evening)
+   * Uses mock generated slots
+   */
+  const slotsByPeriod = useMemo(() => {
+    const grouped: Record<string, TimeSlot[]> = {
+      Morning: [],
+      Afternoon: [],
+      Evening: [],
+    };
+
+    mockSlots.forEach((slot) => {
+      if (!slot.available) return;
+
+      // Parse time to determine period
+      const hour = parseInt(slot.start_time.split(":")[0]);
+
+      if (hour < 12) {
+        grouped.Morning.push(slot);
+      } else if (hour < 17) {
+        grouped.Afternoon.push(slot);
+      } else {
+        grouped.Evening.push(slot);
+      }
+    });
+
+    return grouped;
+  }, [mockSlots]);
+
+  /**
+   * Get periods that have available slots
+   */
+  const availablePeriods = useMemo(() => {
+    return Object.keys(slotsByPeriod).filter(
+      (period) => slotsByPeriod[period].length > 0
+    );
+  }, [slotsByPeriod]);
 
   /** Horizontal pills: show next 10 days starting today */
   const dateStrip = useMemo(() => {
@@ -194,17 +315,9 @@ export default function Step1SessionDetails({
     return days;
   }, [availabilityMap, calendarMonth]);
 
-  /** Periods for the selected date */
-  const selectedDateKey = selectedDate ? toISODateKey(selectedDate) : "";
-  const selectedAvailability: Availability | null = selectedDate
-    ? availabilityMap[selectedDateKey] ??
-      makeMonthAvailability(startOfMonth(selectedDate))[selectedDateKey] ??
-      "unavailable"
-    : null;
+  // periodsForSelected removed - now using availablePeriods from real API data
 
-  const periodsForSelected = selectedDate
-    ? getPeriodsFor(selectedDateKey, selectedAvailability!)
-    : [];
+  // ========== EVENT HANDLERS ==========
 
   function handleChooseCalendarDay(day: Date, status: Availability) {
     if (status === "unavailable") return;
@@ -213,15 +326,47 @@ export default function Step1SessionDetails({
     setCalendarOpen(false);
   }
 
+  /**
+   * Handle continue button click
+   * Validates all required fields and saves booking data
+   */
   function handleContinue() {
+    if (
+      !selectedCentre ||
+      !selectedClinician ||
+      !selectedDate ||
+      !selectedTime
+    ) {
+      return;
+    }
+
+    // Map mode to appointment type
+    const appointmentType =
+      selectedMode === "Video call"
+        ? "ONLINE"
+        : selectedMode === "Phone call"
+        ? "PHONE"
+        : "IN_PERSON";
+
     setBookingData({
       ...bookingData,
       mode: selectedMode,
+      appointmentType,
       duration: "50 mins",
+      durationMinutes: 50,
       price: 1600,
-      date: selectedDate ? selectedDate.toISOString() : "",
+      date: selectedDate.toISOString(),
       time: selectedTime,
-      doctorId: doctor.id,
+      doctorId: doctor?.id,
+      clinicianId: selectedClinician.id,
+      clinicianName: selectedClinician.full_name,
+      centreId: selectedCentre.id,
+      centreName: selectedCentre.name,
+      centreAddress: `${selectedCentre.address_line_1}${
+        selectedCentre.address_line_2
+          ? ", " + selectedCentre.address_line_2
+          : ""
+      }`,
     });
     onContinue();
   }
@@ -243,20 +388,176 @@ export default function Step1SessionDetails({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
-        {/* Doctor quick info */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-4">
-            <img
-              src={doctor.image}
-              alt={doctor.name}
-              className="w-16 h-16 rounded-lg object-cover"
-            />
-            <div>
-              <div className="font-semibold">{doctor.name}</div>
-              <div className="text-sm text-gray-600">{doctor.designation}</div>
+        {/* Doctor Info Card - Show selected doctor from expert page */}
+        {doctor && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <img
+                src={doctor.image}
+                alt={doctor.name}
+                className="w-16 h-16 rounded-lg object-cover"
+              />
+              <div className="flex-1">
+                <div className="font-semibold">{doctor.name}</div>
+                <div className="text-sm text-gray-600">
+                  {doctor.designation}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {doctor.location} • {doctor.sessionTypes}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Centre Selection UI - COMMENTED OUT - Auto-selected based on doctor location */}
+        {/* {!centresLoading && !centresError && centres.length > 0 && (
+          <div>
+            <h3 className="font-semibold mb-2" style={{ color: MIBO.primary }}>
+              Select Centre
+            </h3>
+            <div className="grid grid-cols-1 gap-3">
+              {centres.map((centre) => {
+                const isSelected = selectedCentre?.id === centre.id;
+                return (
+                  <button
+                    key={centre.id}
+                    onClick={() => handleCentreChange(centre)}
+                    className={`p-4 rounded-xl border transition-all text-left shadow-md ${
+                      isSelected
+                        ? "shadow-lg"
+                        : "bg-white border-gray-300 hover:shadow-lg"
+                    }`}
+                    style={
+                      isSelected
+                        ? {
+                            background: MIBO.accent,
+                            borderColor: MIBO.primary,
+                          }
+                        : {}
+                    }
+                  >
+                    <div className="flex items-start gap-3">
+                      <MapPin
+                        className="w-5 h-5 flex-shrink-0 mt-0.5"
+                        style={{ color: isSelected ? MIBO.primary : "#6b7280" }}
+                      />
+                      <div className="flex-1">
+                        <div
+                          className="font-semibold text-sm"
+                          style={{
+                            color: isSelected ? MIBO.primary : "#1f2937",
+                          }}
+                        >
+                          {centre.name}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          {centre.address_line_1}
+                          {centre.address_line_2 &&
+                            `, ${centre.address_line_2}`}
+                        </div>
+                        {centre.contact_phone && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {centre.contact_phone}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )} */}
+
+        {/* Clinician Selection UI - COMMENTED OUT - Auto-selected from expert page */}
+        {/* {selectedCentre && (
+          <>
+            {!cliniciansLoading &&
+              !cliniciansError &&
+              clinicians.length > 0 && (
+                <div>
+                  <h3
+                    className="font-semibold mb-2"
+                    style={{ color: MIBO.primary }}
+                  >
+                    Select Clinician
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {clinicians.map((clinician) => {
+                      const isSelected = selectedClinician?.id === clinician.id;
+                      return (
+                        <button
+                          key={clinician.id}
+                          onClick={() => handleClinicianChange(clinician)}
+                          className={`p-4 rounded-xl border transition-all text-left shadow-md ${
+                            isSelected
+                              ? "shadow-lg"
+                              : "bg-white border-gray-300 hover:shadow-lg"
+                          }`}
+                          style={
+                            isSelected
+                              ? {
+                                  background: MIBO.accent,
+                                  borderColor: MIBO.primary,
+                                }
+                              : {}
+                          }
+                        >
+                          <div className="flex items-center gap-4">
+                            <div
+                              className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
+                              style={{ background: MIBO.primary }}
+                            >
+                              {clinician.full_name.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <div
+                                className="font-semibold"
+                                style={{
+                                  color: isSelected ? MIBO.primary : "#1f2937",
+                                }}
+                              >
+                                {clinician.full_name}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {clinician.specialization ||
+                                  "General Practitioner"}
+                              </div>
+                              {clinician.experience_years && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {clinician.experience_years} years experience
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+            {!cliniciansLoading &&
+              !cliniciansError &&
+              clinicians.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">
+                        No clinicians available
+                      </p>
+                      <p className="text-xs text-yellow-600 mt-1">
+                        No clinicians are currently available at this centre.
+                        Please select a different centre.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+          </>
+        )} */}
 
         {/* Mode of Session (unchanged) */}
         <div>
@@ -399,16 +700,18 @@ export default function Step1SessionDetails({
             </div>
           </div>
 
-          {/* Time groups appear inline below pills (only if that date has availability) */}
-          {selectedDate && periodsForSelected.length > 0 && (
+          {/* Time groups with mock data */}
+          {selectedDate && availablePeriods.length > 0 && (
             <div className="mt-4 space-y-4">
-              {periodsForSelected.map((period) => {
+              {availablePeriods.map((period) => {
                 const Icon =
                   period === "Morning"
                     ? Sunrise
                     : period === "Afternoon"
                     ? Sun
                     : Moon;
+                const slots = slotsByPeriod[period];
+
                 return (
                   <div key={period} className="mb-4 last:mb-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -422,32 +725,34 @@ export default function Step1SessionDetails({
                       >
                         {period}
                       </h4>
+                      <span className="text-xs text-gray-500">
+                        ({slots.length} slot{slots.length !== 1 ? "s" : ""})
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {TIME_SLOTS[period as keyof typeof TIME_SLOTS].map(
-                        (t) => {
-                          const active = selectedTime === t;
-                          return (
-                            <button
-                              key={t}
-                              onClick={() => setSelectedTime(t)}
-                              className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md"
-                              style={
-                                active
-                                  ? {
-                                      background: MIBO.primary,
-                                      color: "#fff",
-                                      borderColor: MIBO.primary,
-                                      transform: "scale(1.03)",
-                                    }
-                                  : {}
-                              }
-                            >
-                              {t}
-                            </button>
-                          );
-                        }
-                      )}
+                      {slots.map((slot) => {
+                        const active = selectedTime === slot.start_time;
+                        return (
+                          <button
+                            key={slot.start_time}
+                            onClick={() => setSelectedTime(slot.start_time)}
+                            disabled={!slot.available}
+                            className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={
+                              active
+                                ? {
+                                    background: MIBO.primary,
+                                    color: "#fff",
+                                    borderColor: MIBO.primary,
+                                    transform: "scale(1.03)",
+                                  }
+                                : {}
+                            }
+                          >
+                            {slot.start_time}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -456,9 +761,20 @@ export default function Step1SessionDetails({
           )}
 
           {/* If selected date has no availability */}
-          {selectedDate && periodsForSelected.length === 0 && (
-            <div className="mt-3 text-sm text-gray-500">
-              No slots for this day. Please pick another date.
+          {selectedDate && availablePeriods.length === 0 && (
+            <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-yellow-800">
+                    No slots available
+                  </p>
+                  <p className="text-xs text-yellow-600 mt-1">
+                    No time slots are available for this date. Please select
+                    another date.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -469,8 +785,13 @@ export default function Step1SessionDetails({
         <div className="p-4">
           <button
             onClick={handleContinue}
-            disabled={!selectedDate || !selectedTime}
-            className="w-full py-3 rounded-full font-semibold transition disabled:opacity-40"
+            disabled={
+              !selectedCentre ||
+              !selectedClinician ||
+              !selectedDate ||
+              !selectedTime
+            }
+            className="w-full py-3 rounded-full font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: MIBO.primary, color: "#fff" }}
           >
             CONTINUE

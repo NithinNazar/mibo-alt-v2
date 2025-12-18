@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 
 interface Step2PhoneVerificationProps {
   bookingData: any;
@@ -16,29 +16,166 @@ export default function Step2PhoneVerification({
 }: Step2PhoneVerificationProps) {
   const [phone, setPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [otpDigits, setOtpDigits] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
   const [error, setError] = useState("");
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
-  const handleSendOtp = () => {
-    if (phone.length < 10) {
-      setError("Please enter a valid phone number");
-      return;
-    }
-    setError("");
-    setOtpSent(true);
+  // Refs for OTP input boxes
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  /**
+   * Validate phone number format
+   * Must be 10 digits for Indian mobile numbers
+   */
+  const validatePhone = (phoneNumber: string): boolean => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phoneNumber);
   };
 
-  const handleVerifyOtp = () => {
-    if (otp === "1111") {
-      const updated = { ...bookingData, phone };
-      setBookingData(updated);
+  /**
+   * Generate a random 6-digit OTP
+   */
+  const generateRandomOTP = (): string => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
 
-      //  Create a local user profile
-      localStorage.setItem("mibo_user", JSON.stringify(updated));
+  /**
+   * Handle OTP send request (Mock/Hardcoded)
+   * Simulates sending OTP and auto-fills it
+   */
+  const handleSendOtp = () => {
+    // Validate phone number format
+    if (!validatePhone(phone)) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
+    }
 
+    setError("");
+    setOtpSent(true);
+
+    // Generate random OTP
+    const randomOTP = generateRandomOTP();
+
+    // Auto-fill OTP after a short delay (simulating SMS arrival)
+    setTimeout(() => {
+      setIsAutoFilling(true);
+      const digits = randomOTP.split("");
+
+      // Fill digits one by one with animation
+      digits.forEach((digit, index) => {
+        setTimeout(() => {
+          setOtpDigits((prev) => {
+            const newDigits = [...prev];
+            newDigits[index] = digit;
+            return newDigits;
+          });
+
+          // Focus next input
+          if (index < 5 && otpRefs.current[index + 1]) {
+            otpRefs.current[index + 1]?.focus();
+          }
+        }, index * 150); // 150ms delay between each digit
+      });
+
+      // After all digits are filled, auto-verify
+      setTimeout(() => {
+        setIsAutoFilling(false);
+        handleVerifyOtp(randomOTP);
+      }, digits.length * 150 + 300);
+    }, 800); // Wait 800ms before starting auto-fill
+  };
+
+  /**
+   * Handle OTP verification (Mock/Hardcoded)
+   * Simulates verification and proceeds to next step
+   */
+  const handleVerifyOtp = (otpValue?: string) => {
+    const otpToVerify = otpValue || otpDigits.join("");
+
+    if (otpToVerify.length !== 6) {
+      setError("Please enter complete 6-digit OTP");
+      return;
+    }
+
+    setError("");
+    setIsVerified(true);
+
+    // Mock user data
+    const mockUserName = "Patient User";
+    const formattedPhone = `+91${phone}`;
+
+    const updated = {
+      ...bookingData,
+      phone: formattedPhone,
+      userId: Math.floor(Math.random() * 10000), // Random user ID
+      userName: mockUserName,
+    };
+    setBookingData(updated);
+
+    // Continue to next step after showing success
+    setTimeout(() => {
       onContinue();
-    } else {
-      setError("Invalid OTP. Try again.");
+    }, 1000);
+  };
+
+  /**
+   * Handle OTP digit input
+   */
+  const handleOtpChange = (index: number, value: string) => {
+    // Only allow digits
+    if (value && !/^\d$/.test(value)) return;
+
+    const newDigits = [...otpDigits];
+    newDigits[index] = value;
+    setOtpDigits(newDigits);
+
+    // Auto-focus next input
+    if (value && index < 5 && otpRefs.current[index + 1]) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  /**
+   * Handle backspace in OTP input
+   */
+  const handleOtpKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      // Focus previous input on backspace if current is empty
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  /**
+   * Handle paste in OTP input
+   */
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    const digits = pastedData.split("").filter((char) => /^\d$/.test(char));
+
+    if (digits.length > 0) {
+      const newDigits = [...otpDigits];
+      digits.forEach((digit, index) => {
+        if (index < 6) {
+          newDigits[index] = digit;
+        }
+      });
+      setOtpDigits(newDigits);
+
+      // Focus last filled input
+      const lastIndex = Math.min(digits.length - 1, 5);
+      otpRefs.current[lastIndex]?.focus();
     }
   };
 
@@ -68,31 +205,89 @@ export default function Step2PhoneVerification({
         {!otpSent ? (
           <button
             onClick={handleSendOtp}
-            className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md"
+            disabled={!phone}
+            className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             Send OTP
           </button>
         ) : (
           <>
-            <div>
-              <label className="block mb-2 text-sm font-medium">
-                Enter OTP (Hint: 1111)
-              </label>
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="Enter 4-digit OTP"
-                className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0]"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-              />
-            </div>
-            <button
-              onClick={handleVerifyOtp}
-              className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md"
-            >
-              Continue
-            </button>
+            {/* Success Message */}
+            {isVerified && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 animate-fade-in">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-green-800">
+                    Verified Successfully!
+                  </p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Proceeding to booking confirmation...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* OTP Input Section */}
+            {!isVerified && (
+              <>
+                <div>
+                  <label className="block mb-3 text-sm font-medium">
+                    Enter OTP
+                  </label>
+
+                  {/* 6-Digit OTP Boxes */}
+                  <div className="flex gap-2 justify-center mb-3">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => {
+                          otpRefs.current[index] = el;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        onPaste={handleOtpPaste}
+                        disabled={isAutoFilling}
+                        className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl outline-none transition-all ${
+                          digit
+                            ? "border-[#034B44] bg-[#d2fafa] text-[#034B44]"
+                            : "border-[#a7c4f2]/50 bg-white"
+                        } focus:ring-2 focus:ring-[#81b2f0] disabled:opacity-70`}
+                      />
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-center text-gray-500 mt-2">
+                    {isAutoFilling
+                      ? "Auto-filling OTP..."
+                      : `OTP sent to +91${phone}`}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleVerifyOtp()}
+                  disabled={otpDigits.join("").length !== 6 || isAutoFilling}
+                  className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Verify & Continue
+                </button>
+
+                <button
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtpDigits(["", "", "", "", "", ""]);
+                    setError("");
+                  }}
+                  disabled={isAutoFilling}
+                  className="w-full text-[#1c0d54] py-2 rounded-full font-medium hover:underline disabled:opacity-50"
+                >
+                  Change Phone Number
+                </button>
+              </>
+            )}
           </>
         )}
 
