@@ -12,7 +12,7 @@ const InPersonPage = () => {
     <div className="bg-[#E3F7F1] min-h-screen">
       <ExpertsHeader />
       {/* Hero Section */}
-      <div className="relative w-full h-[60vh] overflow-hidden">
+      <div className="relative w-full h-[60vh] overflow-hidden mt-20">
         <img
           src={heroImage}
           alt="In-Person Therapy"

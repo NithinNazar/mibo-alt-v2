@@ -18,7 +18,7 @@ const WhoItsForPage = () => {
 
       {/* Hero Section */}
       <div
-        className="relative h-[60vh] w-full bg-cover bg-center flex items-center justify-center"
+        className="relative h-[60vh] w-full bg-cover bg-center flex items-center justify-center mt-20"
         style={{ backgroundImage: `url(${whoItsForHero})` }}
       >
         <div className="absolute inset-0 bg-[#0b1180]/10" />

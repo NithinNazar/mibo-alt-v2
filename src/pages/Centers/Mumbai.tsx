@@ -1,5 +1,5 @@
 import React from "react";
-import CentersHeader from "./components/CentersHeader";
+//import CentersHeader from "./components/CentersHeader";
 import ExpertsFooter from "./components/CentersFooter";
 
 import HeroSection from "./components/HeroSection";
@@ -13,7 +13,7 @@ import Achievements from "./components/Achievements";
 import AddressSection from "./components/AddressSection";
 import BookAppointmentButton from "./components/BookAppointmentButton";
 import { useNavigate } from "react-router-dom";
-
+import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 const Mumbai: React.FC = () => {
   const navigate = useNavigate();
 
@@ -23,7 +23,7 @@ const Mumbai: React.FC = () => {
   return (
     <div className="bg-mibo-offwhite min-h-screen">
       {/* Header */}
-      <CentersHeader />
+      <ExpertsHeader />
 
       {/* Hero Section */}
       <HeroSection
@@ -45,7 +45,7 @@ const Mumbai: React.FC = () => {
 
       {/* Top Rated Psychiatrists & Therapists */}
       <TopPsychiatrists city="Mumbai" />
-      <TopTherapists city="Mumbai" />
+       <TopTherapists city="Mumbai" /> 
       <BookAppointmentButton onClick={handleBookAppointment} />
 
       {/* Testimonials & Achievements */}

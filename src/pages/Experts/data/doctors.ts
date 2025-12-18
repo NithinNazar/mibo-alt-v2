@@ -1,42 +1,3 @@
-// src/pages/Experts/data/doctors.ts
-/**
- * Real doctor data from Mibo Mental Health centres
- * Data sourced from city-specific folders: bangalore, kochi, mumbai
- *
- * Language mapping by location:
- * - Bangalore: English, Kannada, Hindi, Tamil, Malayalam
- * - Kochi: Malayalam, English
- * - Mumbai: English, Hindi, Marathi
- */
-
-// Bangalore doctors
-import drJini from "../../../bangalore/Dr.-Jini-K-Gopinath.png";
-import drSadik from "../../../bangalore/Dr.-Muhammed-Sadik.png";
-import drPrajwal from "../../../bangalore/Dr. Prajwal Devurkar.png";
-import ashirSahal from "../../../bangalore/Mr.-Ashir-Sahal-.png";
-import hridya from "../../../bangalore/Dr.-Hridya-.png";
-import abhinand from "../../../bangalore/Abhinand-01-scaled.png";
-import drSrinivas from "../../../bangalore/Dr.-Srinivas-Reddy.png";
-import shamroz from "../../../bangalore/shamroz-abdu.png";
-import mauli from "../../../bangalore/Mauli-.png";
-import ajay from "../../../bangalore/Ajay-.png";
-import drMiller from "../../../bangalore/Dr.Miller-.png";
-import naufal from "../../../bangalore/Naufal-MA-.png";
-import drVishakh from "../../../bangalore/Vishakh.png";
-import jerry from "../../../bangalore/Dr.-Jerry-.png";
-import yashaswini from "../../../bangalore/Yashaswini-01-.png";
-import lincy from "../../../bangalore/Lincy-Benny.png";
-
-// Kochi doctors
-import drThomas from "../../../kochi/thomas-mathai.png";
-import sruthi from "../../../kochi/sruthy annie vincent.png";
-import drSangeetha from "../../../kochi/sangeetha.png";
-import drAnu from "../../../kochi/anu shobha.png";
-import anet from "../../../kochi/Anet-Augustine-.png";
-import ria from "../../../kochi/Ria.png";
-
-// Mumbai doctors
-import drDhruvi from "../../../mumbai/Dr.-Dhruvi .png";
 
 export interface Doctor {
   id: number;
@@ -46,322 +7,242 @@ export interface Doctor {
   experience: string;
   expertise: string[];
   image: string;
-  location: "Bangalore" | "Kochi" | "Mumbai";
+  location: string;
   language: string[];
   price: string;
-  sessionTypes: string;
 }
 
 export const doctors: Doctor[] = [
-  // ============ BANGALORE DOCTORS ============
+  // --- Bengaluru Team ---
   {
     id: 1,
     name: "Dr. Jini K. Gopinath",
-    qualification: "Clinical Hypnotherapist",
-    designation: "Senior Clinical Psychologist, Advisor – Mibo",
-    experience: "10+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Trauma", "Sleep Issues"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Malayalam", "Kannada"],
-    price: "₹1600/session",
-    image: drJini,
-    sessionTypes: "In-person & Online sessions",
+    qualification: "Ph.D., Clinical Psychology",
+    designation: "Senior Clinical Psychologist",
+    experience: "17+ years",
+    expertise: ["Clinical Hypnotherapy", "Psychotherapy", "Clinical Psychology"],
+    location: "Bengaluru",
+    language: ["English", "Malayalam", "Hindi"],
+    price: "₹1000",
+    image: "https://mibocare.in/wp-content/uploads/2024/03/Dr.-Jini-K-Gopinath.png",
   },
   {
     id: 2,
-    name: "Dr. Muhammed Sadik T.M",
-    qualification: "Ph.D., M.Phil (Clinical Psychology)",
-    designation: "Director of Psychology Services",
-    experience: "10+ years",
-    expertise: [
-      "Depression",
-      "Anxiety",
-      "Relationships",
-      "Work Stress",
-      "PTSD",
-    ],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Tamil"],
-    price: "₹1600/session",
-    image: drSadik,
-    sessionTypes: "In-person & Online Consultations",
-  },
-  {
-    id: 3,
-    name: "Dr. Prajwal Devurkar",
-    qualification: "MBBS, MD",
-    designation: "Medical Director, Head of Operations",
-    experience: "8+ years",
-    expertise: ["Bipolar Disorder", "Schizophrenia", "OCD", "Mood Disorders"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: drPrajwal,
-    sessionTypes: "In-person & Online Sessions",
-  },
-  {
-    id: 4,
     name: "Ashir Sahal K. T",
     qualification: "M.Sc, M.Phil (Clinical Psychology)",
     designation: "Clinical Psychologist",
     experience: "4 years",
-    expertise: ["Anxiety", "Depression", "Stress", "Relationships"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: ashirSahal,
-    sessionTypes: "In-person & Online Sessions",
+    expertise: ["Cognitive Behavioral Therapy", "Adolescent Therapy", "Anxiety"],
+    location: "Bengaluru",
+    language: ["English", "Malayalam"],
+    price: "₹1500",
+    image: "https://mibocare.in/wp-content/uploads/2025/04/Mr.-Ashir-Sahal-01-1-1536x1240.png",
   },
   {
-    id: 5,
-    name: "Hridya V M",
-    qualification: "M.Sc, M.Phil",
-    designation: "Head of the Department, Clinical Psychologist",
-    experience: "5 years",
-    expertise: ["Anxiety", "Depression", "Trauma", "Family Therapy"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: hridya,
-    sessionTypes: "Online Sessions",
-  },
-  {
-    id: 6,
-    name: "Abhinand P.S",
-    qualification: "M.Phil (Clinical Psychology)",
-    designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Stress", "Anxiety", "Work Stress", "Relationships"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Tamil"],
-    price: "₹1600/session",
-    image: abhinand,
-    sessionTypes: "In-person & Online Consultations",
-  },
-  {
-    id: 7,
+    id: 3,
     name: "Dr. Srinivas Reddy",
     qualification: "MBBS, MRCPsych",
     designation: "Consultant Psychiatrist",
-    experience: "7+ years",
-    expertise: ["Depression", "Anxiety", "Bipolar Disorder", "Schizophrenia"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Kannada", "Tamil"],
-    price: "₹1600/session",
-    image: drSrinivas,
-    sessionTypes: "In-person & Online sessions",
+    experience: "30+ years",
+    expertise: ["Depression", "Anxiety Disorders", "Bipolar Disorder", "Schizophrenia"],
+    location: "Bengaluru",
+    language: ["English", "Kannada", "Hindi"],
+    price: "₹2000",
+    image: "https://mibocare.in/wp-content/uploads/2024/03/Dr.-Srinivas-Reddy.png",
+  },
+  {
+    id: 4,
+    name: "Dr. Muhammed Sadik T. M",
+    qualification: "Ph.D., M.Phil (Clinical Psychology)",
+    designation: "Director of Psychology Services",
+    experience: "10+ years",
+    expertise: ["Psychotherapy", "Academic Counseling", "Mental Health Management"],
+    location: "Bengaluru",
+    language: ["English", "Malayalam", "Hindi"],
+    price: "Enquire for rates",
+    image: "https://mibocare.in/wp-content/uploads/2025/10/Dr.-Muhammed-Sadik-scaled.png",
+  },
+   {
+    id: 5,
+    name: "Dr. Vishakh Biradar",
+    qualification: "MD (Psychiatry), Postdoctoral Fellowship in Child & Adolescent Psychiatry",
+    designation: "",
+    experience: "5+ years",
+    expertise: ["Child & Adolescent Psychiatry"],
+    image: "https://mibocare.in/wp-content/uploads/2025/09/Noel--1536x1486.png",
+    location: "Bengaluru",
+    language: [],
+    price: "₹1000",
+  },
+  {
+    id: 6,
+    name: "Dr. Sowmyashree Narayan",
+    qualification: "MD Psychiatry,",
+    designation: "",
+    experience: "10+ years",
+    expertise: ["ADHD", "Childhood Disorders", "Substance Use Disorders", "Developmental Disorders"],
+    location: "Bengaluru",
+    language: ["English", "Kannada", "Hindi"],
+    price: "₹1000",
+    image: "https://mibocare.in/wp-content/uploads/2024/08/Somaya-01.png",
+  },
+   
+  
+  {
+    id: 7,
+    name: "Hridya V. M",
+    qualification: "M.Sc, M.Phil (Clinical Psychology)",
+    designation: "Head of the Department",
+    experience: "5 years",
+    expertise: ["Depression", "Anxiety", "Emotional Dysregulation", "Psychological Wellness"],
+    location: "Bengaluru",
+    language: ["English", "Malayalam"],
+    price: "₹1000–2000",
+    image: "https://mibocare.in/wp-content/uploads/2024/03/Dr.-Hridya-1.png",
   },
   {
     id: 8,
+    name: "Dr. Miller A. M",
+    qualification: "MBBS, MD (Psychiatry), PDF",
+    designation: "Consultant Psychiatrist",
+    experience: "5+ years",
+    expertise: ["Emergency Psychiatry", "Acute Care", "Mood Disorders"],
+    location: "Bengaluru",
+    language: ["English", "Hindi"],
+    price: "₹1000–2000/hr",
+    image: "https://mibocare.in/wp-content/uploads/2025/08/Dr.Miller-01-1536x1240.png",
+  },
+
+  // --- Kochi Team ---
+  {
+    id: 9,
+    name: "Dr. Thomas Mathai",
+    qualification: "MBBS, DPM, DNB",
+    designation: "Consultant Psychiatrist",
+    experience: "6 years",
+    expertise: ["Couple Therapy", "Emotional Wellness", "Patient-Centered Care"],
+    location: "Kochi",
+    language: ["English", "Malayalam"],
+    price: "2000/hr",
+    image: "https://mibocare.in/wp-content/uploads/2023/11/thomas-mathai.png",
+  },
+ 
+  {
+    id: 10,
     name: "Shamroz Abdu",
     qualification: "M.Sc, M.Phil (Clinical Psychology)",
     designation: "Clinical Psychologist",
-    experience: "4+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Trauma"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: shamroz,
-    sessionTypes: "In Person & Online Sessions",
-  },
-  {
-    id: 9,
-    name: "Mauli Rastogi",
-    qualification: "M.Phil, M.Sc (Clinical Psychology)",
-    designation: "Clinical Psychologist",
-    experience: "4+ years",
-    expertise: ["Anxiety", "Depression", "Relationships", "Self-esteem"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: mauli,
-    sessionTypes: "In-person & Online Consultations",
-  },
-  {
-    id: 10,
-    name: "Ajay Siby",
-    qualification: "M.Sc. Clinical Psychology",
-    designation: "Counselling Psychologist",
-    experience: "3+ years",
-    expertise: ["Stress", "Anxiety", "Work Stress", "Relationships"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Tamil"],
-    price: "₹1600/session",
-    image: ajay,
-    sessionTypes: "In-person & Online sessions",
+    experience: "5 years",
+    expertise: ["Anxiety", "Depression", "Drug Abuse", "Learning Disabilities", "CBT"],
+    location: "Kochi / Bengaluru",
+    language: ["English", "Hindi", "Malayalam", "Tamil"],
+    price: "₹1500–2500/hr",
+    image: "https://mibocare.in/wp-content/uploads/2023/11/shamroz-abdu.png",
   },
   {
     id: 11,
-    name: "Dr. Miller A M",
-    qualification: "MBBS, MD (Psychiatry), PDF (Emergency Psychiatry)",
+    name: "Dr. Sangeetha O. S",
+    qualification: "MBBS, MD (Psychiatry)",
     designation: "Consultant Psychiatrist",
-    experience: "5+ years",
-    expertise: ["Depression", "Anxiety", "Bipolar Disorder", "OCD", "PTSD"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: drMiller,
-    sessionTypes: "In-person & Online Sessions",
+    experience: "2 years",
+    expertise: ["Child and Adolescent Psychiatry", "Depression", "Anxiety", "Schizophrenia"],
+    location: "Kochi",
+    language: ["English", "Malayalam"],
+    price: "₹1000–2000/hr",
+    image: "https://mibocare.in/wp-content/uploads/2023/11/sangeetha.png",
   },
-  {
-    id: 12,
-    name: "Naufal M. A",
+    {
+  id: 12,
+  name: "Dr. Anu Sobha Jose",
+  qualification: "MBBS, DPM (Psychiatry), PGDFM",
+  designation: "Consultant Psychiatrist",
+  experience: "7+ years",
+  expertise: [
+    "Psychiatric Medicine", 
+    "Child Psychiatry", 
+    "De-addiction Treatment", 
+    "Mental Health Management", 
+    "Behavior Modification"
+  ],
+  location: "Kochi",
+  language: ["English", "Malayalam"],
+  price: "₹1000–2000/hr",
+  image: "https://mibocare.in/wp-content/uploads/2023/11/Member_10.png",
+},
+ /*  {
+    id: 18,
+    name: "Anoop B. S",
     qualification: "M.Phil (Clinical Psychology)",
     designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Trauma"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Tamil"],
-    price: "₹1600/session",
-    image: naufal,
-    sessionTypes: "In-person & Online Consultations",
-  },
-  {
-    id: 13,
-    name: "Dr Vishakh Biradar",
-    qualification:
-      "MD (Psychiatry), Postdoctoral Fellowship in Child & Adolescent Psychiatry",
-    designation: "Consultant Child & Adolescent Psychiatrist",
     experience: "5+ years",
-    expertise: ["ADHD", "Autism", "Child Anxiety", "Adolescent Issues", "OCD"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: drVishakh,
-    sessionTypes: "In-person & Online Consultations",
+    expertise: ["Addiction", "Personality Disorders", "CBT", "DBT"],
+    location: "Kochi",
+    language: ["English", "Malayalam", "Tamil"],
+    price: "Enquire for rates",
+    image: "https://mibocare.in/wp-content/uploads/2023/05/Anoop-BS.jpg",
+  }, */
+
+   {
+    id: 13,
+    name: "Dr. Prajwal Devurkar",
+    qualification: "",
+    designation: "Medical Director, Head of Operations",
+    experience: "",
+    expertise: ["Operations & Management in Mental Health"],
+    image: "https://mibocare.in/wp-content/uploads/2023/09/Member_9.png",
+    location: "Bengaluru",
+    language: [],
+    price: "₹1000–2000",
   },
+  /* {
+    id: 8,
+    name: "Rachi Jain",
+    qualification: "M.Sc (Psychology)",
+    designation: "Counselling Psychologist",
+    experience: "",
+    expertise: [],
+    image: "",
+    location: "Bengaluru",
+    language: [],
+    price: "",
+  }, */
+ 
   {
     id: 14,
     name: "Jerry P Mathew",
     qualification: "M.Sc, M.Phil (Clinical Psychology)",
     designation: "Clinical Psychologist",
     experience: "4 years",
-    expertise: ["Anxiety", "Depression", "Relationships", "Stress"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Tamil"],
-    price: "₹1600/session",
-    image: jerry,
-    sessionTypes: "Online Sessions",
+    expertise: ["Clinical Psychologist"],
+    image: "https://mibocare.in/wp-content/uploads/2024/03/Dr.-Jerry-picture-01.png",
+    location: "Bengaluru",
+    language: [],
+    price: "₹1000–2000/hr",
   },
+
   {
     id: 15,
     name: "Yashaswini R S",
     qualification: "M.Phil Clinical Psychology",
     designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Self-esteem"],
-    location: "Bangalore",
-    language: ["English", "Hindi", "Kannada", "Tamil"],
-    price: "₹1600/session",
-    image: yashaswini,
-    sessionTypes: "In-person & Online Sessions",
-  },
-  {
-    id: 16,
-    name: "Lincy Benny B",
-    qualification: "M.Phil (Clinical Psychology)",
-    designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Trauma", "Relationships"],
-    location: "Bangalore",
-    language: ["English", "Malayalam", "Hindi", "Kannada"],
-    price: "₹1600/session",
-    image: lincy,
-    sessionTypes: "Online Sessions",
-  },
-
-  // ============ KOCHI DOCTORS ============
-  {
-    id: 17,
-    name: "Dr Thomas Mathai",
-    qualification: "MBBS, DPM, DNB",
-    designation: "Consultant Psychiatrist",
-    experience: "6 years",
-    expertise: ["Depression", "Anxiety", "Bipolar Disorder", "Schizophrenia"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: drThomas,
-    sessionTypes: "In-Person & Online Sessions",
-  },
-  {
-    id: 18,
-    name: "Sruthi Annie Vincent",
-    qualification: "M.Phil. Clinical Psychology",
-    designation: "Clinical Psychologist",
-    experience: "5 years",
-    expertise: ["Anxiety", "Depression", "Trauma", "Family Therapy"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: sruthi,
-    sessionTypes: "In-Person & Online Sessions",
-  },
-  {
-    id: 19,
-    name: "Dr Sangeetha O S",
-    qualification: "MBBS MD",
-    designation: "Consultant Psychiatrist",
     experience: "2 years",
-    expertise: ["Depression", "Anxiety", "OCD", "Mood Disorders"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: drSangeetha,
-    sessionTypes: "In-Person & Online Sessions",
+    expertise: ["Clinical Psychologist"],
+    image: "https://mibocare.in/wp-content/uploads/2025/03/Yashaswini-01-1536x1240.png",
+    location: "Bengaluru",
+    language: ["Kannada", "English", "Hindi"], // from profile context
+    price: "₹1000",
   },
-  {
-    id: 20,
-    name: "Dr Anu Sobha",
-    qualification: "MBBS, DPM, PGDFM",
-    designation: "Consultant Psychiatrist",
-    experience: "7 years",
-    expertise: ["Depression", "Anxiety", "PTSD", "Bipolar Disorder"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: drAnu,
-    sessionTypes: "In-Person & Online Sessions",
+   {
+    id: 16,
+    name: "Ajay Siby",
+    qualification: "M.Sc Clinical Psychology",
+    designation: "Counselling Psychologist",
+    experience: "",
+    expertise: ["Counselling", "Psychologist"],
+    image: "https://mibocare.in/wp-content/uploads/2024/04/Ajay-w-01-01.png",
+    location: "Bengaluru",
+    language: [],
+    price: "₹1000",
   },
-  {
-    id: 21,
-    name: "Anet Augustine",
-    qualification: "M.Phil (Clinical Psychology)",
-    designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Relationships"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: anet,
-    sessionTypes: "In-person & Online Sessions",
-  },
-  {
-    id: 22,
-    name: "Ria Mary",
-    qualification: "M.Phil, M.Sc (Clinical Psychology)",
-    designation: "Clinical Psychologist, Licensed by RCI",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Trauma", "Family Therapy"],
-    location: "Kochi",
-    language: ["Malayalam", "English"],
-    price: "₹1600/session",
-    image: ria,
-    sessionTypes: "In-person & Online Consultations",
-  },
-
-  // ============ MUMBAI DOCTORS ============
-  {
-    id: 23,
-    name: "Dhruvi Kiklawala",
-    qualification: "M.Sc, M.Phil",
-    designation: "Clinical Psychologist",
-    experience: "3+ years",
-    expertise: ["Anxiety", "Depression", "Stress", "Relationships"],
-    location: "Mumbai",
-    language: ["English", "Hindi", "Marathi"],
-    price: "₹1600/session",
-    image: drDhruvi,
-    sessionTypes: "In-person & Online Sessions",
-  },
+  
 ];

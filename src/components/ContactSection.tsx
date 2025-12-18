@@ -80,7 +80,7 @@ const ContactSection = () => {
   return (
     <section
       id="contact"
-      className="w-full bg-[#0a0a7a] text-white py-12 px-4"
+      className="w-full bg-gradient-to-r from-[#18356C] to-[#040a47] text-white py-12 px-4"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -111,7 +111,7 @@ const ContactSection = () => {
               transition={{ duration: 0.5 }}
               className="absolute inset-0 flex items-center justify-center"
             >
-              <div className="bg-[#0a0a7a] border border-[#97f7df] rounded-xl p-4 md:p-5 max-w-md w-[90%] shadow-md">
+              <div className="bg-gradient-to-r from-[#18356C] to-[#040a47] border border-[#97f7df] rounded-xl p-4 md:p-5 max-w-md w-[90%] shadow-md">
                 <h3 className="text-lg font-semibold text-[#97f7df] mb-2">
                   {offices[currentIndex].city}
                 </h3>

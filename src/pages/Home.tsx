@@ -10,11 +10,12 @@ import CareServiceComponent from "../components/Features";
 import SupportServices from "../components/Mibo_Supports";
 import Location from "../components/Location";
 import ContactSection from "../components/ContactSection";
-
 import Footer from "../components/Footer";
 import ScrollRevealWrapper from "../components/ScrollRevealWrapper";
 import lottie from "lottie-web";
 import { defineElement } from "lord-icon-element";
+
+
 
 const Home = () => {
   defineElement(lottie.loadAnimation);
@@ -104,7 +105,7 @@ const Home = () => {
       <ContactSection />
 
       {/* --- FOOTER --- */}
-      <div className="bg-gradient-to-b from-[#E3F7F1] via-[#D7EFFF]/60 to-[#CFEAE5] py-16">
+      <div className="bg-gradient-to-b from-[#E3F7F1] via-[#D7EFFF]/60 to-[#CFEAE5] ">
         <ScrollRevealWrapper direction="fade" delay={700} cascade>
           <Footer />
         </ScrollRevealWrapper>

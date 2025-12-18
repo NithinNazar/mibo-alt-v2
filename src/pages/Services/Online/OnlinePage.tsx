@@ -16,7 +16,7 @@ const OnlinePage = () => {
         <img
           src={heroImage}
           alt="Online Therapy"
-          className="w-full h-full object-cover brightness-75"
+          className="w-full h-full object-cover brightness-75 mt-20"
         />
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-6">
           <h1 className="text-4xl font-bold mb-3 drop-shadow-lg">
