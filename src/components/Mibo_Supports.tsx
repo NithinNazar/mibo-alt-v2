@@ -50,7 +50,7 @@ export default function SupportServices() {
           Support shaped around you
         </motion.h2>
         <motion.p
-          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          className="text-gray-900 text-base font-medium leading-relaxed text-center"
           variants={childVariants}
         >
           We look at your needs and experiences to connect you with someone who
@@ -79,7 +79,7 @@ export default function SupportServices() {
           Supporting those who support you
         </motion.h2>
         <motion.p
-          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          className="text-gray-900 text-base font-medium leading-relaxed text-center"
           variants={childVariants}
         >
           We bring your loved ones into the process through joint sessions when
@@ -109,7 +109,7 @@ export default function SupportServices() {
           Care in your language, and for your context
         </motion.h2>
         <motion.p
-          className="text-gray-900 text-[0.9rem] leading-relaxed text-center"
+          className="text-gray-900 text-base font-medium leading-relaxed text-center"
           variants={childVariants}
         >
           With fluency across 15+ Indian languages, our experts understand your

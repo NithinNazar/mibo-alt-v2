@@ -1,235 +1,316 @@
-import { useState, useEffect, useRef } from "react";
-import { ArrowRight } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, type Variants, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import depressionIcon from "../assets/depression.gif";
 import stress from "../assets/anxiety.gif";
 import doubt from "../assets/doubt.gif";
-import bipolar from "../assets/bipolar.gif";
-import adhd from "../assets/adhd.gif";
-import Anxiety from "../assets/anxiety (1).gif";
 
-const MentalHealthCards = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const cardRef = useRef(null);
-  const startX = useRef(0);
-  const currentX = useRef(0);
-  const isDragging = useRef(false);
+const MentalHealthConcerns = () => {
+  const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-  const conditions = [
+  // Animation variants
+  const containerVariant: Variants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.2 } },
+  };
+
+  const cardVariant: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  // Mobile slider animation variants - smoother transitions
+  const slideVariants: Variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 100 : -100,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 100 : -100,
+      opacity: 0,
+    }),
+  };
+
+  const concerns = [
     {
       name: "Depression",
+      stats: "Affects 5% million people worldwide",
       description:
-        "Does your life feel impossible & hopeless? You don't have to manage it alone.",
+        "Depression is more than just feeling sad. We offer compassionate care and evidence-based treatments to help you find hope and find joy again.",
       icon: depressionIcon,
-      color: "from-orange-400 to-orange-600",
+      bgColor: "bg-[#FFF5E6]",
+      treatments: [
+        "Medication Management",
+        "Lifestyle Changes",
+        "Support Groups",
+      ],
     },
     {
-      name: "Generalized Anxiety Disorder (GAD)",
+      name: "Generalized Anxiety Disorder",
+      stats: "1 in 14 people affected globally",
       description:
-        "Chronic feelings of worry and fear about everyday situations affecting your daily life.",
+        "Living with constant worry can be exhausting. Our specialized approaches help you manage anxiety and reclaim peace.",
       icon: stress,
-      color: "from-orange-400 to-orange-600",
+      bgColor: "bg-[#E6F4FF]",
+      treatments: [
+        "Mindfulness Techniques",
+        "Exposure Therapy",
+        "Relaxation Training",
+        "Stress Management",
+      ],
     },
     {
-      name: "Obsessive Compulsive Disorder (OCD)",
+      name: "Obsessive Compulsive Disorder",
+      stats: "Affects 2-3% of population",
       description:
-        "Repetitive thoughts and behaviors that interfere with your daily routine.",
+        "OCD can feel overwhelming, but you're not alone. We provide specialized therapy to break free from compulsive cycles.",
       icon: doubt,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      name: "Bipolar Disorder",
-      description:
-        "Extreme mood swings including emotional highs and lows affecting your energy.",
-      icon: bipolar,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      name: "Adult ADHD",
-      description:
-        "Difficulty with attention, hyperactivity, and impulse control in adult life.",
-      icon: adhd,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      name: "Social Anxiety",
-      description:
-        "Intense fear of social situations and being judged by others.",
-      icon: Anxiety,
-      color: "from-orange-400 to-orange-600",
+      bgColor: "bg-[#FFE6F0]",
+      treatments: [
+        "ERP Therapy",
+        "Medication",
+        "Mindfulness",
+        "Habit Reversal",
+      ],
     },
   ];
 
-  const nextCard = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev + 1) % conditions.length);
-    setTimeout(() => setIsAnimating(false), 800); // slower animation
-  };
-
-  // Touch and mouse handlers
-  const handleStart = (clientX: number) => {
-    if (isAnimating) return;
-    startX.current = clientX;
-    currentX.current = clientX;
-    isDragging.current = true;
-  };
-
-  const handleMove = (clientX: number) => {
-    if (!isDragging.current || isAnimating) return;
-    currentX.current = clientX;
-  };
-
-  const handleEnd = () => {
-    if (!isDragging.current || isAnimating) return;
-    const diffX = startX.current - currentX.current;
-    const threshold = 50;
-
-    if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        nextCard();
-      } else {
-        setIsAnimating(true);
-        setCurrentIndex(
-          (prev) => (prev - 1 + conditions.length) % conditions.length
-        );
-        setTimeout(() => setIsAnimating(false), 800);
-      }
-    }
-    isDragging.current = false;
-  };
-
-  const handleTouchStart = (e: any) => handleStart(e.touches[0].clientX);
-  const handleTouchMove = (e: any) => handleMove(e.touches[0].clientX);
-  const handleTouchEnd = () => handleEnd();
-  const handleMouseDown = (e: any) => handleStart(e.clientX);
-  const handleMouseMove = (e: any) => handleMove(e.clientX);
-  const handleMouseUp = () => handleEnd();
-
-  const goToCard = (index: number) => {
-    if (isAnimating || index === currentIndex) return;
-    setIsAnimating(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsAnimating(false), 800);
-  };
-
-  const currentCondition = conditions[currentIndex];
-
-  // Auto-scroll cards every 5s
+  // Auto-slide for mobile with pause functionality
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (!isDragging.current) {
-      timer = setInterval(() => nextCard(), 5000);
-    }
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setDirection(1);
+      setCurrentSlide((prev) => (prev + 1) % concerns.length);
+    }, 5000); // Change slide every 5 seconds
+
     return () => clearInterval(timer);
-  }, [isDragging.current]);
+  }, [concerns.length, isPaused]);
 
-  // Mouse event listeners
+  // Resume auto-slide after manual interaction
   useEffect(() => {
-    const handleGlobalMouseMove = (e: any) => handleMouseMove(e);
-    const handleGlobalMouseUp = () => handleMouseUp();
+    if (!isPaused) return;
 
-    if (isDragging.current) {
-      document.addEventListener("mousemove", handleGlobalMouseMove);
-      document.addEventListener("mouseup", handleGlobalMouseUp);
-    }
+    const resumeTimer = setTimeout(() => {
+      setIsPaused(false);
+    }, 5000); // Resume after 5 seconds
 
-    return () => {
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, []);
+    return () => clearTimeout(resumeTimer);
+  }, [isPaused]);
+
+  const goToSlide = (index: number) => {
+    setDirection(index > currentSlide ? 1 : -1);
+    setCurrentSlide(index);
+    setIsPaused(true); // Pause auto-slide when user manually navigates
+  };
 
   return (
-    <div id="concerns" className="max-w-md mx-auto p-6 bg-[#E0F2FF] pb-16">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="mt-6 text-[1.56rem] font-[700] text-[rgb(76,76,76)] leading-snug pt-4">
-          Mental health concerns we care for
-        </h1>
-        <p className="mt-4 text-[rgb(76,76,76)] text-[0.94rem] font-semibold">
-          Mibo offers support for 30+ mental health conditions. Explore some of
-          the most common ones below to see how we approach care.
-        </p>
-      </div>
+    <div className="w-full py-16">
+      {/* Mobile View - Horizontal Slider */}
+      <div className="block lg:hidden max-w-md mx-auto px-6">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-[#2b2b2b] mb-3">
+            Mental Health Concerns We Care For
+          </h1>
+          <p className="text-base font-medium text-[#4c4c4c] leading-relaxed">
+            Mibo offers comprehensive support for 30+ mental health conditions.
+            Explore some of the most common concerns below to see how we
+            approach care.
+          </p>
+        </div>
 
-      {/* Card Container */}
-      <div
-        ref={cardRef}
-        className="relative overflow-hidden rounded-lg cursor-grab active:cursor-grabbing select-none w-full h-80 sm:h-96 mb-6"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-      >
-        <div className="relative w-full h-full">
-          <AnimatePresence mode="wait">
+        {/* Slider Container */}
+        <div className="relative overflow-hidden mb-6">
+          <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
-              key={currentIndex} // only content animates
-              initial={{ opacity: 0, x: 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -80 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className={`absolute inset-0 flex flex-col bg-[#FAFDFF] border border-[#bfd1e5] rounded-2xl p-4 sm:p-6`}
+              key={currentSlide}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "tween", duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.4 },
+              }}
+              className={`${concerns[currentSlide].bgColor} rounded-2xl p-6 shadow-lg`}
             >
-              {/* Icon */}
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                <img
-                  src={currentCondition.icon}
-                  alt={currentCondition.name}
-                  className="w-20 h-20 sm:w-28 sm:h-28 object-contain"
-                />
+              {/* Icon and Title Row */}
+              <div className="flex items-start gap-4 mb-4">
+                {/* Icon */}
+                <div className="w-20 h-20 flex-shrink-0">
+                  <img
+                    src={concerns[currentSlide].icon}
+                    alt={concerns[currentSlide].name}
+                    className="w-full h-full object-contain mix-blend-multiply"
+                  />
+                </div>
+
+                {/* Title and Stats */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-[#2b2b2b] mb-1">
+                    {concerns[currentSlide].name}
+                  </h3>
+                  <p className="text-sm font-medium text-[#4c4c4c]">
+                    {concerns[currentSlide].stats}
+                  </p>
+                </div>
               </div>
 
-              {/* Title */}
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2">
-                {currentCondition.name}
-              </h2>
-
               {/* Description */}
-              <p className="text-gray-600 text-sm sm:text-[0.875rem] leading-relaxed mb-4 sm:mb-6 flex-1 overflow-hidden line-clamp-4">
-                {currentCondition.description}
+              <p className="text-base font-medium text-[#4c4c4c] leading-relaxed mb-4">
+                {concerns[currentSlide].description}
               </p>
 
+              {/* Treatment Approaches */}
+              <div className="mb-4">
+                <p className="text-sm font-bold text-[#2b2b2b] mb-2 uppercase">
+                  Treatment Approaches
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {concerns[currentSlide].treatments.map((treatment, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1.5 bg-white/60 rounded-full text-sm font-medium text-[#4c4c4c]"
+                    >
+                      {treatment}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               {/* Buttons */}
-              <div className="flex items-center justify-between flex-shrink-0">
-                <button className="w-30 h-5 p-4 sm:w-10 sm:h-10 rounded-lg bg-[#A7DAD3] text-[0.75rem] font-500 text-[#4c4c47] flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex flex-col gap-3">
+                <button className="text-base text-[#2FA19A] font-bold hover:underline text-left">
                   Learn More
                 </button>
                 <button
-                  onClick={nextCard}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#A7DAD3] text-[#4c4c47] flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
+                  onClick={() => navigate("/experts")}
+                  className="w-full bg-[#18356C] hover:bg-[#2a4a8f] text-white font-bold py-3 px-6 rounded-full text-base transition-all"
                 >
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Book Consultation
                 </button>
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Indicators */}
+        <div className="flex justify-center gap-2">
+          {concerns.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? "w-8 bg-[#18356C]"
+                  : "w-2 bg-gray-300 hover:bg-gray-400"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center space-x-2 mb-6">
-        {conditions.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToCard(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              index === currentIndex
-                ? "bg-[#18276c] w-6"
-                : "bg-gray-300 hover:bg-gray-400"
-            }`}
-          />
-        ))}
-      </div>
+      {/* Desktop View - Three Cards Side by Side */}
+      <div className="hidden lg:block max-w-7xl mx-auto px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-[#2b2b2b] mb-4">
+            Mental Health Concerns We Care For
+          </h1>
+          <p className="text-base text-[#4c4c4c] leading-relaxed max-w-3xl mx-auto">
+            Mibo offers comprehensive support for 30+ mental health conditions.
+            Explore some of the most common concerns below to see how we
+            approach care.
+          </p>
+        </div>
 
-      {/* Counter */}
-      <div className="text-center text-sm text-gray-500">
-        {currentIndex + 1} of {conditions.length}
+        {/* Three Cards */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariant}
+          className="grid grid-cols-3 gap-6"
+        >
+          {concerns.map((concern, index) => (
+            <motion.div
+              key={index}
+              variants={cardVariant}
+              className={`${concern.bgColor} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col`}
+            >
+              {/* Icon and Title Row */}
+              <div className="flex items-start gap-4 mb-6">
+                {/* Icon */}
+                <div className="w-24 h-24 flex-shrink-0">
+                  <img
+                    src={concern.icon}
+                    alt={concern.name}
+                    className="w-full h-full object-contain mix-blend-multiply"
+                  />
+                </div>
+
+                {/* Title and Stats */}
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-[#2b2b2b] mb-1">
+                    {concern.name}
+                  </h3>
+                  <p className="text-xs text-[#4c4c4c]">{concern.stats}</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="text-sm text-[#4c4c4c] leading-relaxed mb-6 flex-grow">
+                {concern.description}
+              </p>
+
+              {/* Treatment Approaches */}
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-[#2b2b2b] mb-3 uppercase tracking-wide">
+                  Treatment Approaches
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {concern.treatments.map((treatment, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1.5 bg-white/60 rounded-full text-xs text-[#4c4c4c] font-medium"
+                    >
+                      {treatment}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col gap-3 mt-auto">
+                <button className="text-sm text-[#2FA19A] font-semibold hover:underline text-left">
+                  Learn More
+                </button>
+                <button
+                  onClick={() => navigate("/experts")}
+                  className="w-full bg-[#18356C] hover:bg-[#2a4a8f] text-white font-semibold py-3 px-6 rounded-full text-sm transition-all shadow-md hover:shadow-lg"
+                >
+                  Book Consultation
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </div>
   );
 };
 
-export default MentalHealthCards;
+export default MentalHealthConcerns;

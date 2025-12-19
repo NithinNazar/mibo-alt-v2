@@ -111,7 +111,7 @@ const MiboCarousel = () => {
       whileInView="visible"
       viewport={{ once: true, amount: 0.1, margin: "-50px" }}
       variants={containerVariant}
-      className="w-full max-w-md mx-auto bg-[#040a47] p-8 text-white text-center"
+      className="w-full max-w-md mx-auto bg-[#040a47] py-16 px-8 text-white text-center"
     >
       {/* Header */}
       <motion.h2 variants={itemVariant} className="text-2xl font-semibold mb-4">

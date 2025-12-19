@@ -26,7 +26,7 @@ export default function DoctorCard({ doctor }: Props) {
       <img
         src={doctor.image}
         alt={doctor.name}
-        className="rounded-xl w-full h-40 object-cover mb-3"
+        className="rounded-xl w-full h-40 object-cover object-top mb-3"
       />
       <h3 className="text-lg font-semibold text-[#034B44]">{doctor.name}</h3>
       <p className="text-sm text-[#034B44]/80">{doctor.qualification}</p>

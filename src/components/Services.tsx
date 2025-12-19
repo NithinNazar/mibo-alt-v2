@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronDown, User, Users, Monitor } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import Lottie from "lottie-react";
@@ -9,6 +10,7 @@ import inPersonImg from "../assets/In-person.jpg";
 import onlineImg from "../assets/online.jpg";
 
 const MentalHealthServices: React.FC = () => {
+  const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState<string | null>(
     "in-patient"
   );
@@ -20,6 +22,15 @@ const MentalHealthServices: React.FC = () => {
       online: onlineImg,
     };
     return images[serviceId as keyof typeof images] || images["in-person"];
+  };
+
+  const getServiceLink = (serviceId: string) => {
+    const links = {
+      "in-patient": "/services/in-patient",
+      "in-person": "/services/in-person",
+      online: "/experts",
+    };
+    return links[serviceId as keyof typeof links] || "/experts";
   };
 
   const services = [
@@ -145,7 +156,10 @@ const MentalHealthServices: React.FC = () => {
                     <p className="text-white text-lg font-semibold mb-2">
                       {service.details}
                     </p>
-                    <button className="bg-white/20 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-xl font-semibold hover:bg-white/30 hover:border-white/50 transform hover:scale-105 active:scale-95 transition-all duration-300 w-fit shadow-lg">
+                    <button
+                      onClick={() => navigate(getServiceLink(service.id))}
+                      className="bg-white/20 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-xl font-semibold hover:bg-white/30 hover:border-white/50 transform hover:scale-105 active:scale-95 transition-all duration-300 w-fit shadow-lg"
+                    >
                       Learn More
                     </button>
                   </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import miboIcon from "../assets/logo1.png";
+import homeVideo from "../assets/home_video.mp4";
 import PremiumSlider from "../components/Slider";
 import MentalHealthCard from "./mentalhealth";
 
@@ -42,8 +43,8 @@ const Header = () => {
   return (
     <header
       className={`w-full fixed top-0 left-0 z-50 
-        bg-[rgb(255,255,255)] md:bg-transparent
-        shadow-sm border-b border-gray-100 
+        bg-white
+        shadow-sm border-b border-gray-100
         transition-all duration-1000 ease-out
         ${
           isVisible
@@ -96,7 +97,7 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <nav
-          className={`hidden lg:flex flex-grow justify-center gap-6 text-sm text-white font-medium transition-all duration-800 delay-400 ease-out ${
+          className={`hidden lg:flex flex-grow justify-center gap-6 text-sm text-gray-700 font-medium transition-all duration-800 delay-400 ease-out ${
             isVisible
               ? "transform translate-y-0 opacity-100"
               : "transform translate-y-4 opacity-0"
@@ -217,7 +218,7 @@ const Header = () => {
               : "transform translate-x-8 opacity-0"
           }`}
         >
-          <button className="w-10 h-10 flex items-center justify-center rounded-full border border-white/30 hover:border-[#34b9a5] text-white hover:text-[#34b9a5] bg-black/20 backdrop-blur-sm transition-all duration-300 hover:scale-110">
+          <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110">
             <Phone size={18} />
           </button>
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110">
@@ -230,7 +231,10 @@ const Header = () => {
             SIGN UP
           </button>
 
-          <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105">
+          <button
+            onClick={() => handleNavigate("/patientAuth")}
+            className="border-2 border-[#1c0d54] text-[#1c0d54] px-6 py-2 rounded-full hover:bg-[#1c0d54] hover:text-white font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
+          >
             SIGN IN
           </button>
         </div>
@@ -327,22 +331,44 @@ const Header = () => {
   );
 };
 
-const DesktopVideo = () => (
-  <div className="relative w-full h-screen overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
-    <video
-      autoPlay
-      muted
-      loop
-      playsInline
-      className="absolute top-0 left-0 w-full h-full object-cover z-0"
-    >
-      <source src="/home_vedio.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 z-10" />
-  </div>
-);
+const DesktopVideo = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Background Video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+      >
+        <source src={homeVideo} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/30 z-10" />
+
+      {/* Content */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6">
+        <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+          Welcome to Mibo
+        </h1>
+        <p className="text-white text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl">
+          Your Mental Health Companion - Professional care for your wellbeing
+        </p>
+        <button
+          onClick={() => navigate("/experts")}
+          className="bg-[#34b9a5] hover:bg-[#2a9d8c] text-white font-bold py-4 px-12 rounded-full text-lg transition-all duration-300 shadow-2xl hover:scale-105"
+        >
+          Get Started
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const App = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -366,7 +392,10 @@ const App = () => {
             </div>
           </div>
         ) : (
-          <DesktopVideo />
+          <div className="flex flex-col">
+            <DesktopVideo />
+            <MentalHealthCard />
+          </div>
         )}
       </div>
     </div>
