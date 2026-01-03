@@ -31,6 +31,8 @@ interface Appointment {
   status: string;
   consultation_fee?: number;
   notes?: string;
+  google_meet_link?: string;
+  meet_link?: string;
 }
 
 interface DashboardData {
@@ -414,6 +416,50 @@ export default function PatientDashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Google Meet Link for Online Appointments */}
+                  {appointment.appointment_type === "ONLINE" &&
+                    (appointment.google_meet_link || appointment.meet_link) && (
+                      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-5 h-5 text-blue-600"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-blue-900 mb-1">
+                              Online Consultation Link
+                            </p>
+                            <p className="text-xs text-blue-700 mb-3">
+                              Join your session using Google Meet
+                            </p>
+                            <a
+                              href={
+                                appointment.google_meet_link ||
+                                appointment.meet_link
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M22.547 9.548l-6.547 5.452v-4.55c-6.627 0-12 5.373-12 12 0 1.26.195 2.476.558 3.611-2.557-2.983-4.108-6.868-4.108-11.111 0-9.389 7.611-17 17-17v-4.55l6.547 5.452-1.45 1.696z" />
+                              </svg>
+                              Join Google Meet
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                   <div className="mt-2 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
                     <p className="text-gray-500">
