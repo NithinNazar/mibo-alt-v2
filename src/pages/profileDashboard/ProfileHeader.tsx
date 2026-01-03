@@ -11,11 +11,46 @@ const ProfileHeader = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  //  Mock user (replace later with auth context)
-  const [user, setUser] = useState<{ name: string; email: string } | null>({
-    name: "Nithin",
-    email: "nithin@example.com",
-  });
+  //  Get authenticated user from localStorage
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Load user data from localStorage on component mount
+    const loadUserData = () => {
+      const userStr = localStorage.getItem("mibo_user");
+      if (userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          setUser({
+            name: userData.full_name || "User",
+            email: userData.email || "No email provided",
+            phone: userData.phone || "",
+          });
+        } catch (error) {
+          console.error("Failed to parse user data:", error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    loadUserData();
+
+    // Optional: Listen for storage changes (if user logs in from another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "mibo_user") {
+        loadUserData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -36,6 +71,12 @@ const ProfileHeader = () => {
   }, []);
 
   const handleLogout = () => {
+    // Clear all authentication data
+    localStorage.removeItem("mibo_access_token");
+    localStorage.removeItem("mibo_refresh_token");
+    localStorage.removeItem("mibo_user");
+    localStorage.removeItem("latestBooking");
+
     setUser(null);
     setProfileMenuOpen(false);
     navigate("/"); //  Redirect to home
@@ -82,27 +123,42 @@ const ProfileHeader = () => {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
                   <Link
                     to="/profileDashboard"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setProfileMenuOpen(false)}
                   >
-                    My Profile
+                    Profile
                   </Link>
                   <Link
                     to="/appointments"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setProfileMenuOpen(false)}
                   >
-                    My Appointments
+                    Appointments
                   </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  <Link
+                    to="/profile-settings"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setProfileMenuOpen(false)}
                   >
-                    Logout
-                  </button>
+                    Settings
+                  </Link>
+                  <div className="border-t border-gray-100">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -117,11 +173,67 @@ const ProfileHeader = () => {
           </button> */}
         </div>
 
-        {/* Desktop Placeholder */}
+        {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-4">
-          <button className="bg-[#34b9a5] text-white px-6 py-2 rounded-full hover:bg-[#2fa18f] font-semibold text-sm">
-            BOOK APPOINTMENT
-          </button>
+          {user && (
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 bg-[#1c0d54] text-white px-5 py-2.5 rounded-full hover:bg-[#2a1470] text-sm font-semibold transition-all"
+              >
+                <span className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+                <span>My Profile</span>
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform ${
+                    profileMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {profileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                  <Link
+                    to="/profileDashboard"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/appointments"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    All Appointments
+                  </Link>
+                  <Link
+                    to="/profile-settings"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    Profile Settings
+                  </Link>
+                  <div className="border-t border-gray-100">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

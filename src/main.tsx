@@ -20,6 +20,8 @@ import ScrollToTop from "./components/ScrollToTop";
 // --- Auth & Dashboard ---
 import PatientDashboard from "./pages/profileDashboard/PatientDashboard";
 import PatientAuth from "./pages/auth/PatientAuth";
+import AllAppointments from "./pages/profileDashboard/AllAppointments";
+import ProfileSettings from "./pages/profileDashboard/ProfileSettings";
 
 // --- Centres ---
 import Bangalore from "./pages/Centers/Bangalore";
@@ -66,6 +68,8 @@ const App = () => {
           {/* 👤 Auth & Profile */}
           <Route path="/patientAuth" element={<PatientAuth />} />
           <Route path="/profileDashboard" element={<PatientDashboard />} />
+          <Route path="/appointments" element={<AllAppointments />} />
+          <Route path="/profile-settings" element={<ProfileSettings />} />
           {/*  Booking Flow (book for a specific doctor) */}
           <Route
             path="/book-appointment/:doctorId"

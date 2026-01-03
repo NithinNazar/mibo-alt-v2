@@ -1,285 +1,167 @@
-<<<<<<< HEAD
-# Mibo Mental Health - Patient Booking Portal
+# Mibo Frontend
 
-A modern, user-friendly web application for booking mental health consultations at Mibo Mental Health centres across India. Built with React, TypeScript, and Vite.
+React + TypeScript + Vite frontend for Mibo Mental Hospital booking system.
 
-## Features
-
-- 🔐 **Phone OTP Authentication** - Secure login using mobile number verification
-- 👨‍⚕️ **Doctor Selection** - Browse and select from qualified mental health professionals
-- 📅 **Real-time Availability** - Check and book available appointment slots
-- 💳 **Razorpay Payment Integration** - Secure online payment processing
-- 🎥 **Video Consultations** - Join online appointments via Google Meet
-- 📱 **Patient Dashboard** - View and manage your appointments
-- 🏥 **Multi-Centre Support** - Book at Bangalore, Mumbai, or Kochi centres
-- ✨ **Smooth Animations** - Beautiful UI with Framer Motion and Lottie
-
-## Tech Stack
-
-- **Frontend Framework**: React 19 with TypeScript
-- **Build Tool**: Vite 7
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion, Lottie
-- **HTTP Client**: Axios
-- **Payment Gateway**: Razorpay
-- **Testing**: Vitest, React Testing Library
-- **Routing**: React Router v7
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v18 or higher)
-- **npm** (v9 or higher)
-- **Backend API** running on `http://localhost:5000` (or configure your API URL)
-
-## Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd mibo
-```
-
-### 2. Install Dependencies
+## Quick Start
 
 ```bash
 npm install
-```
-
-### 3. Environment Configuration
-
-Create a `.env` file in the root directory by copying the example file:
-
-```bash
-cp .env.example .env
-```
-
-Update the `.env` file with your configuration:
-
-```env
-# Backend API Base URL
-# Development: http://localhost:5000/api
-# Production: Update with your production API URL
-VITE_API_BASE_URL=http://localhost:5000/api
-
-# Razorpay Configuration
-# Get your test/live keys from Razorpay Dashboard
-# Test mode key format: rzp_test_xxxxx
-# Live mode key format: rzp_live_xxxxx
-VITE_RAZORPAY_KEY_ID=rzp_test_xxxxx
-```
-
-#### Getting Razorpay Keys
-
-1. Sign up at [Razorpay Dashboard](https://dashboard.razorpay.com/)
-2. Navigate to Settings → API Keys
-3. Generate Test/Live keys
-4. Copy the Key ID to your `.env` file
-
-### 4. Start Development Server
-
-```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+App runs on `http://localhost:5173` (or 5174 if port is in use)
 
-### 5. Build for Production
+## Key Features
+
+- **Patient Booking Flow**: Complete appointment booking with OTP verification
+- **Doctor Selection**: Browse doctors by specialization
+- **Phone Verification**: OTP-based authentication (test mode available)
+- **Payment Integration**: Razorpay checkout ready
+- **Responsive Design**: Mobile-first UI with Tailwind CSS
+- **Patient Dashboard**: View appointments and profile
+
+## Tech Stack
+
+- React 19 with TypeScript
+- Vite for fast development
+- Tailwind CSS for styling
+- React Router for navigation
+- Axios for API calls
+- Lucide React for icons
+- Lottie for animations
+
+## Project Structure
+
+```
+src/
+├── pages/
+│   ├── BookAppointment/     # Booking flow (3 steps)
+│   ├── auth/                # Patient authentication
+│   └── PatientDashboard/    # Patient portal
+├── services/                # API integration
+├── components/              # Reusable components
+├── assets/                  # Images, animations
+└── App.tsx                  # Main app component
+```
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Lint code
+- `npm test` - Run tests
+
+## Environment Setup
+
+Create `.env` file:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+## Booking Flow
+
+### Step 1: Select Doctor & Time
+
+- Browse doctors from static data (no database needed)
+- Select appointment date and time
+- Choose consultation type (online/in-person)
+
+### Step 2: Phone Verification
+
+- Enter phone number
+- Receive OTP via WhatsApp (or browser alert in test mode)
+- Verify OTP to continue
+
+### Step 3: Confirm Booking
+
+- Review appointment details
+- Proceed to payment
+- Get confirmation
+
+## Test Mode
+
+For testing without WhatsApp:
+
+- OTP is shown in browser alert
+- Backend test endpoints used (`/api/test/send-otp`, `/api/test/verify-otp`)
+- No database required
+
+## API Integration
+
+All API calls are in `src/services/`:
+
+- `authService.ts` - Authentication
+- `bookingService.ts` - Appointment booking
+- `patientDashboardService.ts` - Patient data
+
+Example:
+
+```typescript
+import { sendOTP, verifyOTP } from "./services/authService";
+
+// Send OTP
+await sendOTP("919876543210");
+
+// Verify OTP
+const result = await verifyOTP("919876543210", "123456");
+```
+
+## Backend Integration
+
+Backend runs on `http://localhost:5000`
+
+Make sure backend is running before starting frontend:
+
+```bash
+cd backend
+npm run dev
+```
+
+## Current Status
+
+✅ **Working**:
+
+- Complete booking flow UI
+- OTP verification (test mode)
+- Doctor selection from static data
+- Responsive design
+- API integration structure
+
+⚠️ **In Progress**:
+
+- Payment flow completion
+- Patient dashboard features
+- WhatsApp OTP delivery (backend issue)
+
+## Documentation
+
+**Frontend**:
+
+- **[INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)** - Complete frontend integration guide with code examples
+
+**Backend**:
+
+- API endpoints: [backend/API_DOCUMENTATION.md](../backend/API_DOCUMENTATION.md)
+- Setup guide: [backend/SETUP_GUIDE.md](../backend/SETUP_GUIDE.md)
+- Project overview: [backend/PROJECT_OVERVIEW.md](../backend/PROJECT_OVERVIEW.md)
+
+## Deployment
+
+Build for production:
 
 ```bash
 npm run build
 ```
 
-The production-ready files will be in the `dist` directory.
-
-### 6. Preview Production Build
-
-```bash
-npm run preview
-```
-
-## Available Scripts
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint for code quality
-- `npm test` - Run tests in watch mode
-- `npm run test:run` - Run tests once
-- `npm run test:ui` - Open Vitest UI for interactive testing
-
-## Project Structure
-
-```
-mibo/
-├── src/
-│   ├── assets/          # Images, animations, and static files
-│   ├── components/      # Reusable React components
-│   ├── pages/           # Page components
-│   ├── services/        # API service layer
-│   │   ├── api.ts              # Axios client configuration
-│   │   ├── authService.ts      # Authentication (OTP)
-│   │   ├── clinicianService.ts # Doctor data
-│   │   ├── appointmentService.ts # Appointments
-│   │   ├── paymentService.ts   # Razorpay integration
-│   │   ├── centreService.ts    # Hospital centres
-│   │   ├── patientService.ts   # Patient profile
-│   │   └── videoService.ts     # Video consultations
-│   ├── types/           # TypeScript type definitions
-│   ├── utils/           # Utility functions
-│   │   ├── apiRetry.ts         # Retry logic
-│   │   └── dateHelpers.ts      # Date/time utilities
-│   ├── ui/              # UI components
-│   ├── App.tsx          # Main application component
-│   └── main.tsx         # Application entry point
-├── public/              # Public static assets
-├── .env                 # Environment variables (create from .env.example)
-├── .env.example         # Environment variables template
-├── index.html           # HTML entry point
-├── package.json         # Dependencies and scripts
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite configuration
-├── vitest.config.ts     # Vitest configuration
-└── tailwind.config.js   # Tailwind CSS configuration
-```
-
-## API Integration
-
-The application integrates with the Mibo Mental Health backend API. Ensure the backend is running before starting the frontend.
-
-### API Endpoints Used
-
-- `POST /auth/send-otp` - Send OTP to phone
-- `POST /auth/login/phone-otp` - Verify OTP and login
-- `GET /clinicians` - Fetch doctors
-- `GET /appointments/availability` - Check availability
-- `POST /appointments` - Create appointment
-- `GET /patients/:id/appointments` - Get patient appointments
-- `DELETE /appointments/:id` - Cancel appointment
-- `POST /payments/create-order` - Create Razorpay order
-- `POST /payments/verify` - Verify payment
-- `GET /video/appointment/:id/meet-link` - Get video link
-- `GET /centres` - Get hospital centres
-- `GET /patients/:id` - Get patient profile
-- `PUT /patients/:id` - Update patient profile
-
-### Authentication
-
-The application uses JWT tokens stored in localStorage:
-
-- `mibo_access_token` - Access token for API requests
-- `mibo_refresh_token` - Refresh token
-- `mibo_user` - User data
-
-Tokens are automatically added to API requests via Axios interceptors.
-
-## Testing
-
-The project uses Vitest and React Testing Library for testing.
-
-### Run Tests
-
-```bash
-# Run tests in watch mode
-npm test
-
-# Run tests once
-npm run test:run
-
-# Open Vitest UI
-npm run test:ui
-```
-
-### Test Coverage
-
-```bash
-npm run test:run -- --coverage
-```
-
-## Deployment
-
-### Deploy to GitHub Pages
-
-```bash
-npm run deploy
-```
-
-### Deploy to Other Platforms
-
-1. Build the project: `npm run build`
-2. Upload the `dist` directory to your hosting provider
-3. Configure environment variables on your hosting platform
-4. Ensure the backend API URL is correctly set
-
-## Environment Variables
-
-| Variable               | Description          | Example                     |
-| ---------------------- | -------------------- | --------------------------- |
-| `VITE_API_BASE_URL`    | Backend API base URL | `http://localhost:5000/api` |
-| `VITE_RAZORPAY_KEY_ID` | Razorpay public key  | `rzp_test_xxxxx`            |
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Troubleshooting
-
-### API Connection Issues
-
-If you're having trouble connecting to the backend:
-
-1. Verify the backend is running on the correct port
-2. Check `VITE_API_BASE_URL` in your `.env` file
-3. Ensure CORS is properly configured on the backend
-4. Check browser console for error messages
-
-### Payment Integration Issues
-
-If Razorpay checkout is not working:
-
-1. Verify `VITE_RAZORPAY_KEY_ID` is correct
-2. Check that Razorpay script is loaded in `index.html`
-3. Ensure you're using test keys in development
-4. Check browser console for Razorpay errors
-
-### Build Issues
-
-If the build fails:
-
-1. Clear node_modules: `rm -rf node_modules && npm install`
-2. Clear Vite cache: `rm -rf node_modules/.vite`
-3. Ensure all environment variables are set
-4. Check for TypeScript errors: `npm run build`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
-
-## License
-
-This project is proprietary and confidential.
+Output in `dist/` folder ready for deployment.
 
 ## Support
 
-For support, please contact the Mibo Mental Health technical team.
+For issues:
 
----
-
-Built with ❤️ by the Mibo Mental Health Team
-=======
-# Link To Images to be used on the website.
-
-https://drive.google.com/drive/folders/1NTfy3dLW24RzAKVglWL9BaDsX3VaQRyS?usp=sharing
-
-
-# !!!!! Currently Dummy Images are used in the code base, use the images from gdrive link!!!!!!!!!!!
->>>>>>> f607f2ec4f42eb552a1946b9555cffb22423016a
+1. Check backend is running on port 5000
+2. Verify `.env` configuration
+3. Check browser console for errors
+4. Review backend logs

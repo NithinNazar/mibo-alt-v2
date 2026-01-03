@@ -1,13 +1,9 @@
-// NOTE TO FREELANCER: This is the full Patient Dashboard page shown after login.
-// It includes handling for when there is no current booking stored in localStorage,
-// as well as a detailed dashboard view when a booking is present.
-// Feel free to split into smaller components if needed.
-// refer the back end repository for the API integration.
-
+// PatientDashboard.tsx - Updated to fetch from API
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ProfileHeader from "./ProfileHeader";
+import patientDashboardService from "../../services/patientDashboardService";
 import {
   CalendarDays,
   MapPin,
@@ -21,36 +17,171 @@ import {
   Activity,
   RefreshCcw,
   Phone,
+  XCircle,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 
-interface Booking {
-  phone?: string;
-  doctor?: string;
-  centre?: string;
-  date?: string;
-  time?: string;
-  duration?: string;
-  amount?: number;
-  mode?: "IN_PERSON" | "ONLINE";
+interface Appointment {
+  id: number;
+  clinician_name: string;
+  centre_name: string;
+  appointment_type: "IN_PERSON" | "ONLINE";
+  scheduled_start_at: string;
+  scheduled_end_at: string;
+  duration_minutes?: number;
+  status: string;
+  consultation_fee?: number;
+  notes?: string;
+}
+
+interface DashboardData {
+  patient: {
+    id: number;
+    name: string;
+    phone: string;
+    email: string | null;
+  };
+  statistics: {
+    totalAppointments: number;
+    completedAppointments: number;
+    upcomingAppointments: number;
+    totalSpent: number;
+  };
+  upcomingAppointments: Appointment[];
+  recentAppointments: Appointment[];
 }
 
 export default function PatientDashboard() {
-  const [booking, setBooking] = useState<Booking | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const stored = localStorage.getItem("latestBooking");
-    if (!stored) return;
+  // Cancellation state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
 
-    try {
-      const parsed = JSON.parse(stored);
-      setBooking(parsed);
-    } catch {
-      setBooking(null);
-    }
+  useEffect(() => {
+    loadDashboardData();
   }, []);
 
-  if (!booking) {
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await patientDashboardService.getDashboard();
+
+      if (response.success) {
+        setDashboardData(response.data);
+      } else {
+        setError("Failed to load dashboard data");
+      }
+    } catch (err: any) {
+      console.error("Error loading dashboard:", err);
+      setError(err.response?.data?.message || "Failed to load dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!cancelReason.trim()) {
+      setCancelError("Please provide a reason for cancellation");
+      return;
+    }
+
+    if (!selectedAppointment?.id) {
+      setCancelError("Appointment ID not found");
+      return;
+    }
+
+    setIsCancelling(true);
+    setCancelError("");
+
+    try {
+      const accessToken = localStorage.getItem("mibo_access_token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/patient/appointments/${selectedAppointment.id}/cancel`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reason: cancelReason.trim(),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to cancel appointment");
+      }
+
+      // Reload dashboard data
+      await loadDashboardData();
+
+      // Close modal
+      setShowCancelModal(false);
+      setSelectedAppointment(null);
+      setCancelReason("");
+    } catch (err: any) {
+      console.error("Cancellation error:", err);
+      setCancelError(err.message || "Failed to cancel appointment");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <ProfileHeader />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-[#034B44] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <ProfileHeader />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-md border border-gray-100 p-8 text-center">
+            <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Error Loading Dashboard
+            </h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={loadDashboardData}
+              className="px-6 py-3 bg-[#034B44] text-white rounded-full hover:bg-[#046e63] transition"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (!dashboardData || dashboardData.upcomingAppointments.length === 0) {
     return (
       <>
         <ProfileHeader />
@@ -66,8 +197,21 @@ export default function PatientDashboard() {
               You do not have any upcoming sessions scheduled. Book a session
               with a clinician to get started.
             </p>
+            {dashboardData?.statistics.totalAppointments > 0 && (
+              <p className="text-sm text-gray-600 mb-4">
+                You have {dashboardData.statistics.totalAppointments} past
+                appointment
+                {dashboardData.statistics.totalAppointments !== 1 ? "s" : ""}.{" "}
+                <button
+                  onClick={() => navigate("/appointments")}
+                  className="text-[#034B44] font-medium hover:underline"
+                >
+                  View history
+                </button>
+              </p>
+            )}
             <button
-              onClick={() => navigate("/book-appointment")}
+              onClick={() => navigate("/experts")}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#034B44] text-white rounded-full text-sm font-medium hover:bg-[#046e63] transition"
             >
               Book an appointment
@@ -79,7 +223,10 @@ export default function PatientDashboard() {
     );
   }
 
-  const referenceNumber = Math.floor(Math.random() * 90000) + 10000;
+  // Get the next upcoming appointment
+  const nextAppointment = dashboardData.upcomingAppointments[0];
+  const appointmentDate = new Date(nextAppointment.scheduled_start_at);
+  const durationMinutes = nextAppointment.duration_minutes || 50;
 
   return (
     <>
@@ -96,415 +243,327 @@ export default function PatientDashboard() {
           >
             <div>
               <h1 className="text-3xl font-semibold text-gray-800">
-                Welcome back
+                Welcome back, {dashboardData.patient.name}
               </h1>
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
                 <Phone size={16} className="text-[#034B44]" />
-                <span>{booking.phone || "Phone number not available"}</span>
+                <span>
+                  {dashboardData.patient.phone.startsWith("91")
+                    ? `+${dashboardData.patient.phone}`
+                    : `+91${dashboardData.patient.phone}`}
+                </span>
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <div className="px-4 py-2 rounded-full bg-green-50 text-green-700 text-xs font-medium inline-flex items-center gap-2">
                 <CheckCircle2 size={16} />
-                Appointment confirmed
+                {dashboardData.statistics.upcomingAppointments} upcoming
               </div>
               <div className="px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium inline-flex items-center gap-2">
                 <Activity size={16} />
-                Profile active
+                {dashboardData.statistics.totalAppointments} total
               </div>
             </div>
           </motion.div>
 
-          {/* Main appointment card + side stats */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Appointment details card */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-              className="lg:col-span-2 bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden"
-            >
-              <div className="bg-gradient-to-r from-[#2a1470] to-[#034B44] text-white p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold mb-1">
-                      Upcoming appointment
-                    </h2>
-                    <p className="text-xs opacity-80">
-                      Booking reference: #{referenceNumber}
+          {/* Show all upcoming appointments */}
+          <div className="space-y-6">
+            {dashboardData.upcomingAppointments.map((appointment, index) => (
+              <motion.div
+                key={appointment.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: index * 0.1 }}
+                className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-[#2a1470] to-[#034B44] text-white p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-semibold mb-1">
+                        {index === 0
+                          ? "Next Appointment"
+                          : `Upcoming Appointment #${index + 1}`}
+                      </h2>
+                      <p className="text-xs opacity-80">
+                        Booking reference: #{appointment.id}
+                      </p>
+                    </div>
+                    <div className="text-right text-xs opacity-80">
+                      <p>Mibo Mental Health</p>
+                      <p>Your care, personalised</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 text-gray-700">
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                        <Stethoscope className="text-[#2a1470]" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Clinician
+                        </p>
+                        <p className="font-medium">
+                          {appointment.clinician_name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                        <MapPin className="text-[#034B44]" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Centre
+                        </p>
+                        <p className="font-medium">{appointment.centre_name}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+                        <CalendarDays className="text-[#2a1470]" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Date
+                        </p>
+                        <p className="font-medium">
+                          {new Date(
+                            appointment.scheduled_start_at
+                          ).toLocaleDateString("en-IN", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-teal-50 flex items-center justify-center">
+                        <Clock className="text-[#034B44]" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Time and duration
+                        </p>
+                        <p className="font-medium">
+                          {new Date(
+                            appointment.scheduled_start_at
+                          ).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          · {appointment.duration_minutes || 50} mins
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+                    <p className="text-gray-500">
+                      {appointment.appointment_type === "ONLINE"
+                        ? "Join the online session from a quiet space."
+                        : "Please reach the centre 10–15 minutes before your scheduled time."}
                     </p>
-                  </div>
-                  <div className="text-right text-xs opacity-80">
-                    <p>Mibo Mental Health</p>
-                    <p>Your care, personalised</p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="p-6 space-y-4 text-gray-700">
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center">
-                      <Stethoscope className="text-[#2a1470]" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Clinician
-                      </p>
-                      <p className="font-medium">
-                        {booking.doctor || "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                      <MapPin className="text-[#034B44]" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Centre
-                      </p>
-                      <p className="font-medium">{booking.centre || "—"}</p>
+                    <div className="flex gap-2">
+                      {appointment.status !== "CANCELLED" && (
+                        <>
+                          <button
+                            onClick={() => navigate("/experts")}
+                            className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                          >
+                            Book another
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedAppointment(appointment);
+                              setShowCancelModal(true);
+                            }}
+                            className="inline-flex items-center justify-center rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+                          >
+                            <XCircle size={14} className="mr-1" />
+                            Cancel
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-                      <CalendarDays className="text-[#2a1470]" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Date
-                      </p>
-                      <p className="font-medium">
-                        {booking.date || "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-teal-50 flex items-center justify-center">
-                      <Clock className="text-[#034B44]" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Time and duration
-                      </p>
-                      <p className="font-medium">
-                        {booking.time ? `${booking.time} · ` : ""}
-                        {booking.duration || "30 mins"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-2 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
-                  <p className="text-gray-500">
-                    Please reach the centre 10–15 minutes before your scheduled
-                    time, or join the online session from a quiet space.
-                  </p>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate("/book-appointment")}
-                      className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      Book another
-                    </button>
-                    <button
-                      onClick={() => navigate("/book-appointment")}
-                      className="inline-flex items-center justify-center rounded-lg bg-[#2a1470] px-3 py-2 text-xs font-medium text-white hover:bg-[#251061]"
-                    >
-                      Manage appointment
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 px  -6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <CheckCircle2 className="text-green-600" size={16} />
-                  <span>
-                    Status:{" "}
-                    <span className="font-medium text-green-600">
-                      Confirmed
-                    </span>
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Need to reschedule or cancel? Please contact our centre at
-                  least 24 hours before your slot.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Side stats / quick cards */}
-            <motion.div
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-4"
-            >
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Session overview
-                  </p>
-                  <History size={16} className="text-gray-400" />
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Current status</span>
-                    <span className="rounded-full bg-green-50 text-green-700 text-xs px-2 py-1">
-                      Confirmed
+                <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <CheckCircle2 className="text-green-600" size={16} />
+                    <span>
+                      Status:{" "}
+                      <span className="font-medium text-green-600">
+                        Confirmed
+                      </span>
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Mode</span>
-                    <span className="text-gray-800 font-medium">
-                      {booking.mode === "ONLINE"
-                        ? "Online consultation"
-                        : "In-person visit"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Duration</span>
-                    <span className="text-gray-800 font-medium">
-                      {booking.duration || "30 mins"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Payment
-                  </p>
-                  <CreditCard size={16} className="text-gray-400" />
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p className="text-gray-500">Amount due for this session:</p>
-                  <p className="text-2xl font-semibold text-gray-800">
-                    {booking.amount
-                      ? `₹${booking.amount.toLocaleString()}`
-                      : "To be confirmed"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Once integrated, your payment history and invoices will
-                    appear here.
+                  <p className="text-xs text-gray-500">
+                    Mode:{" "}
+                    {appointment.appointment_type === "ONLINE"
+                      ? "Online"
+                      : "In-Person"}
                   </p>
                 </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Follow-ups
-                  </p>
-                  <RefreshCcw size={16} className="text-gray-400" />
-                </div>
-                <p className="text-sm text-gray-600 mb-3">
-                  No follow-up session has been scheduled yet.
-                </p>
-                <button
-                  onClick={() => navigate("/book-appointment")}
-                  className="w-full inline-flex items-center justify-center rounded-lg border border-dashed border-[#034B44] px-3 py-2 text-xs font-medium text-[#034B44] hover:bg-[#034B44]/5"
-                >
-                  Schedule a follow-up
-                </button>
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
 
-          {/* History and documents section */}
+          {/* Statistics */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <History className="text-[#2a1470]" size={20} />
-                  <h3 className="text-sm font-semibold text-gray-800">
-                    Appointment history
-                  </h3>
-                </div>
-                <span className="text-xs text-gray-500">
-                  History from this device
-                </span>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Total Appointments
+                </p>
+                <History size={16} className="text-gray-400" />
               </div>
-              <div className="space-y-4 text-sm">
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <span className="w-3 h-3 rounded-full bg-[#2a1470]" />
-                    <span className="flex-1 w-px bg-gray-200" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      Profile created and first appointment booked
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {booking.date || "Date not available"} ·{" "}
-                      {booking.centre || "Centre not available"}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      When you complete more sessions, they will appear here for
-                      easy reference.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <p className="text-3xl font-bold text-gray-800">
+                {dashboardData.statistics.totalAppointments}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {dashboardData.statistics.completedAppointments} completed
+              </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <FileText className="text-[#034B44]" size={20} />
-                  <h3 className="text-sm font-semibold text-gray-800">
-                    Session notes and documents
-                  </h3>
-                </div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Total Spent
+                </p>
+                <CreditCard size={16} className="text-gray-400" />
               </div>
-              <p className="text-sm text-gray-600 mb-3">
-                After your sessions, summaries and documents shared by your
-                clinician will appear here.
+              <p className="text-3xl font-bold text-gray-800">
+                ₹{dashboardData.statistics.totalSpent.toLocaleString()}
               </p>
-              <div className="rounded-lg border border-dashed border-gray-200 p-3 text-xs text-gray-500 flex items-center gap-2">
+              <p className="text-xs text-gray-500 mt-1">All time</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Quick Actions
+                </p>
                 <Activity size={16} className="text-gray-400" />
-                <span>
-                  No documents available yet. Attend your first session to see
-                  your records here.
-                </span>
+              </div>
+              <div className="space-y-2 mt-3">
+                <button
+                  onClick={() => navigate("/appointments")}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  View all appointments
+                </button>
+                <button
+                  onClick={() => navigate("/profile-settings")}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Update profile
+                </button>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {/* Cancellation Modal */}
+      {showCancelModal && selectedAppointment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Cancel Appointment
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Appointment #{selectedAppointment.id}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to cancel this appointment? Your
+                cancellation request will be sent to the admin for approval.
+              </p>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-yellow-800">
+                  <strong>Note:</strong> Refund will be processed only after
+                  admin approval. This may take 3-5 business days.
+                </p>
+              </div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for cancellation <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Please provide a reason for cancellation..."
+                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-red-400 focus:outline-none resize-none"
+                rows={4}
+                disabled={isCancelling}
+              />
+              {cancelError && (
+                <p className="text-xs text-red-600 mt-2">{cancelError}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setSelectedAppointment(null);
+                  setCancelReason("");
+                  setCancelError("");
+                }}
+                disabled={isCancelling}
+                className="flex-1 px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Keep Appointment
+              </button>
+              <button
+                onClick={handleCancelAppointment}
+                disabled={isCancelling || !cancelReason.trim()}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  "Confirm Cancellation"
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }
-
-// import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-// import ProfileHeader from "./ProfileHeader";
-// import { CalendarDays, MapPin, Stethoscope, Clock } from "lucide-react";
-
-// export default function PatientDashboard() {
-//   const [booking, setBooking] = useState<any>(null);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const stored = localStorage.getItem("latestBooking");
-//     if (stored) setBooking(JSON.parse(stored));
-//   }, []);
-
-//   if (!booking) {
-//     return (
-//       <>
-//         <ProfileHeader />
-//         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-700">
-//           <p className="text-lg font-semibold mb-4">No current appointments.</p>
-//           <button
-//             onClick={() => navigate("/book-appointment")}
-//             className="px-6 py-3 bg-[#034B44] text-white rounded-full hover:bg-[#046e63]"
-//           >
-//             Book Appointment
-//           </button>
-//         </div>
-//       </>
-//     );
-//   }
-
-//   return (
-//     <>
-//       <ProfileHeader />
-
-//       <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-28 pb-10 px-4">
-//         <div className="w-full max-w-3xl">
-//           <motion.div
-//             initial={{ opacity: 0, y: -20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.4 }}
-//             className="text-center mb-8"
-//           >
-//             <h1 className="text-3xl font-semibold text-gray-800">
-//               New Profile Created 🎉
-//             </h1>
-//             <p className="text-gray-500 mt-2">
-//               Welcome, <span className="font-medium">{booking.phone}</span>
-//             </p>
-//           </motion.div>
-
-//           <motion.div
-//             initial={{ opacity: 0, y: 20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.5 }}
-//             className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden"
-//           >
-//             <div className="bg-[#2a1470] text-white p-6">
-//               <h2 className="text-2xl font-semibold">Appointment Confirmed</h2>
-//               <p className="mt-1 text-sm opacity-80">
-//                 Booking reference: #{Math.floor(Math.random() * 90000) + 10000}
-//               </p>
-//             </div>
-
-//             <div className="p-6 space-y-4 text-gray-700">
-//               <div className="flex items-center gap-3">
-//                 <Stethoscope className="text-[#2a1470]" />
-//                 <p>
-//                   <span className="font-medium">Doctor:</span>{" "}
-//                   {booking.doctor || "Not specified"}
-//                 </p>
-//               </div>
-
-//               <div className="flex items-center gap-3">
-//                 <MapPin className="text-[#2a1470]" />
-//                 <p>
-//                   <span className="font-medium">Location:</span>{" "}
-//                   {booking.centre || "—"}
-//                 </p>
-//               </div>
-
-//               <div className="flex items-center gap-3">
-//                 <CalendarDays className="text-[#2a1470]" />
-//                 <p>
-//                   <span className="font-medium">Date:</span> {booking.date}
-//                 </p>
-//               </div>
-
-//               <div className="flex items-center gap-3">
-//                 <Clock className="text-[#2a1470]" />
-//                 <p>
-//                   <span className="font-medium">Duration:</span>{" "}
-//                   {booking.duration}
-//                 </p>
-//               </div>
-//             </div>
-
-//             <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
-//               <span className="text-gray-600 text-sm">
-//                 Status:{" "}
-//                 <span className="text-green-600 font-medium">Confirmed</span>
-//               </span>
-
-//               {/* <button
-//                 onClick={() => navigate("/book-appointment")}
-//                 className="px-5 py-2 bg-[#2fbfa8] text-white rounded-lg hover:bg-[#28a895]"
-//               >
-//                 Book Another
-//               </button> */}
-//             </div>
-//           </motion.div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }

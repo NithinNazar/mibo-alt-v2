@@ -7,14 +7,25 @@ import {
   CreditCard,
   Shield,
   Clock,
+  AlertCircle,
+  User,
+  Mail,
 } from "lucide-react";
+import authService from "../../services/authService";
 
 interface Step3ConfirmBookingProps {
   bookingData: any;
   onBack: () => void;
 }
 
-type PaymentStep = "review" | "processing" | "success";
+type PaymentStep = "review" | "processing" | "success" | "failed";
+
+// Razorpay types
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function Step3ConfirmBooking({
   bookingData,
@@ -22,44 +33,286 @@ export default function Step3ConfirmBooking({
 }: Step3ConfirmBookingProps) {
   const navigate = useNavigate();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>("review");
-  const [appointmentId] = useState<number>(
-    Math.floor(100000 + Math.random() * 900000)
-  );
+  const [error, setError] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
 
   /**
-   * Handle payment confirmation (Mock/Hardcoded)
-   * Simulates payment processing with realistic delays
+   * Handle payment confirmation - Real Razorpay integration with NEW booking flow
+   * Step 0: Verify OTP with name and email
+   * Step 1: Create appointment
+   * Step 2: Create payment order
+   * Step 3: Open Razorpay modal
    */
-  const handleConfirmPayment = () => {
-    // Move to processing step
+  const handleConfirmPayment = async () => {
+    // Validate name and email
+    if (!fullName.trim()) {
+      setError("Please enter your full name");
+      return;
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    setError("");
     setPaymentStep("processing");
 
-    // Simulate payment processing (2 seconds)
-    setTimeout(() => {
-      // Payment successful
-      setPaymentStep("success");
+    try {
+      // Step 0: Verify OTP with name and email to get auth token
+      // Get access token from localStorage (set by authService during OTP verification on Step2)
+      const accessToken = localStorage.getItem("mibo_access_token");
+      if (!accessToken) {
+        throw new Error(
+          "Authentication failed. Please go back and verify OTP again."
+        );
+      }
 
-      // Save booking info for dashboard
-      const bookingInfo = {
-        ...bookingData,
-        appointmentId: appointmentId,
-        status: "CONFIRMED",
-        paymentStatus: "PAID",
-        transactionId: `TXN${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem("latestBooking", JSON.stringify(bookingInfo));
-
-      // Navigate to dashboard after showing success (3 seconds)
-      setTimeout(() => {
-        navigate("/profileDashboard", {
-          state: { bookingSuccess: true, appointmentId },
+      // Update user profile with name and email
+      try {
+        await fetch("http://localhost:5000/api/patient-auth/update-profile", {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: fullName,
+            email: email || undefined,
+          }),
         });
-      }, 3000);
-    }, 2000);
+        console.log("✅ User profile updated with name and email");
+      } catch (profileErr) {
+        console.warn(
+          "Profile update failed, continuing with booking:",
+          profileErr
+        );
+        // Don't fail the booking if profile update fails
+      }
+
+      // Log booking data for debugging
+      console.log("📋 Full booking data:", bookingData);
+
+      const appointmentPayload = {
+        clinicianId: parseInt(bookingData.clinicianId),
+        centreId: parseInt(bookingData.centreId),
+        appointmentDate: bookingData.date.split("T")[0], // "2026-01-10"
+        appointmentTime: bookingData.time, // "10:00"
+        appointmentType: bookingData.appointmentType, // "ONLINE" or "IN_PERSON"
+      };
+
+      console.log("📤 Sending appointment payload:", appointmentPayload);
+
+      // Step 1: Create appointment
+      const appointmentResponse = await fetch(
+        "http://localhost:5000/api/booking/create",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(appointmentPayload),
+        }
+      );
+
+      const appointmentData = await appointmentResponse.json();
+      if (!appointmentResponse.ok) {
+        console.error("Appointment creation failed:", appointmentData);
+        throw new Error(
+          appointmentData.message || "Failed to create appointment"
+        );
+      }
+
+      const appointmentId = appointmentData.data.appointment.id;
+      console.log("✅ Appointment created:", appointmentId);
+
+      // Step 2: Create payment order
+      const paymentResponse = await fetch(
+        "http://localhost:5000/api/payments/create-order",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            appointmentId: appointmentId,
+          }),
+        }
+      );
+
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) {
+        throw new Error(
+          paymentData.message || "Failed to create payment order"
+        );
+      }
+
+      console.log("✅ Payment order created");
+
+      // Step 3: Open Razorpay with order details
+      setPaymentStep("review");
+      openRazorpayModal(
+        paymentData.data.orderId,
+        paymentData.data.amount,
+        appointmentId,
+        paymentData.data.razorpayKeyId
+      );
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setError(err.message || "Failed to process booking. Please try again.");
+      setPaymentStep("review");
+    }
+  };
+
+  /**
+   * Open Razorpay payment modal
+   */
+  const openRazorpayModal = (
+    orderId: string,
+    amount: number,
+    appointmentId: number,
+    razorpayKeyId: string
+  ) => {
+    // Check if Razorpay is loaded
+    if (!window.Razorpay) {
+      setError("Payment gateway not loaded. Please refresh and try again.");
+      return;
+    }
+
+    const options = {
+      key: razorpayKeyId, // Use key from backend
+      amount: amount, // Already in paise from backend
+      currency: "INR",
+      name: "Mibo Mental Health",
+      description: "Consultation Booking",
+      order_id: orderId,
+      handler: async function (response: any) {
+        // Payment successful - verify on backend
+        setPaymentStep("processing");
+        try {
+          const accessToken = localStorage.getItem("mibo_access_token");
+
+          const verifyResponse = await fetch(
+            "http://localhost:5000/api/payments/verify",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                appointmentId: appointmentId,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            }
+          );
+
+          const verifyData = await verifyResponse.json();
+          if (!verifyResponse.ok) {
+            throw new Error(
+              verifyData.message || "Payment verification failed"
+            );
+          }
+
+          setPaymentStep("success");
+
+          // Save booking info for dashboard
+          const bookingInfo = {
+            ...bookingData,
+            appointmentId: appointmentId,
+            status: "CONFIRMED",
+            paymentStatus: "PAID",
+            transactionId: response.razorpay_payment_id,
+            createdAt: new Date().toISOString(),
+          };
+          localStorage.setItem("latestBooking", JSON.stringify(bookingInfo));
+
+          // Navigate to dashboard after showing success
+          setTimeout(() => {
+            navigate("/profileDashboard", {
+              state: {
+                bookingSuccess: true,
+                appointmentId: appointmentId,
+              },
+            });
+          }, 3000);
+        } catch (err: any) {
+          setError(err.message || "Payment verification failed");
+          setPaymentStep("failed");
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          // User closed the payment modal
+          setError("Payment cancelled. Please try again.");
+          setPaymentStep("review");
+        },
+      },
+      prefill: {
+        name: fullName,
+        email: email || undefined,
+        contact: bookingData.phone,
+      },
+      theme: {
+        color: "#034B44",
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.on("payment.failed", function (response: any) {
+      // Payment failed
+      setError(
+        response.error.description || "Payment failed. Please try again."
+      );
+      setPaymentStep("failed");
+    });
+
+    razorpay.open();
   };
 
   // Render different views based on payment step
+  if (paymentStep === "failed") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#e9f6f4] text-[#034B44] p-6">
+        <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-12 h-12 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-red-800 mb-2">
+              Payment Failed
+            </h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                setPaymentStep("review");
+                setError("");
+              }}
+              className="w-full py-3 bg-[#034B44] text-white font-semibold rounded-full hover:bg-[#046e63] transition-all"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate("/experts")}
+              className="w-full py-3 border border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-all"
+            >
+              Back to Experts
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (paymentStep === "processing") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#e9f6f4] text-[#034B44] p-6">
@@ -100,13 +353,13 @@ export default function Step3ConfirmBooking({
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Appointment ID</span>
               <span className="font-mono font-semibold text-[#034B44]">
-                #{appointmentId}
+                #{bookingData.appointmentId}
               </span>
             </div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Amount Paid</span>
               <span className="font-semibold text-green-700">
-                ₹{bookingData.price || 1600}
+                ₹{bookingData.amount || bookingData.price || 1600}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -172,17 +425,60 @@ export default function Step3ConfirmBooking({
       </div>
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Welcome Message */}
-        {bookingData.userName && (
-          <div className="bg-white border border-[#a7c4f2]/40 rounded-xl p-4 text-center shadow-sm">
-            <h3 className="text-xl font-semibold text-[#034B44]">
-              🎉 Welcome, {bookingData.userName}!
-            </h3>
-            <p className="text-sm text-[#034B44]/70 mt-1">
-              Review your booking details and confirm payment
-            </p>
+        {/* User Details Form */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-[#034B44]/10 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-[#034B44]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Your Details</h3>
+              <p className="text-xs text-gray-500">
+                Required for booking confirmation
+              </p>
+            </div>
           </div>
-        )}
+
+          <div className="space-y-4">
+            {/* Full Name Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address <span className="text-gray-400">(Optional)</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.email@example.com"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                We'll send booking confirmation to this email
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Payment Summary Card */}
         <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
@@ -200,7 +496,7 @@ export default function Step3ConfirmBooking({
             <div className="flex items-center justify-between py-2 border-b border-gray-100">
               <span className="text-sm text-gray-600">Consultation Fee</span>
               <span className="font-semibold">
-                ₹{bookingData.price || 1600}
+                ₹{bookingData.amount || bookingData.price || 1600}
               </span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -210,7 +506,7 @@ export default function Step3ConfirmBooking({
             <div className="flex items-center justify-between py-3 bg-[#034B44]/5 rounded-lg px-3">
               <span className="font-bold text-[#034B44]">Total Amount</span>
               <span className="font-bold text-2xl text-[#034B44]">
-                ₹{bookingData.price || 1600}
+                ₹{bookingData.amount || bookingData.price || 1600}
               </span>
             </div>
           </div>
@@ -268,12 +564,19 @@ export default function Step3ConfirmBooking({
 
       {/* Footer - Confirm Payment Button */}
       <div className="p-4 border-t border-[#a7c4f2]/30 bg-white sticky bottom-0">
+        {error && (
+          <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-red-800">{error}</p>
+          </div>
+        )}
         <button
           onClick={handleConfirmPayment}
-          className="w-full py-4 bg-[#034B44] text-white font-bold rounded-full hover:bg-[#046e63] transition-all shadow-lg flex items-center justify-center gap-2 text-lg"
+          disabled={!fullName.trim()}
+          className="w-full py-4 bg-[#034B44] text-white font-bold rounded-full hover:bg-[#046e63] transition-all shadow-lg flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <CreditCard className="w-5 h-5" />
-          Confirm & Pay ₹{bookingData.price || 1600}
+          Confirm & Pay ₹{bookingData.amount || bookingData.price || 1600}
         </button>
         <p className="text-xs text-center text-gray-500 mt-3">
           By confirming, you agree to our terms and conditions

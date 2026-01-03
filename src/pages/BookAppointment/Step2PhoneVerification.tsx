@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2, User, Mail } from "lucide-react";
+import authService from "../../services/authService";
 
 interface Step2PhoneVerificationProps {
   bookingData: any;
@@ -25,7 +26,7 @@ export default function Step2PhoneVerification({
     "",
   ]);
   const [error, setError] = useState("");
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
   // Refs for OTP input boxes
@@ -41,17 +42,10 @@ export default function Step2PhoneVerification({
   };
 
   /**
-   * Generate a random 6-digit OTP
+   * Handle OTP send request - PRODUCTION MODE
+   * Sends OTP via WhatsApp using production endpoint
    */
-  const generateRandomOTP = (): string => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
-  /**
-   * Handle OTP send request (Mock/Hardcoded)
-   * Simulates sending OTP and auto-fills it
-   */
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     // Validate phone number format
     if (!validatePhone(phone)) {
       setError("Please enter a valid 10-digit mobile number");
@@ -59,45 +53,31 @@ export default function Step2PhoneVerification({
     }
 
     setError("");
-    setOtpSent(true);
+    setIsLoading(true);
 
-    // Generate random OTP
-    const randomOTP = generateRandomOTP();
+    try {
+      const formattedPhone = `91${phone}`; // Add country code
 
-    // Auto-fill OTP after a short delay (simulating SMS arrival)
-    setTimeout(() => {
-      setIsAutoFilling(true);
-      const digits = randomOTP.split("");
+      // PRODUCTION: Call production endpoint via authService
+      const response = await authService.sendOTP(formattedPhone);
 
-      // Fill digits one by one with animation
-      digits.forEach((digit, index) => {
-        setTimeout(() => {
-          setOtpDigits((prev) => {
-            const newDigits = [...prev];
-            newDigits[index] = digit;
-            return newDigits;
-          });
+      setOtpSent(true);
+      setError("");
 
-          // Focus next input
-          if (index < 5 && otpRefs.current[index + 1]) {
-            otpRefs.current[index + 1]?.focus();
-          }
-        }, index * 150); // 150ms delay between each digit
-      });
-
-      // After all digits are filled, auto-verify
-      setTimeout(() => {
-        setIsAutoFilling(false);
-        handleVerifyOtp(randomOTP);
-      }, digits.length * 150 + 300);
-    }, 800); // Wait 800ms before starting auto-fill
+      // Show success message
+      console.log("OTP sent successfully via WhatsApp");
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
-   * Handle OTP verification (Mock/Hardcoded)
-   * Simulates verification and proceeds to next step
+   * Handle OTP verification - Verify OTP and authenticate user
+   * Get auth token and store it for booking
    */
-  const handleVerifyOtp = (otpValue?: string) => {
+  const handleVerifyOtp = async (otpValue?: string) => {
     const otpToVerify = otpValue || otpDigits.join("");
 
     if (otpToVerify.length !== 6) {
@@ -106,24 +86,37 @@ export default function Step2PhoneVerification({
     }
 
     setError("");
-    setIsVerified(true);
+    setIsLoading(true);
 
-    // Mock user data
-    const mockUserName = "Patient User";
-    const formattedPhone = `+91${phone}`;
+    try {
+      const formattedPhone = `91${phone}`;
 
-    const updated = {
-      ...bookingData,
-      phone: formattedPhone,
-      userId: Math.floor(Math.random() * 10000), // Random user ID
-      userName: mockUserName,
-    };
-    setBookingData(updated);
+      // Verify OTP and get auth token (without name/email for now)
+      // Name/email will be collected on payment screen
+      const response = await authService.verifyOTP(formattedPhone, otpToVerify);
 
-    // Continue to next step after showing success
-    setTimeout(() => {
-      onContinue();
-    }, 1000);
+      setIsVerified(true);
+
+      // Store phone, OTP, and auth status in booking data
+      const updated = {
+        ...bookingData,
+        phone: `+${formattedPhone}`,
+        otp: otpToVerify,
+        authenticated: true,
+      };
+      setBookingData(updated);
+
+      // Continue to next step after showing success
+      setTimeout(() => {
+        onContinue();
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message || "Invalid OTP. Please try again.");
+      setOtpDigits(["", "", "", "", "", ""]);
+      otpRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
@@ -205,10 +198,17 @@ export default function Step2PhoneVerification({
         {!otpSent ? (
           <button
             onClick={handleSendOtp}
-            disabled={!phone}
+            disabled={!phone || isLoading}
             className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Send OTP
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Sending OTP...
+              </>
+            ) : (
+              "Send OTP"
+            )}
           </button>
         ) : (
           <>
@@ -250,7 +250,7 @@ export default function Step2PhoneVerification({
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         onPaste={handleOtpPaste}
-                        disabled={isAutoFilling}
+                        disabled={isLoading}
                         className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl outline-none transition-all ${
                           digit
                             ? "border-[#034B44] bg-[#d2fafa] text-[#034B44]"
@@ -261,18 +261,23 @@ export default function Step2PhoneVerification({
                   </div>
 
                   <p className="text-xs text-center text-gray-500 mt-2">
-                    {isAutoFilling
-                      ? "Auto-filling OTP..."
-                      : `OTP sent to +91${phone}`}
+                    OTP sent to +91{phone} via WhatsApp
                   </p>
                 </div>
 
                 <button
                   onClick={() => handleVerifyOtp()}
-                  disabled={otpDigits.join("").length !== 6 || isAutoFilling}
-                  className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={otpDigits.join("").length !== 6 || isLoading}
+                  className="w-full bg-[#1c0d54] text-white py-3 rounded-full font-semibold hover:bg-[#2a1470] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Verify & Continue
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify & Continue"
+                  )}
                 </button>
 
                 <button
@@ -281,7 +286,7 @@ export default function Step2PhoneVerification({
                     setOtpDigits(["", "", "", "", "", ""]);
                     setError("");
                   }}
-                  disabled={isAutoFilling}
+                  disabled={isLoading}
                   className="w-full text-[#1c0d54] py-2 rounded-full font-medium hover:underline disabled:opacity-50"
                 >
                   Change Phone Number

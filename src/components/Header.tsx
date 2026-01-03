@@ -84,7 +84,7 @@ const Header = () => {
             onClick={() => handleNavigate("/patientAuth")}
             className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300"
           >
-            SIGN UP
+            SIGN IN
           </button>
 
           <button
@@ -227,13 +227,6 @@ const Header = () => {
           <button
             onClick={() => handleNavigate("/patientAuth")}
             className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
-          >
-            SIGN UP
-          </button>
-
-          <button
-            onClick={() => handleNavigate("/patientAuth")}
-            className="border-2 border-[#1c0d54] text-[#1c0d54] px-6 py-2 rounded-full hover:bg-[#1c0d54] hover:text-white font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
           >
             SIGN IN
           </button>

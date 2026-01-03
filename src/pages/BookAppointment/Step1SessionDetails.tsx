@@ -139,8 +139,43 @@ export default function Step1SessionDetails({
 
   // ========== MOCK DATA STATE (No API calls) ==========
   // Mock centre and clinician - auto-set from doctor
+  // Map frontend doctor IDs to real database clinician IDs
+  const doctorToClinicianMap: Record<
+    number,
+    { clinicianId: number; centreId: number }
+  > = {
+    1: { clinicianId: 24, centreId: 1 }, // Dr. Jini K. Gopinath - Bangalore
+    2: { clinicianId: 25, centreId: 1 }, // Dr. Muhammed Sadik T.M - Bangalore
+    3: { clinicianId: 26, centreId: 1 }, // Dr. Prajwal Devurkar - Bangalore
+    4: { clinicianId: 27, centreId: 1 }, // Ashir Sahal K. T - Bangalore
+    5: { clinicianId: 28, centreId: 1 }, // Hridya V M - Bangalore
+    6: { clinicianId: 29, centreId: 1 }, // Abhinand P.S - Bangalore
+    7: { clinicianId: 30, centreId: 1 }, // Dr. Srinivas Reddy - Bangalore
+    8: { clinicianId: 31, centreId: 1 }, // Shamroz Abdu - Bangalore
+    9: { clinicianId: 32, centreId: 1 }, // Mauli Rastogi - Bangalore
+    10: { clinicianId: 33, centreId: 1 }, // Ajay Siby - Bangalore
+    11: { clinicianId: 34, centreId: 1 }, // Dr. Miller - Bangalore
+    12: { clinicianId: 35, centreId: 1 }, // Naufal - Bangalore
+    13: { clinicianId: 36, centreId: 1 }, // Dr. Vishakh - Bangalore
+    14: { clinicianId: 37, centreId: 1 }, // Jerry - Bangalore
+    15: { clinicianId: 38, centreId: 1 }, // Yashaswini - Bangalore
+    16: { clinicianId: 39, centreId: 1 }, // Lincy - Bangalore
+    17: { clinicianId: 40, centreId: 2 }, // Dr. Thomas - Kochi
+    18: { clinicianId: 41, centreId: 2 }, // Sruthi - Kochi
+    19: { clinicianId: 42, centreId: 2 }, // Dr. Sangeetha - Kochi
+    20: { clinicianId: 43, centreId: 2 }, // Dr. Anu - Kochi
+    21: { clinicianId: 44, centreId: 2 }, // Anet - Kochi
+    22: { clinicianId: 45, centreId: 2 }, // Ria - Kochi
+    23: { clinicianId: 46, centreId: 3 }, // Dr. Dhruvi - Mumbai
+  };
+
+  const realIds = doctorToClinicianMap[doctor.id] || {
+    clinicianId: 24,
+    centreId: 1,
+  };
+
   const [selectedCentre] = useState<Centre | null>({
-    id: doctor.id,
+    id: realIds.centreId,
     name: `Mibo ${doctor.location}`,
     city: doctor.location.toLowerCase() as any,
     address_line_1: `${doctor.location} Centre`,
@@ -151,12 +186,12 @@ export default function Step1SessionDetails({
   });
 
   const [selectedClinician] = useState<Clinician | null>({
-    id: doctor.id,
+    id: realIds.clinicianId,
     user_id: doctor.id,
     full_name: doctor.name,
     phone: "+919876543210",
     email: null,
-    primary_centre_id: doctor.id,
+    primary_centre_id: realIds.centreId,
     primary_centre_name: `Mibo ${doctor.location}`,
     specialization: doctor.designation,
     registration_number: null,

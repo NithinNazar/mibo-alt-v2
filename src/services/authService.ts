@@ -3,7 +3,7 @@
  *
  * This service handles patient authentication via phone OTP (One-Time Password).
  * It manages the complete authentication flow:
- * 1. Send OTP to patient's phone number
+ * 1. Send OTP to patient's phone number via WhatsApp
  * 2. Verify OTP and receive authentication tokens
  * 3. Store tokens and user data in localStorage
  * 4. Provide authentication state helpers
@@ -23,10 +23,9 @@ import apiClient from "./api";
  */
 interface SendOTPResponse {
   success: boolean;
-  message: string;
   data: {
-    phone: string;
-    expiresIn: number; // OTP expiry time in seconds
+    message: string;
+    isNewUser: boolean;
   };
 }
 
@@ -35,14 +34,19 @@ interface SendOTPResponse {
  */
 interface LoginResponse {
   success: boolean;
-  message: string;
   data: {
     user: {
       id: number;
-      full_name: string;
       phone: string;
+      full_name: string;
       email: string | null;
-      user_type: "PATIENT";
+      userType: "PATIENT";
+    };
+    patient: {
+      id: number;
+      date_of_birth: Date | null;
+      gender: string | null;
+      blood_group: string | null;
     };
     accessToken: string;
     refreshToken: string;
@@ -57,7 +61,8 @@ export interface AuthUser {
   full_name: string;
   phone: string;
   email: string | null;
-  user_type: "PATIENT";
+  userType: "PATIENT";
+  patientId: number;
 }
 
 /**
@@ -68,30 +73,36 @@ export interface AuthUser {
  */
 class AuthService {
   /**
-   * Send OTP to patient's phone number
+   * Send OTP to patient's phone number via WhatsApp
    *
    * This initiates the authentication flow by sending a 6-digit OTP
-   * to the provided phone number via SMS. The OTP is valid for a limited
-   * time (typically 5-10 minutes).
+   * to the provided phone number via WhatsApp (using Gallabox).
+   * The OTP is valid for 10 minutes.
    *
-   * @param phone - 10-digit Indian mobile number (e.g., "9876543210")
-   * @returns Promise with OTP send confirmation including expiry time
-   * @throws {AxiosError} If phone number is invalid or SMS service fails
+   * @param phone - Phone number with country code (e.g., "919876543210")
+   * @returns Promise with OTP send confirmation
+   * @throws {AxiosError} If phone number is invalid or WhatsApp service fails
    *
    * @example
    * ```typescript
    * try {
-   *   const response = await authService.sendOTP("9876543210");
-   *   console.log(`OTP sent! Expires in ${response.data.expiresIn} seconds`);
+   *   const response = await authService.sendOTP("919876543210");
+   *   console.log(`OTP sent via WhatsApp!`);
+   *   if (response.data.isNewUser) {
+   *     console.log("New user - will need to provide name and email");
+   *   }
    * } catch (error) {
    *   console.error("Failed to send OTP:", error.response?.data?.message);
    * }
    * ```
    */
   async sendOTP(phone: string): Promise<SendOTPResponse> {
-    const response = await apiClient.post<SendOTPResponse>("/auth/send-otp", {
-      phone,
-    });
+    const response = await apiClient.post<SendOTPResponse>(
+      "/patient-auth/send-otp",
+      {
+        phone,
+      }
+    );
     return response.data;
   }
 
@@ -104,15 +115,24 @@ class AuthService {
    * - User data is stored in localStorage
    * - Patient is automatically authenticated for subsequent API calls
    *
-   * @param phone - 10-digit phone number (must match the number OTP was sent to)
-   * @param otp - 6-digit OTP code received via SMS
+   * For new users, full_name is required. Email is optional.
+   *
+   * @param phone - Phone number with country code (must match the number OTP was sent to)
+   * @param otp - 6-digit OTP code received via WhatsApp
+   * @param full_name - Full name (required for new users)
+   * @param email - Email address (optional)
    * @returns Promise with user data and authentication tokens
    * @throws {AxiosError} If OTP is invalid, expired, or phone number doesn't match
    *
    * @example
    * ```typescript
    * try {
-   *   const response = await authService.verifyOTP("9876543210", "123456");
+   *   const response = await authService.verifyOTP(
+   *     "919876543210",
+   *     "123456",
+   *     "John Doe",
+   *     "john@example.com"
+   *   );
    *   console.log(`Welcome ${response.data.user.full_name}!`);
    *   // User is now authenticated, tokens are stored automatically
    * } catch (error) {
@@ -120,23 +140,36 @@ class AuthService {
    * }
    * ```
    */
-  async verifyOTP(phone: string, otp: string): Promise<LoginResponse> {
+  async verifyOTP(
+    phone: string,
+    otp: string,
+    full_name?: string,
+    email?: string
+  ): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
-      "/auth/login/phone-otp",
+      "/patient-auth/verify-otp",
       {
         phone,
         otp,
+        full_name,
+        email,
       }
     );
 
     // Extract tokens and user data from response
-    const { accessToken, refreshToken, user } = response.data.data;
+    const { accessToken, refreshToken, user, patient } = response.data.data;
 
     // Store authentication data in localStorage
     // These will be automatically used by the API client for subsequent requests
     localStorage.setItem("mibo_access_token", accessToken);
     localStorage.setItem("mibo_refresh_token", refreshToken);
-    localStorage.setItem("mibo_user", JSON.stringify(user));
+    localStorage.setItem(
+      "mibo_user",
+      JSON.stringify({
+        ...user,
+        patientId: patient.id,
+      })
+    );
 
     return response.data;
   }
@@ -182,7 +215,7 @@ class AuthService {
    * const user = authService.getCurrentUser();
    * if (user) {
    *   console.log(`Logged in as: ${user.full_name}`);
-   *   console.log(`Patient ID: ${user.id}`);
+   *   console.log(`Patient ID: ${user.patientId}`);
    * } else {
    *   console.log("No user logged in");
    * }
@@ -271,8 +304,8 @@ class AuthService {
  * // Send OTP
  * await authService.sendOTP(phoneNumber);
  *
- * // Verify OTP
- * await authService.verifyOTP(phoneNumber, otpCode);
+ * // Verify OTP (with name for new users)
+ * await authService.verifyOTP(phoneNumber, otpCode, "John Doe", "john@example.com");
  *
  * // Check authentication
  * if (authService.isAuthenticated()) {
