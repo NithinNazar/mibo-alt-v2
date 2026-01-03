@@ -60,19 +60,11 @@ interface RazorpaySuccessResponse {
 }
 
 /**
- * Razorpay instance interface
- */
-interface RazorpayInstance {
-  open: () => void;
-  on: (event: string, handler: (response: any) => void) => void;
-}
-
-/**
  * Extend Window interface to include Razorpay
  */
 declare global {
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+    Razorpay: any;
   }
 }
 

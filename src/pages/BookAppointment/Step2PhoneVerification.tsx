@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { ArrowLeft, CheckCircle, Loader2, User, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import authService from "../../services/authService";
 
 interface Step2PhoneVerificationProps {
@@ -59,7 +59,7 @@ export default function Step2PhoneVerification({
       const formattedPhone = `91${phone}`; // Add country code
 
       // PRODUCTION: Call production endpoint via authService
-      const response = await authService.sendOTP(formattedPhone);
+      await authService.sendOTP(formattedPhone);
 
       setOtpSent(true);
       setError("");
@@ -93,7 +93,7 @@ export default function Step2PhoneVerification({
 
       // Verify OTP and get auth token (without name/email for now)
       // Name/email will be collected on payment screen
-      const response = await authService.verifyOTP(formattedPhone, otpToVerify);
+      await authService.verifyOTP(formattedPhone, otpToVerify);
 
       setIsVerified(true);
 

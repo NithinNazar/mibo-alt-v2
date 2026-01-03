@@ -11,7 +11,6 @@ import {
   User,
   Mail,
 } from "lucide-react";
-import authService from "../../services/authService";
 
 interface Step3ConfirmBookingProps {
   bookingData: any;
@@ -19,13 +18,6 @@ interface Step3ConfirmBookingProps {
 }
 
 type PaymentStep = "review" | "processing" | "success" | "failed";
-
-// Razorpay types
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 export default function Step3ConfirmBooking({
   bookingData,

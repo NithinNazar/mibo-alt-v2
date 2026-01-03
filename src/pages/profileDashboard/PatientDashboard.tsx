@@ -13,9 +13,7 @@ import {
   ArrowRight,
   CheckCircle2,
   History,
-  FileText,
   Activity,
-  RefreshCcw,
   Phone,
   XCircle,
   AlertTriangle,
@@ -26,9 +24,9 @@ interface Appointment {
   id: number;
   clinician_name: string;
   centre_name: string;
-  appointment_type: "IN_PERSON" | "ONLINE";
+  appointment_type: string;
   scheduled_start_at: string;
-  scheduled_end_at: string;
+  scheduled_end_at?: string;
   duration_minutes?: number;
   status: string;
   consultation_fee?: number;
@@ -42,11 +40,11 @@ interface DashboardData {
     phone: string;
     email: string | null;
   };
-  statistics: {
-    totalAppointments: number;
-    completedAppointments: number;
-    upcomingAppointments: number;
-    totalSpent: number;
+  statistics?: {
+    totalAppointments?: number;
+    completedAppointments?: number;
+    upcomingAppointments?: number;
+    totalSpent?: number;
   };
   upcomingAppointments: Appointment[];
   recentAppointments: Appointment[];
@@ -80,7 +78,7 @@ export default function PatientDashboard() {
       const response = await patientDashboardService.getDashboard();
 
       if (response.success) {
-        setDashboardData(response.data);
+        setDashboardData(response.data as DashboardData);
       } else {
         setError("Failed to load dashboard data");
       }
@@ -197,19 +195,22 @@ export default function PatientDashboard() {
               You do not have any upcoming sessions scheduled. Book a session
               with a clinician to get started.
             </p>
-            {dashboardData?.statistics.totalAppointments > 0 && (
-              <p className="text-sm text-gray-600 mb-4">
-                You have {dashboardData.statistics.totalAppointments} past
-                appointment
-                {dashboardData.statistics.totalAppointments !== 1 ? "s" : ""}.{" "}
-                <button
-                  onClick={() => navigate("/appointments")}
-                  className="text-[#034B44] font-medium hover:underline"
-                >
-                  View history
-                </button>
-              </p>
-            )}
+            {dashboardData?.statistics?.totalAppointments &&
+              dashboardData.statistics.totalAppointments > 0 && (
+                <p className="text-sm text-gray-600 mb-4">
+                  You have {dashboardData.statistics.totalAppointments} past
+                  appointment
+                  {dashboardData.statistics.totalAppointments !== 1
+                    ? "s"
+                    : ""}.{" "}
+                  <button
+                    onClick={() => navigate("/appointments")}
+                    className="text-[#034B44] font-medium hover:underline"
+                  >
+                    View history
+                  </button>
+                </p>
+              )}
             <button
               onClick={() => navigate("/experts")}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#034B44] text-white rounded-full text-sm font-medium hover:bg-[#046e63] transition"
@@ -223,11 +224,57 @@ export default function PatientDashboard() {
     );
   }
 
-  // Get the next upcoming appointment
-  const nextAppointment = dashboardData.upcomingAppointments[0];
-  const appointmentDate = new Date(nextAppointment.scheduled_start_at);
-  const durationMinutes = nextAppointment.duration_minutes || 50;
+  // Show empty state if no upcoming appointments
+  if (
+    !dashboardData ||
+    !dashboardData.upcomingAppointments ||
+    dashboardData.upcomingAppointments.length === 0
+  ) {
+    return (
+      <>
+        <ProfileHeader />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="text-center max-w-md">
+            <div className="mb-6">
+              <CalendarDays className="w-20 h-20 mx-auto text-gray-300" />
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              No current appointments
+            </h2>
+            <p className="text-gray-500 text-sm mb-6">
+              You do not have any upcoming sessions scheduled. Book a session
+              with a clinician to get started.
+            </p>
+            {dashboardData?.statistics?.totalAppointments &&
+              dashboardData.statistics.totalAppointments > 0 && (
+                <p className="text-sm text-gray-600 mb-4">
+                  You have {dashboardData.statistics.totalAppointments} past
+                  appointment
+                  {dashboardData.statistics.totalAppointments !== 1
+                    ? "s"
+                    : ""}.{" "}
+                  <button
+                    onClick={() => navigate("/appointments")}
+                    className="text-[#034B44] font-medium hover:underline"
+                  >
+                    View history
+                  </button>
+                </p>
+              )}
+            <button
+              onClick={() => navigate("/experts")}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#034B44] text-white rounded-full text-sm font-medium hover:bg-[#046e63] transition"
+            >
+              Book an appointment
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
+  // Render dashboard with appointments
   return (
     <>
       <ProfileHeader />
@@ -243,7 +290,7 @@ export default function PatientDashboard() {
           >
             <div>
               <h1 className="text-3xl font-semibold text-gray-800">
-                Welcome back, {dashboardData.patient.name}
+                Welcome back, {dashboardData?.patient.name}
               </h1>
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
                 <Phone size={16} className="text-[#034B44]" />
@@ -258,11 +305,11 @@ export default function PatientDashboard() {
             <div className="flex flex-wrap gap-3">
               <div className="px-4 py-2 rounded-full bg-green-50 text-green-700 text-xs font-medium inline-flex items-center gap-2">
                 <CheckCircle2 size={16} />
-                {dashboardData.statistics.upcomingAppointments} upcoming
+                {dashboardData?.statistics?.upcomingAppointments || 0} upcoming
               </div>
               <div className="px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium inline-flex items-center gap-2">
                 <Activity size={16} />
-                {dashboardData.statistics.totalAppointments} total
+                {dashboardData?.statistics?.totalAppointments || 0} total
               </div>
             </div>
           </motion.div>
@@ -436,10 +483,11 @@ export default function PatientDashboard() {
                 <History size={16} className="text-gray-400" />
               </div>
               <p className="text-3xl font-bold text-gray-800">
-                {dashboardData.statistics.totalAppointments}
+                {dashboardData?.statistics?.totalAppointments || 0}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {dashboardData.statistics.completedAppointments} completed
+                {dashboardData?.statistics?.completedAppointments || 0}{" "}
+                completed
               </p>
             </div>
 
@@ -451,7 +499,7 @@ export default function PatientDashboard() {
                 <CreditCard size={16} className="text-gray-400" />
               </div>
               <p className="text-3xl font-bold text-gray-800">
-                ₹{dashboardData.statistics.totalSpent.toLocaleString()}
+                ₹{(dashboardData?.statistics?.totalSpent || 0).toLocaleString()}
               </p>
               <p className="text-xs text-gray-500 mt-1">All time</p>
             </div>

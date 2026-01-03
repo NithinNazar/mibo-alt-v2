@@ -6,7 +6,6 @@ import authService from "../../services/authService";
 
 const PatientAuth = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"phone">("phone"); // Only phone auth now
 
   // Phone + OTP credentials
   const [phone, setPhone] = useState("");
@@ -87,7 +86,7 @@ const PatientAuth = () => {
     try {
       // Add country code 91 for India
       const phoneWithCountryCode = `91${phone}`;
-      const response = await authService.verifyOTP(
+      await authService.verifyOTP(
         phoneWithCountryCode,
         otp,
         fullName.trim() || undefined,
