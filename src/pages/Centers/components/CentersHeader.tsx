@@ -66,6 +66,11 @@ const CentersHeader = () => {
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300">
             <MessageCircle size={20} />
           </button>
+          <Link to="/patientAuth">
+            <button className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300">
+              SIGN IN
+            </button>
+          </Link>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-[#18356C] hover:text-[#34b9a5] text-3xl transition-colors duration-300"
@@ -124,12 +129,7 @@ const CentersHeader = () => {
             </button>
           </Link>
 
-          <Link to="/signup">
-            <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
-              SIGN UP
-            </button>
-          </Link>
-          <Link to="/signin">
+          <Link to="/patientAuth">
             <button className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold text-sm">
               SIGN IN
             </button>
