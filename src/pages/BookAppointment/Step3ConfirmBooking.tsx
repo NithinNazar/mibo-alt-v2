@@ -63,7 +63,9 @@ export default function Step3ConfirmBooking({
 
       // Update user profile with name and email
       try {
-        await fetch("http://localhost:5000/api/patient-auth/update-profile", {
+        const apiBaseUrl =
+          import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+        await fetch(`${apiBaseUrl}/patient-auth/update-profile`, {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -97,17 +99,16 @@ export default function Step3ConfirmBooking({
       console.log("📤 Sending appointment payload:", appointmentPayload);
 
       // Step 1: Create appointment
-      const appointmentResponse = await fetch(
-        "http://localhost:5000/api/booking/create",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(appointmentPayload),
-        }
-      );
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+      const appointmentResponse = await fetch(`${apiBaseUrl}/booking/create`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(appointmentPayload),
+      });
 
       const appointmentData = await appointmentResponse.json();
       if (!appointmentResponse.ok) {
@@ -122,7 +123,7 @@ export default function Step3ConfirmBooking({
 
       // Step 2: Create payment order
       const paymentResponse = await fetch(
-        "http://localhost:5000/api/payments/create-order",
+        `${apiBaseUrl}/payments/create-order`,
         {
           method: "POST",
           headers: {
@@ -186,23 +187,22 @@ export default function Step3ConfirmBooking({
         setPaymentStep("processing");
         try {
           const accessToken = localStorage.getItem("mibo_access_token");
+          const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
-          const verifyResponse = await fetch(
-            "http://localhost:5000/api/payments/verify",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                appointmentId: appointmentId,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }),
-            }
-          );
+          const verifyResponse = await fetch(`${apiBaseUrl}/payments/verify`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              appointmentId: appointmentId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            }),
+          });
 
           const verifyData = await verifyResponse.json();
           if (!verifyResponse.ok) {
