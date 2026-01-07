@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -22,6 +22,13 @@ const PatientAuth = () => {
   const [success, setSuccess] = useState("");
 
   const otpRefs = useRef<HTMLInputElement[]>([]);
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      navigate("/profileDashboard", { replace: true });
+    }
+  }, [navigate]);
 
   /**
    * Send OTP via WhatsApp

@@ -108,9 +108,11 @@ export default function PatientDashboard() {
 
     try {
       const accessToken = localStorage.getItem("mibo_access_token");
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
       const response = await fetch(
-        `http://localhost:5000/api/patient/appointments/${selectedAppointment.id}/cancel`,
+        `${apiBaseUrl}/patient/appointments/${selectedAppointment.id}/cancel`,
         {
           method: "POST",
           headers: {
