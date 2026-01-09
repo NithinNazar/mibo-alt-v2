@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"; //  Modern imports
+import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -103,86 +103,60 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a
-                    href="#services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("services");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Adult Therapy
-                  </a>
+                  </Link>
                 </li>
-
                 <li>
-                  <a
-                    href="#services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("services");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Adult Psychiatry
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("services");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/services/in-patient"
+                    className="hover:text-[#276C72] transition"
                   >
                     Mental Health Hospital
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
-                    Children First Services
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
-                    Couples Therapy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
-                    Self-Care
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#support-services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section =
-                        document.getElementById("support-services");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
-                    Community
-                  </a>
+                    Children First Services
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#276C72] transition">
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
+                    Couples Therapy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/services/in-person"
+                    className="hover:text-[#276C72] transition"
+                  >
+                    Self-Care
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
                     Assessments
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -197,125 +171,68 @@ const Footer = () => {
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Depression
-                  </a>
+                  </Link>
                 </li>
-
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Anxiety
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Bipolar Disorder
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     OCD
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     ADHD
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Social Anxiety
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
-                    Women’s Mental Health
-                  </a>
+                    Women's Mental Health
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#concerns"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.getElementById("concerns");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="hover:text-[#276C72] transition cursor-pointer"
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
                   >
                     Addiction
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -326,9 +243,14 @@ const Footer = () => {
                 Professionals
               </h3>
               <ul className="space-y-2 text-sm">
-                <Link to="/experts" className="hover:text-[#276C72] transition">
-                  Therapists
-                </Link>
+                <li>
+                  <Link
+                    to="/experts"
+                    className="hover:text-[#276C72] transition"
+                  >
+                    Therapists
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/experts"

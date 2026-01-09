@@ -121,7 +121,7 @@ export default function ExpertsPage() {
       <ExpertsHeader />
 
       {/* --- INTRO TEXT --- */}
-      <div className="mt-[100px] text-center px-6 py-16">
+      <div className="mt-[100px] text-center px-6 py-8 md:py-16">
         <h1 className="text-4xl font-bold mb-4">Meet Our Experts</h1>
         <p className="text-[#034B44]/80 text-lg">
           Compassionate professionals ready to support your wellbeing.
@@ -150,7 +150,7 @@ export default function ExpertsPage() {
         </h2>
 
         {filteredDoctors.length > 0 ? (
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 snap-x snap-mandatory pl-2">
+          <div className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-6 snap-x snap-mandatory">
             {filteredDoctors.map((doc, index) => (
               <motion.div
                 key={doc.id}
@@ -163,8 +163,6 @@ export default function ExpertsPage() {
                 <DoctorCard doctor={doc} />
               </motion.div>
             ))}
-            {/* Spacer to show part of next card */}
-            <div className="flex-shrink-0 w-8" />
           </div>
         ) : (
           <div className="text-center py-12">

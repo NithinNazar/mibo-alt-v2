@@ -20,7 +20,7 @@ export default function DoctorCard({ doctor }: Props) {
       transition={{ duration: 0.4 }}
       viewport={{ once: true }}
       className="bg-[#d0f7e9]/60 border border-[#a7c4f2]/40 rounded-2xl 
-             p-4 w-[260px] h-[420px] mx-auto flex-shrink-0 flex flex-col
+             p-4 w-[240px] sm:w-[260px] h-[420px] mx-auto flex-shrink-0 flex flex-col
              hover:shadow-lg hover:scale-[1.03] transition-all duration-300"
     >
       <img

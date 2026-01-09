@@ -146,66 +146,70 @@ const Header = () => {
 
           {/* Locations Dropdown */}
           <div
-            className="relative cursor-pointer"
+            className="relative cursor-pointer group"
             onMouseEnter={() => setLocationsOpen(true)}
             onMouseLeave={() => setLocationsOpen(false)}
           >
-            <span className="hover:text-[#34b9a5] transition-all duration-300 drop-shadow-lg">
+            <span className="hover:text-[#34b9a5] transition-all duration-300 drop-shadow-lg pb-4">
               LOCATIONS ▾
             </span>
             {locationsOpen && (
-              <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-md text-black flex flex-col z-50">
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleLocationClick("/centres/bengaluru")}
-                >
-                  Bengaluru
-                </span>
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleLocationClick("/centres/kochi")}
-                >
-                  Kochi
-                </span>
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleLocationClick("/centres/mumbai")}
-                >
-                  Mumbai
-                </span>
+              <div className="absolute top-full left-0 pt-4 -mt-4 w-40 z-50">
+                <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleLocationClick("/centres/bengaluru")}
+                  >
+                    Bengaluru
+                  </span>
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleLocationClick("/centres/kochi")}
+                  >
+                    Kochi
+                  </span>
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleLocationClick("/centres/mumbai")}
+                  >
+                    Mumbai
+                  </span>
+                </div>
               </div>
             )}
           </div>
 
           {/* Services Dropdown */}
           <div
-            className="relative cursor-pointer"
+            className="relative cursor-pointer group"
             onMouseEnter={() => setServicesOpen(true)}
             onMouseLeave={() => setServicesOpen(false)}
           >
-            <span className="hover:text-[#34b9a5] transition-all duration-300 drop-shadow-lg">
+            <span className="hover:text-[#34b9a5] transition-all duration-300 drop-shadow-lg pb-4">
               SERVICES ▾
             </span>
             {servicesOpen && (
-              <div className="absolute top-full left-0 mt-2 w-44 bg-white shadow-lg rounded-md text-black flex flex-col z-50">
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleServiceClick("/services/in-patient")}
-                >
-                  In-Patient
-                </span>
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleServiceClick("/services/in-person")}
-                >
-                  In-Person
-                </span>
-                <span
-                  className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                  onClick={() => handleServiceClick("/services/online")}
-                >
-                  Online
-                </span>
+              <div className="absolute top-full left-0 pt-4 -mt-4 w-44 z-50">
+                <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/services/in-patient")}
+                  >
+                    In-Patient
+                  </span>
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/services/in-person")}
+                  >
+                    In-Person
+                  </span>
+                  <span
+                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/services/online")}
+                  >
+                    Online
+                  </span>
+                </div>
               </div>
             )}
           </div>

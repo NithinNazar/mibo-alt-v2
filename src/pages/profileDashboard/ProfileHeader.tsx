@@ -242,7 +242,7 @@ const ProfileHeader = () => {
         <div className="lg:hidden px-4 py-6 bg-[#C2D3E4] border-t border-white/20">
           <nav className="flex flex-col gap-4 text-[#18276c] font-medium">
             <Link
-              to="/book-appointment"
+              to="/experts"
               onClick={() => setMenuOpen(false)}
               className="bg-[#34b9a5] text-white px-6 py-3 mt-2 rounded-full text-center font-semibold hover:bg-[#2fa18f]"
             >

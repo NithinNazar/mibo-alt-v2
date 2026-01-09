@@ -104,16 +104,18 @@ const ExpertsHeader = () => {
               )}
 
               {item.dropdown && (
-                <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-                  {item.dropdown.map((drop) => (
-                    <Link
-                      key={drop.label}
-                      to={drop.path}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      {drop.label}
-                    </Link>
-                  ))}
+                <div className="absolute top-full left-0 pt-2 -mt-2 w-40 z-50">
+                  <div className="bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {item.dropdown.map((drop) => (
+                      <Link
+                        key={drop.label}
+                        to={drop.path}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md last:rounded-b-md"
+                      >
+                        {drop.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
