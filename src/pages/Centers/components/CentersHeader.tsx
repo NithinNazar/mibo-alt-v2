@@ -123,7 +123,7 @@ const CentersHeader = () => {
           </button>
 
           {/* New Book Appointment Button */}
-          <Link to="/book-appointment">
+          <Link to="/experts">
             <button className="bg-[#34b9a5] text-white px-6 py-2 rounded-full hover:bg-[#2fa18f] font-semibold text-sm">
               BOOK APPOINTMENT
             </button>
@@ -173,7 +173,7 @@ const CentersHeader = () => {
 
             {/* Mobile Book Appointment Button */}
             <Link
-              to="/book-appointment"
+              to="/experts"
               onClick={() => setMenuOpen(false)}
               className="bg-[#34b9a5] text-white px-6 py-3 mt-2 rounded-full text-center font-semibold hover:bg-[#2fa18f]"
             >

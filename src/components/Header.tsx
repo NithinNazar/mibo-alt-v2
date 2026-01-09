@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { Phone, MessageCircle, Menu, X } from "lucide-react";
+import { Phone, MessageCircle, Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import miboIcon from "../assets/logo1.png";
 import homeVideo from "../assets/home_video.mp4";
 import PremiumSlider from "../components/Slider";
 import MentalHealthCard from "./mentalhealth";
+import authService from "../services/authService";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [locationsOpen, setLocationsOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -17,6 +19,26 @@ const Header = () => {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
 
   const navigate = useNavigate();
+
+  // Check authentication status on mount and when localStorage changes
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(authService.isAuthenticated());
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (e.g., login/logout in another tab)
+    window.addEventListener("storage", checkAuth);
+
+    // Custom event for same-tab auth changes
+    window.addEventListener("authChange", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("authChange", checkAuth);
+    };
+  }, []);
 
   const handleLocationClick = (path: string) => {
     navigate(path);
@@ -80,12 +102,23 @@ const Header = () => {
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300">
             <MessageCircle size={20} />
           </button>
-          <button
-            onClick={() => handleNavigate("/patientAuth")}
-            className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300"
-          >
-            SIGN IN
-          </button>
+
+          {isAuthenticated ? (
+            <button
+              onClick={() => handleNavigate("/profileDashboard")}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c0d54] text-white hover:bg-[#2a1470] transition-all duration-300"
+              title="Profile"
+            >
+              <User size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={() => handleNavigate("/patientAuth")}
+              className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300"
+            >
+              SIGN IN
+            </button>
+          )}
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -105,7 +138,7 @@ const Header = () => {
         >
           {/* Book Appointment */}
           <span
-            onClick={() => handleNavigate("/book-appointment")}
+            onClick={() => handleNavigate("/experts")}
             className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 drop-shadow-lg hover:scale-105 font-semibold"
           >
             BOOK APPOINTMENT
@@ -224,12 +257,23 @@ const Header = () => {
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110">
             <MessageCircle size={18} />
           </button>
-          <button
-            onClick={() => handleNavigate("/patientAuth")}
-            className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
-          >
-            SIGN IN
-          </button>
+
+          {isAuthenticated ? (
+            <button
+              onClick={() => handleNavigate("/profileDashboard")}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c0d54] text-white hover:bg-[#2a1470] transition-all duration-300 shadow-lg hover:scale-110"
+              title="Profile"
+            >
+              <User size={18} />
+            </button>
+          ) : (
+            <button
+              onClick={() => handleNavigate("/patientAuth")}
+              className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
+            >
+              SIGN IN
+            </button>
+          )}
         </div>
       </div>
 
@@ -239,7 +283,7 @@ const Header = () => {
           <nav className="flex flex-col gap-4 text-[#18276c] font-medium mb-6">
             {/* Book Appointment */}
             <span
-              onClick={() => handleNavigate("/book-appointment")}
+              onClick={() => handleNavigate("/experts")}
               className="py-2 px-2 bg-[#34b9a5] text-white rounded-full text-center cursor-pointer hover:bg-[#2a857f] transition-colors duration-300"
             >
               BOOK APPOINTMENT

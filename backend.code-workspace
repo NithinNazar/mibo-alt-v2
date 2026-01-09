@@ -1,0 +1,16 @@
+{
+  "folders": [
+	{
+		"path": "../../../backend_mibo/backend"
+	},
+	{
+		"path": "."
+	},
+	{
+		"path": "../../../admin_mibo/mibo-admin"
+	}
+],
+"settings": {
+	"typescript.autoClosingTags": false
+}
+}

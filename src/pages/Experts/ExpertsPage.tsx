@@ -150,19 +150,21 @@ export default function ExpertsPage() {
         </h2>
 
         {filteredDoctors.length > 0 ? (
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 snap-x snap-mandatory">
+          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 snap-x snap-mandatory pl-2">
             {filteredDoctors.map((doc, index) => (
               <motion.div
                 key={doc.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="snap-start flex-shrink-0"
               >
                 <DoctorCard doctor={doc} />
               </motion.div>
             ))}
+            {/* Spacer to show part of next card */}
+            <div className="flex-shrink-0 w-8" />
           </div>
         ) : (
           <div className="text-center py-12">

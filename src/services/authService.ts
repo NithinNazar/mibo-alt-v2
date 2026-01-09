@@ -171,6 +171,9 @@ class AuthService {
       })
     );
 
+    // Dispatch custom event to notify components of auth change
+    window.dispatchEvent(new Event("authChange"));
+
     return response.data;
   }
 
@@ -264,6 +267,9 @@ class AuthService {
     localStorage.removeItem("mibo_access_token");
     localStorage.removeItem("mibo_refresh_token");
     localStorage.removeItem("mibo_user");
+
+    // Dispatch custom event to notify components of auth change
+    window.dispatchEvent(new Event("authChange"));
   }
 
   /**
