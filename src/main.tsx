@@ -40,7 +40,7 @@ const App = () => {
 
   return (
     <StrictMode>
-      <Router basename={import.meta.env.VITE_BASE_PATH || "/mibo-alt-v2/"}>
+      <Router basename={import.meta.env.VITE_BASE_PATH || "/"}>
         <ScrollToTop />
 
         {/* Splash Screen */}

@@ -1,0 +1,88 @@
+========================================
+AWS ENVIRONMENT VARIABLES - FRONTEND
+========================================
+
+REQUIRED FOR DEPLOYMENT:
+========================================
+
+VITE_API_BASE_URL=https://your-backend-url.elasticbeanstalk.com/api
+
+========================================
+OPTIONAL (Not Currently Used):
+========================================
+
+VITE_RAZORPAY_KEY_ID=rzp_live_xxxxx
+
+========================================
+IMPORTANT NOTES:
+========================================
+
+1. VITE_API_BASE_URL:
+   - Must include /api suffix
+   - Must use HTTPS in production
+   - Must match your actual backend URL
+   - No trailing slash
+   
+   Examples:
+   - https://mibo-backend.eu-north-1.elasticbeanstalk.com/api
+   - https://api.mibo.com/api
+   - https://backend.mibo.com/api
+
+2. VITE_RAZORPAY_KEY_ID:
+   - Currently NOT used in frontend code
+   - All Razorpay operations handled by backend
+   - Can be omitted
+   - If needed in future, use LIVE key (rzp_live_...)
+
+3. Environment Variables in Vite:
+   - Variables are embedded at BUILD TIME
+   - Cannot be changed after build
+   - Must rebuild if you change variables
+   
+   Workflow:
+   a. Set variables in .env file
+   b. Run: npm run build
+   c. Deploy dist/ folder
+   d. If API URL changes → Rebuild and redeploy
+
+4. CORS Configuration:
+   - Backend must allow requests from frontend domain
+   - Update backend CORS_ORIGIN environment variable
+   
+   Example:
+   CORS_ORIGIN=https://main.d1234567890.amplifyapp.com
+
+========================================
+DEPLOYMENT WORKFLOW:
+========================================
+
+1. Update .env file:
+   VITE_API_BASE_URL=https://your-backend-url.elasticbeanstalk.com/api
+
+2. Build:
+   npm run build
+
+3. Deploy dist/ folder to AWS
+
+4. Update backend CORS:
+   CORS_ORIGIN=https://your-frontend-domain.com
+
+5. Test all features
+
+========================================
+PLATFORM-SPECIFIC SETUP:
+========================================
+
+AWS AMPLIFY:
+- Set in: App Settings > Environment variables
+- Rebuilds automatically on git push
+
+S3 + CLOUDFRONT:
+- Set in .env file before build
+- Must rebuild and redeploy if changed
+
+ELASTIC BEANSTALK:
+- Set via: eb setenv VITE_API_BASE_URL=...
+- Or via Console: Configuration > Software > Environment properties
+
+========================================
