@@ -127,14 +127,14 @@ export default function Step1SessionDetails({
     initialAvailableToday[todayKey] !== "unavailable";
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    initialDate ?? (isTodayAvailable ? today : null)
+    initialDate ?? (isTodayAvailable ? today : null),
   );
   const [selectedTime, setSelectedTime] = useState<string>(
-    bookingData.time || ""
+    bookingData.time || "",
   );
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<Date>(
-    startOfMonth(initialDate ?? new Date())
+    startOfMonth(initialDate ?? new Date()),
   );
 
   // ========== MOCK DATA STATE (No API calls) ==========
@@ -198,6 +198,9 @@ export default function Step1SessionDetails({
     experience_years: parseInt(doctor.experience) || 5,
     consultation_fee: 1600,
     bio: null,
+    qualification: null,
+    expertise: [],
+    languages: [],
     is_active: true,
   });
 
@@ -208,7 +211,7 @@ export default function Step1SessionDetails({
   /** Month availability map - for calendar UI */
   const availabilityMap = useMemo(
     () => makeMonthAvailability(calendarMonth),
-    [calendarMonth]
+    [calendarMonth],
   );
 
   // ========== GENERATE MOCK TIME SLOTS ==========
@@ -315,7 +318,7 @@ export default function Step1SessionDetails({
    */
   const availablePeriods = useMemo(() => {
     return Object.keys(slotsByPeriod).filter(
-      (period) => slotsByPeriod[period].length > 0
+      (period) => slotsByPeriod[period].length > 0,
     );
   }, [slotsByPeriod]);
 
@@ -343,8 +346,8 @@ export default function Step1SessionDetails({
         av === "unavailable"
           ? 0
           : av === "few"
-          ? ((d.getDate() % 3) + 1) * 2
-          : ((d.getDate() % 4) + 2) * 2; // 2–8
+            ? ((d.getDate() % 3) + 1) * 2
+            : ((d.getDate() % 4) + 2) * 2; // 2–8
       days.push({ date: d, key, availability: av, slots });
     }
     return days;
@@ -380,8 +383,8 @@ export default function Step1SessionDetails({
       selectedMode === "Video call"
         ? "ONLINE"
         : selectedMode === "Phone call"
-        ? "PHONE"
-        : "IN_PERSON";
+          ? "PHONE"
+          : "IN_PERSON";
 
     setBookingData({
       ...bookingData,
@@ -603,8 +606,8 @@ export default function Step1SessionDetails({
                 mode === "In-person"
                   ? MapPin
                   : mode === "Video call"
-                  ? Video
-                  : Phone;
+                    ? Video
+                    : Phone;
               const isSelected = selectedMode === mode;
               return (
                 <button
@@ -743,8 +746,8 @@ export default function Step1SessionDetails({
                   period === "Morning"
                     ? Sunrise
                     : period === "Afternoon"
-                    ? Sun
-                    : Moon;
+                      ? Sun
+                      : Moon;
                 const slots = slotsByPeriod[period];
 
                 return (
@@ -993,8 +996,8 @@ function CalendarMonthGrid({
                   status === "available"
                     ? MIBO.primary
                     : status === "few"
-                    ? MIBO.accent
-                    : MIBO.gray,
+                      ? MIBO.accent
+                      : MIBO.gray,
                 opacity: disabled ? 0.6 : 1,
               }}
             />
