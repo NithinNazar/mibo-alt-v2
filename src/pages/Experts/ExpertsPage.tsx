@@ -7,10 +7,14 @@ import DoctorCard from "./Components/DoctorCard";
 import Testimonials from "./Components/Testimonials";
 import CompStatContact from "./Components/CompStatContact";
 import ExpertsFooter from "./Components/ExpertsFooter";
-import { doctors } from "./data/doctors";
+import { doctors as staticDoctors } from "./data/doctors";
+import clinicianService from "../../services/clinicianService";
+import type { Doctor } from "./data/doctors";
 
 export default function ExpertsPage() {
   const [isReady, setIsReady] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All Experts");
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
@@ -24,9 +28,69 @@ export default function ExpertsPage() {
   useEffect(() => {
     // Scroll instantly to top before showing content
     window.scrollTo({ top: 0, behavior: "instant" });
-    const timer = setTimeout(() => setIsReady(true), 100);
-    return () => clearTimeout(timer);
+    fetchClinicians();
   }, []);
+
+  const fetchClinicians = async () => {
+    try {
+      setLoading(true);
+      const clinicians = await clinicianService.getClinicians();
+
+      if (clinicians.length === 0) {
+        // Fallback to static data if no clinicians in database
+        console.log("No clinicians in database, using static data");
+        setDoctors(staticDoctors);
+      } else {
+        // Transform backend data to match Doctor interface
+        const transformedDoctors: Doctor[] = clinicians.map((c: any) => ({
+          id: parseInt(c.id),
+          name: c.fullName || c.full_name,
+          qualification: c.qualification || "",
+          designation: c.designation || c.specialization,
+          experience: `${c.yearsOfExperience || c.years_of_experience || 0}+ years`,
+          expertise: c.expertise || [],
+          image:
+            c.profilePictureUrl ||
+            c.profile_picture_url ||
+            "/default-avatar.png",
+          location: (c.centreName || c.centre_name || "Bangalore") as
+            | "Bangalore"
+            | "Kochi"
+            | "Mumbai",
+          language: c.languages || ["English"],
+          price: `₹${c.consultationFee || c.consultation_fee || 0}/session`,
+          sessionTypes: getSessionTypes(
+            c.consultationModes || c.consultation_modes || [],
+          ),
+        }));
+
+        setDoctors(transformedDoctors);
+        console.log(
+          `Loaded ${transformedDoctors.length} clinicians from backend`,
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch clinicians, using static data:", error);
+      // Fallback to static data on error
+      setDoctors(staticDoctors);
+    } finally {
+      setLoading(false);
+      const timer = setTimeout(() => setIsReady(true), 100);
+      return () => clearTimeout(timer);
+    }
+  };
+
+  const getSessionTypes = (modes: string[]) => {
+    if (modes.includes("ONLINE") && modes.includes("IN_PERSON")) {
+      return "In-person & Online sessions";
+    } else if (modes.includes("ONLINE")) {
+      return "Online sessions";
+    } else if (modes.includes("IN_PERSON")) {
+      return "In-person sessions";
+    } else {
+      return "In-person & Online sessions";
+    }
+  };
 
   /**
    * Filter doctors based on category and selected filters
@@ -74,7 +138,7 @@ export default function ExpertsPage() {
     // Filter by Location
     if (selectedFilters.Location.length > 0) {
       filtered = filtered.filter((doc) =>
-        selectedFilters.Location.includes(doc.location)
+        selectedFilters.Location.includes(doc.location),
       );
     }
 
@@ -83,31 +147,35 @@ export default function ExpertsPage() {
       filtered = filtered.filter((doc) =>
         selectedFilters.Expertise.some((expertise) =>
           doc.expertise.some((exp) =>
-            exp.toLowerCase().includes(expertise.toLowerCase())
-          )
-        )
+            exp.toLowerCase().includes(expertise.toLowerCase()),
+          ),
+        ),
       );
     }
 
     // Filter by Language
     if (selectedFilters.Language.length > 0) {
       filtered = filtered.filter((doc) =>
-        selectedFilters.Language.some((lang) => doc.language.includes(lang))
+        selectedFilters.Language.some((lang) => doc.language.includes(lang)),
       );
     }
 
     // Filter by Price
     if (selectedFilters.Price.length > 0) {
       filtered = filtered.filter((doc) =>
-        selectedFilters.Price.includes(doc.price)
+        selectedFilters.Price.includes(doc.price),
       );
     }
 
     return filtered;
   }, [selectedCategory, selectedFilters]);
 
-  if (!isReady) {
-    return <div className="w-full h-screen bg-[#e9f6f4]" />; // blank splash frame
+  if (!isReady || loading) {
+    return (
+      <div className="w-full h-screen bg-[#e9f6f4] flex items-center justify-center">
+        <div className="text-[#034B44] text-xl">Loading experts...</div>
+      </div>
+    );
   }
 
   return (

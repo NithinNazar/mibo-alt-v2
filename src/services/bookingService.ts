@@ -84,7 +84,7 @@ class BookingService {
    * ```
    */
   async createPaymentOrder(appointmentId: number): Promise<any> {
-    const response = await apiClient.post("/payment/create-order", {
+    const response = await apiClient.post("/payments/create-order", {
       appointmentId,
     });
     return response.data;
@@ -110,7 +110,7 @@ class BookingService {
    * ```
    */
   async verifyPayment(data: VerifyPaymentData): Promise<any> {
-    const response = await apiClient.post("/payment/verify", data);
+    const response = await apiClient.post("/payments/verify", data);
     return response.data;
   }
 

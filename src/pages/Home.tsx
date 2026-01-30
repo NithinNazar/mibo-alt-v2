@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "../components/Header";
 import OfferingsAndTherapy from "../components/offerings_Therapy";
 import MiboCarousel from "../components/why_mibo";
@@ -19,8 +20,21 @@ import { defineElement } from "lord-icon-element";
 const Home = () => {
   defineElement(lottie.loadAnimation);
 
+  // Optimize scroll performance
+  useEffect(() => {
+    // Enable smooth scrolling
+    document.documentElement.style.scrollBehavior = "smooth";
+
+    return () => {
+      document.documentElement.style.scrollBehavior = "auto";
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col w-full overflow-hidden bg-[#F3FBFA]">
+    <div
+      className="flex flex-col w-full overflow-hidden bg-[#F3FBFA]"
+      style={{ willChange: "scroll-position" }}
+    >
       {/* --- HEADER --- */}
       <ScrollRevealWrapper direction="fade" delay={400}>
         <Header />

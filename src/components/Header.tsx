@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Phone, MessageCircle, Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import miboIcon from "../assets/logo1.png";
@@ -374,16 +374,29 @@ const Header = () => {
 
 const DesktopVideo = () => {
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Force video to play on mount
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.log("Video autoplay failed:", error);
+      });
+    }
+  }, []);
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Background Video */}
       <video
+        ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        preload="auto"
+        className="absolute top-0 left-0 w-full h-full object-cover z-0 will-change-transform"
+        style={{ transform: "translateZ(0)" }}
       >
         <source src={homeVideo} type="video/mp4" />
         Your browser does not support the video tag.

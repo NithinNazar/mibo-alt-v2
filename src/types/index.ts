@@ -57,6 +57,9 @@ export interface Clinician {
   experience_years: number;
   consultation_fee: number;
   bio: string | null;
+  qualification: string | null;
+  expertise: string[];
+  languages: string[];
   is_active: boolean;
 }
 

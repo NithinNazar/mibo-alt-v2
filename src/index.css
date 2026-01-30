@@ -18,4 +18,26 @@ html, body {
   max-width: 100%;
   overflow-x: hidden; 
   box-sizing: border-box;
+  /* Optimize scroll performance */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize animations and transitions for better performance */
+* {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimize video rendering */
+video {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }

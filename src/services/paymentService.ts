@@ -174,12 +174,12 @@ class PaymentService {
    * ```
    */
   async verifyPayment(
-    paymentData: PaymentVerification
+    paymentData: PaymentVerification,
   ): Promise<PaymentVerificationResponse> {
     try {
       const response = await apiClient.post<PaymentVerificationResponse>(
         "/payments/verify",
-        paymentData
+        paymentData,
       );
 
       console.log("Payment verified:", response.data.data.status);
@@ -236,7 +236,7 @@ class PaymentService {
   openRazorpayCheckout(
     orderData: PaymentOrder,
     onSuccess: (response: RazorpaySuccessResponse) => void,
-    onFailure: (error: { message: string; code?: string }) => void
+    onFailure: (error: { message: string; code?: string }) => void,
   ): void {
     // Check if Razorpay SDK is loaded
     if (typeof window.Razorpay === "undefined") {
@@ -262,7 +262,7 @@ class PaymentService {
       handler: (response: RazorpaySuccessResponse) => {
         console.log(
           "Razorpay payment successful:",
-          response.razorpay_payment_id
+          response.razorpay_payment_id,
         );
         onSuccess(response);
       },
