@@ -54,7 +54,7 @@ interface DashboardData {
 
 export default function PatientDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +109,7 @@ export default function PatientDashboard() {
     try {
       const accessToken = localStorage.getItem("mibo_access_token");
       const apiBaseUrl =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+        import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
 
       const response = await fetch(
         `${apiBaseUrl}/patient/appointments/${selectedAppointment.id}/cancel`,
@@ -122,7 +122,7 @@ export default function PatientDashboard() {
           body: JSON.stringify({
             reason: cancelReason.trim(),
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -387,7 +387,7 @@ export default function PatientDashboard() {
                         </p>
                         <p className="font-medium">
                           {new Date(
-                            appointment.scheduled_start_at
+                            appointment.scheduled_start_at,
                           ).toLocaleDateString("en-IN", {
                             weekday: "long",
                             day: "numeric",
@@ -408,7 +408,7 @@ export default function PatientDashboard() {
                         </p>
                         <p className="font-medium">
                           {new Date(
-                            appointment.scheduled_start_at
+                            appointment.scheduled_start_at,
                           ).toLocaleTimeString("en-IN", {
                             hour: "2-digit",
                             minute: "2-digit",

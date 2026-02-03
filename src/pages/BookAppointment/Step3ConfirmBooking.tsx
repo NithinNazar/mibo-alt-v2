@@ -57,14 +57,14 @@ export default function Step3ConfirmBooking({
       const accessToken = localStorage.getItem("mibo_access_token");
       if (!accessToken) {
         throw new Error(
-          "Authentication failed. Please go back and verify OTP again."
+          "Authentication failed. Please go back and verify OTP again.",
         );
       }
 
       // Update user profile with name and email
       try {
         const apiBaseUrl =
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+          import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
         await fetch(`${apiBaseUrl}/patient-auth/update-profile`, {
           method: "PUT",
           headers: {
@@ -80,7 +80,7 @@ export default function Step3ConfirmBooking({
       } catch (profileErr) {
         console.warn(
           "Profile update failed, continuing with booking:",
-          profileErr
+          profileErr,
         );
         // Don't fail the booking if profile update fails
       }
@@ -100,7 +100,7 @@ export default function Step3ConfirmBooking({
 
       // Step 1: Create appointment
       const apiBaseUrl =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+        import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
       const appointmentResponse = await fetch(`${apiBaseUrl}/booking/create`, {
         method: "POST",
         headers: {
@@ -114,7 +114,7 @@ export default function Step3ConfirmBooking({
       if (!appointmentResponse.ok) {
         console.error("Appointment creation failed:", appointmentData);
         throw new Error(
-          appointmentData.message || "Failed to create appointment"
+          appointmentData.message || "Failed to create appointment",
         );
       }
 
@@ -133,13 +133,13 @@ export default function Step3ConfirmBooking({
           body: JSON.stringify({
             appointmentId: appointmentId,
           }),
-        }
+        },
       );
 
       const paymentData = await paymentResponse.json();
       if (!paymentResponse.ok) {
         throw new Error(
-          paymentData.message || "Failed to create payment order"
+          paymentData.message || "Failed to create payment order",
         );
       }
 
@@ -151,7 +151,7 @@ export default function Step3ConfirmBooking({
         paymentData.data.orderId,
         paymentData.data.amount,
         appointmentId,
-        paymentData.data.razorpayKeyId
+        paymentData.data.razorpayKeyId,
       );
     } catch (err: any) {
       console.error("Booking error:", err);
@@ -167,7 +167,7 @@ export default function Step3ConfirmBooking({
     orderId: string,
     amount: number,
     appointmentId: number,
-    razorpayKeyId: string
+    razorpayKeyId: string,
   ) => {
     // Check if Razorpay is loaded
     if (!window.Razorpay) {
@@ -188,7 +188,7 @@ export default function Step3ConfirmBooking({
         try {
           const accessToken = localStorage.getItem("mibo_access_token");
           const apiBaseUrl =
-            import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+            import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
 
           const verifyResponse = await fetch(`${apiBaseUrl}/payments/verify`, {
             method: "POST",
@@ -207,7 +207,7 @@ export default function Step3ConfirmBooking({
           const verifyData = await verifyResponse.json();
           if (!verifyResponse.ok) {
             throw new Error(
-              verifyData.message || "Payment verification failed"
+              verifyData.message || "Payment verification failed",
             );
           }
 
@@ -260,7 +260,7 @@ export default function Step3ConfirmBooking({
     razorpay.on("payment.failed", function (response: any) {
       // Payment failed
       setError(
-        response.error.description || "Payment failed. Please try again."
+        response.error.description || "Payment failed. Please try again.",
       );
       setPaymentStep("failed");
     });

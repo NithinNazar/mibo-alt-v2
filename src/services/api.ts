@@ -16,10 +16,10 @@ import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
 /**
  * Base URL for the API
- * Defaults to localhost:5000 if not specified in environment variables
+ * Defaults to production API if not specified in environment variables
  */
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
 
 /**
  * Configured Axios instance for API calls
@@ -63,7 +63,7 @@ apiClient.interceptors.request.use(
     // Handle request errors
     console.error("Request error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -87,7 +87,7 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized - token expired or invalid
     if (error.response?.status === 401) {
       console.warn(
-        "Authentication failed - clearing tokens and redirecting to login"
+        "Authentication failed - clearing tokens and redirecting to login",
       );
 
       // Clear all authentication data
@@ -119,7 +119,7 @@ apiClient.interceptors.response.use(
     // Handle other errors (400, 500, etc.)
     // These will be handled by individual service methods
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
