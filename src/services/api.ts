@@ -97,8 +97,8 @@ apiClient.interceptors.response.use(
 
       // Redirect to authentication page
       // Only redirect if not already on auth page to prevent loops
-      if (!window.location.pathname.includes("/auth")) {
-        window.location.href = "/auth";
+      if (!window.location.pathname.includes("/patientAuth")) {
+        window.location.href = "/patientAuth";
       }
 
       return Promise.reject(error);

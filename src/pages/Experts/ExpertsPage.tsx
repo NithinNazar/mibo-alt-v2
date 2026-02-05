@@ -34,6 +34,19 @@ export default function ExpertsPage() {
   const fetchClinicians = async () => {
     try {
       setLoading(true);
+
+      // Check if user is authenticated before making API call
+      const token = localStorage.getItem("mibo_access_token");
+
+      if (!token) {
+        // No token, use static data immediately (experts page is public)
+        console.log("No authentication token, using static data");
+        setDoctors(staticDoctors);
+        setLoading(false);
+        setIsReady(true);
+        return;
+      }
+
       const clinicians = await clinicianService.getClinicians();
 
       if (clinicians.length === 0) {
@@ -69,9 +82,15 @@ export default function ExpertsPage() {
           `Loaded ${transformedDoctors.length} clinicians from backend`,
         );
       }
-    } catch (error) {
-      console.error("Failed to fetch clinicians, using static data:", error);
-      // Fallback to static data on error
+    } catch (error: any) {
+      console.error("Failed to fetch clinicians:", error);
+
+      // Check if it's an auth error
+      if (error.response?.status === 401) {
+        console.log("Authentication failed, using static data");
+      }
+
+      // Always fallback to static data on error
       setDoctors(staticDoctors);
     } finally {
       setLoading(false);

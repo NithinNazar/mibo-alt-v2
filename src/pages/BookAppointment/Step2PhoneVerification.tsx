@@ -17,6 +17,9 @@ export default function Step2PhoneVerification({
 }: Step2PhoneVerificationProps) {
   const [phone, setPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [otpDigits, setOtpDigits] = useState<string[]>([
     "",
     "",
@@ -59,8 +62,10 @@ export default function Step2PhoneVerification({
       const formattedPhone = `91${phone}`; // Add country code
 
       // PRODUCTION: Call production endpoint via authService
-      await authService.sendOTP(formattedPhone);
+      const response = await authService.sendOTP(formattedPhone);
 
+      // Check if user is new and needs to provide name/email
+      setIsNewUser(response.data.isNewUser);
       setOtpSent(true);
       setError("");
 
@@ -85,15 +90,25 @@ export default function Step2PhoneVerification({
       return;
     }
 
+    // Validate required fields for new users
+    if (isNewUser && !fullName.trim()) {
+      setError("Please enter your full name");
+      return;
+    }
+
     setError("");
     setIsLoading(true);
 
     try {
       const formattedPhone = `91${phone}`;
 
-      // Verify OTP and get auth token (without name/email for now)
-      // Name/email will be collected on payment screen
-      await authService.verifyOTP(formattedPhone, otpToVerify);
+      // Verify OTP with name/email for new users
+      await authService.verifyOTP(
+        formattedPhone,
+        otpToVerify,
+        isNewUser ? fullName.trim() : undefined,
+        isNewUser && email.trim() ? email.trim() : undefined,
+      );
 
       setIsVerified(true);
 
@@ -141,7 +156,7 @@ export default function Step2PhoneVerification({
    */
   const handleOtpKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
       // Focus previous input on backspace if current is empty
@@ -264,6 +279,41 @@ export default function Step2PhoneVerification({
                     OTP sent to +91{phone} via WhatsApp
                   </p>
                 </div>
+
+                {/* New User Details - Show name/email fields if isNewUser */}
+                {isNewUser && (
+                  <div className="space-y-3 pt-2 border-t border-[#a7c4f2]/30">
+                    <p className="text-sm text-[#034B44] font-medium text-center">
+                      Welcome! Please provide your details
+                    </p>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your full name"
+                        className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0]"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Email (optional)
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="your.email@example.com"
+                        className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0]"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={() => handleVerifyOtp()}

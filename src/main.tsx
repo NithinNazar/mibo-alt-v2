@@ -1,6 +1,11 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import "./index.css";
 
 // --- Main pages ---
@@ -66,6 +71,11 @@ const App = () => {
           <Route path="/centres/kochi" element={<Kochi />} />
           <Route path="/centres/mumbai" element={<Mumbai />} />
           {/* 👤 Auth & Profile */}
+          {/* Auth route alias - redirect /auth to /patientAuth for backward compatibility */}
+          <Route
+            path="/auth"
+            element={<Navigate to="/patientAuth" replace />}
+          />
           <Route path="/patientAuth" element={<PatientAuth />} />
           <Route path="/profileDashboard" element={<PatientDashboard />} />
           <Route path="/appointments" element={<AllAppointments />} />
