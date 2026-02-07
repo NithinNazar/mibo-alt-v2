@@ -46,21 +46,24 @@ export interface AuthTokens {
  */
 export interface Clinician {
   id: number;
-  user_id: number;
-  full_name: string;
+  userId: number;
+  fullName: string;
   phone: string;
   email: string | null;
-  primary_centre_id: number;
-  primary_centre_name: string;
-  specialization: string;
-  registration_number: string | null;
-  experience_years: number;
-  consultation_fee: number;
+  primaryCentreId: number;
+  primaryCentreName: string;
+  specialization: string | string[];
+  registrationNumber: string | null;
+  yearsOfExperience: number;
+  consultationFee: number;
   bio: string | null;
-  qualification: string | null;
+  qualification: string | string[] | null;
   expertise: string[];
   languages: string[];
-  is_active: boolean;
+  isActive: boolean;
+  profilePictureUrl?: string;
+  consultationModes?: string[];
+  defaultDurationMinutes?: number;
 }
 
 /**
