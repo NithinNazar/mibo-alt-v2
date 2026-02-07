@@ -1,0 +1,368 @@
+# Implementation Plan: Dynamic Clinician Management System
+
+## Overview
+
+This implementation plan transforms the clinician management system from static file-based to fully dynamic database-driven. The approach follows an incremental strategy:
+
+1. Update database schema and backend validation
+2. Enhance admin panel with new fields and components
+3. Update frontend to query database with fallback
+4. Create data migration script
+5. Implement comprehensive testing
+
+Each task builds on previous work, with checkpoints to ensure stability before proceeding.
+
+## Tasks
+
+- [x] 1. Update database schema and backend validation
+  - [x] 1.1 Create database migration for new fields
+    - Add JSONB columns for specialization and qualification arrays to clinician_profiles table
+    - Create clinician_availability_rules table with proper constraints
+    - Add indexes for performance
+    - _Requirements: 2.5, 3.4, 6.7_
+  - [x] 1.2 Update backend validation for array fields
+    - Modify validateCreateClinician to accept specialization and qualification as arrays
+    - Modify validateUpdateClinician to handle array updates
+    - Update staff.types.ts to reflect array types
+    - _Requirements: 2.5, 3.4_
+  - [x] 1.3 Update repository layer for array storage
+    - Modify createClinician to store arrays as JSONB
+    - Modify updateClinician to handle array updates
+    - Ensure proper JSON serialization/deserialization
+    - _Requirements: 2.5, 3.4_
+  - [x] 1.4 Write property test for array field storage
+    - **Property 4: Array Field Storage**
+    - **Validates: Requirements 2.5, 3.4**
+  - [x] 1.5 Write unit tests for validation
+    - Test specialization array validation
+    - Test qualification array validation
+    - Test empty array handling
+    - _Requirements: 2.5, 3.4_
+
+- [ ] 2. Implement profile picture upload functionality
+  - [ ] 2.1 Create image upload service
+    - Implement file type validation (JPEG, PNG, WebP)
+    - Implement file size validation (5MB limit)
+    - Generate unique filenames to prevent collisions
+    - Store images in designated location
+    - Return image URL
+    - _Requirements: 5.3, 14.1, 14.2, 14.3, 14.4, 14.5_
+  - [ ] 2.2 Add upload endpoint to backend
+    - Create POST /api/upload/profile-picture endpoint
+    - Integrate with image upload service
+    - Return uploaded image URL
+    - _Requirements: 5.3_
+  - [ ] 2.3 Update clinician creation to handle profile pictures
+    - Accept profile_picture_url in request
+    - Set default placeholder if not provided
+    - Store URL in database
+    - _Requirements: 5.4, 5.5_
+  - [ ] 2.4 Write property test for image upload round-trip
+    - **Property 7: Image Upload Round-Trip**
+    - **Validates: Requirements 14.1, 14.2, 14.3, 14.4, 14.5**
+  - [ ] 2.5 Write property test for URL validation
+    - **Property 8: URL Format Validation**
+    - **Validates: Requirements 5.4**
+  - [ ] 2.6 Write property test for default placeholder
+    - **Property 6: Profile Picture Default**
+    - **Validates: Requirements 5.5**
+
+- [ ] 3. Checkpoint - Ensure backend tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 4. Implement availability schedule management
+  - [ ] 4.1 Update availability validation
+    - Validate start_time < end_time
+    - Validate time format (HH:MM)
+    - Validate day_of_week range (0-6)
+    - Check for overlapping slots
+    - _Requirements: 15.1, 15.2, 15.3_
+  - [ ] 4.2 Implement availability CRUD operations
+    - Update updateClinicianAvailability to handle bulk slot updates
+    - Implement slot deletion (delete all, then insert new)
+    - Return updated availability rules
+    - _Requirements: 6.7_
+  - [ ] 4.3 Add availability to clinician response
+    - Include availabilityRules in getClinicianById response
+    - Include availabilityRules in getClinicians response
+    - _Requirements: 8.5_
+  - [ ] 4.4 Write property test for availability slot persistence
+    - **Property 9: Availability Slot Persistence**
+    - **Validates: Requirements 6.7**
+  - [ ] 4.5 Write property test for time slot validation
+    - **Property 25: Time Slot Validation**
+    - **Validates: Requirements 15.1, 15.2, 15.3**
+  - [ ] 4.6 Write unit tests for overlap detection
+    - Test overlapping slots are rejected
+    - Test non-overlapping slots are accepted
+    - Test edge cases (same start/end times)
+    - _Requirements: 15.2_
+
+- [-] 5. Enhance admin panel with new fields
+  - [x] 5.1 Create specialization dropdown component
+    - Define SPECIALIZATIONS constant array
+    - Use existing MultiSelect component
+    - Allow multiple selections
+    - Display selected items as chips
+    - _Requirements: 2.1, 2.3, 2.4_
+  - [x] 5.2 Create qualification dropdown component
+    - Define QUALIFICATIONS constant array
+    - Use existing MultiSelect component
+    - Allow multiple selections
+    - Display selected items as chips
+    - _Requirements: 3.1, 3.2, 3.3_
+  - [x] 5.3 Remove registration number and area of expertise fields
+    - Remove registration_number input from form
+    - Remove area_of_expertise input from form
+    - Keep fields in view/edit mode for legacy data
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [x] 5.4 Create profile picture upload component
+    - Add file upload input
+    - Add URL input as alternative
+    - Show image preview
+    - Handle upload to backend
+    - Display upload progress
+    - _Requirements: 5.1, 5.2_
+  - [x] 5.5 Create availability schedule builder component
+    - Add day of week dropdown
+    - Add time input fields with AM/PM selectors
+    - Add "Set Slot" button
+    - Display created slots with "+" button
+    - Add "Remove" button for each slot
+    - Store slots in component state
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+  - [x] 5.6 Update clinician form to use new components
+    - Replace specialization text input with dropdown
+    - Replace qualification text input with dropdown
+    - Add profile picture upload component
+    - Add availability schedule builder
+    - Update form submission to include new fields
+    - _Requirements: 1.1, 1.2_
+  - [ ] 5.7 Write unit tests for new components
+    - Test specialization dropdown renders correctly
+    - Test qualification dropdown renders correctly
+    - Test profile picture upload component
+    - Test availability schedule builder
+    - _Requirements: 2.1, 3.1, 5.1, 6.1_
+
+- [ ] 6. Implement credential display functionality
+  - [ ] 6.1 Add credential display to clinician list
+    - Show username in clinician table
+    - Add "View Credentials" button for each clinician
+    - _Requirements: 7.5, 13.1_
+  - [ ] 6.2 Create credential modal component
+    - Display username and password
+    - Add "Copy" button for clipboard
+    - Style for security (password initially hidden with show/hide toggle)
+    - _Requirements: 13.2, 13.3_
+  - [ ] 6.3 Implement credential access logging
+    - Log admin ID, clinician ID, timestamp when credentials viewed
+    - Store logs in audit table or log file
+    - _Requirements: 13.4_
+  - [x] 6.4 Convert "View Details" modal to editable form
+    - Transform read-only details modal into editable form
+    - Include all fields: specialization dropdown, qualification dropdown, availability schedule builder, profile picture upload
+    - Add "Save" button that becomes enabled when changes are made
+    - Implement form validation before save
+    - Show success/error messages after save
+    - Refresh clinician list after successful save
+    - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8_
+  - [ ] 6.5 Write property test for credential access audit
+    - **Property 23: Credential Access Audit**
+    - **Validates: Requirements 13.4**
+  - [ ] 6.6 Write unit test for credential modal
+    - Test modal displays username and password
+    - Test copy button functionality
+    - _Requirements: 13.2, 13.3_
+  - [ ] 6.7 Write unit test for editable details modal
+    - Test modal displays all clinician fields
+    - Test fields are editable
+    - Test save button enables on change
+    - Test save functionality
+    - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5_
+
+- [ ] 7. Checkpoint - Ensure admin panel works correctly
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 8. Update frontend to query database
+  - [x] 8.1 Update clinicianService for public access
+    - Modify getClinicians to work without authentication
+    - Handle 401 errors gracefully
+    - Return empty array on auth failure
+    - _Requirements: 8.1_
+  - [x] 8.2 Implement database query with fallback
+    - Update ExpertsPage to call clinicianService.getClinicians()
+    - On success with data, use database clinicians
+    - On empty result or error, fall back to static files
+    - Log data source for monitoring
+    - _Requirements: 8.1, 8.3, 8.4, 11.1, 11.2, 11.3, 11.5_
+  - [x] 8.3 Transform database response to Doctor interface
+    - Map backend fields to frontend Doctor interface
+    - Handle array fields (specialization, qualification)
+    - Format experience string
+    - Format price string
+    - Map consultation modes to session types
+    - _Requirements: 8.2_
+  - [ ] 8.4 Update filters to work with database data
+    - Ensure location filter works with primaryCentreName
+    - Ensure specialization filter works with array field
+    - Ensure consultation mode filter works with consultationModes array
+    - Maintain filter logic for both data sources
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
+  - [ ] 8.5 Write property test for frontend database query
+    - **Property 13: Frontend Database Query**
+    - **Validates: Requirements 8.1, 11.1, 11.2, 11.3**
+  - [ ] 8.6 Write property test for filter application
+    - **Property 15: Filter Application**
+    - **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5**
+  - [ ] 8.7 Write integration test for frontend display
+    - Test database clinicians display correctly
+    - Test fallback to static files works
+    - Test filters work with both data sources
+    - _Requirements: 8.2, 8.3, 8.4, 11.4_
+
+- [ ] 9. Create data migration script
+  - [ ] 9.1 Implement static file parser
+    - Read text files from bangalore/, kochi/, mumbai/ folders
+    - Parse clinician entries (name, qualification, designation, experience, modes)
+    - Extract specializations from designation lines
+    - Extract qualifications from qualification lines
+    - Extract years of experience from experience lines
+    - Extract consultation modes from mode lines
+    - _Requirements: 10.2, 10.3_
+  - [ ] 9.2 Implement centre mapping logic
+    - Map "bangalore" folder to centre_id 1
+    - Map "kochi" folder to centre_id 2
+    - Map "mumbai" folder to centre_id 3
+    - _Requirements: 10.4_
+  - [ ] 9.3 Create migration script
+    - Parse all static files
+    - Create user accounts for each clinician
+    - Create clinician profiles
+    - Generate random passwords
+    - Log migration progress and errors
+    - _Requirements: 10.1, 10.5_
+  - [ ] 9.4 Write property test for static data parsing
+    - **Property 16: Static Data Parsing**
+    - **Validates: Requirements 10.2, 10.3**
+  - [ ] 9.5 Write property test for centre mapping
+    - **Property 17: Centre Mapping**
+    - **Validates: Requirements 10.4**
+  - [ ] 9.6 Write property test for migration logging
+    - **Property 18: Migration Logging**
+    - **Validates: Requirements 10.5**
+
+- [ ] 10. Implement comprehensive validation
+  - [ ] 10.1 Add input format validation
+    - Validate phone number format (10 digits, starts with 6-9)
+    - Validate email format (standard email pattern)
+    - Validate consultation fee (positive number)
+    - Validate years of experience (non-negative integer)
+    - _Requirements: 12.2, 12.3, 12.4, 12.5_
+  - [ ] 10.2 Improve validation error messages
+    - Return specific field names in error messages
+    - Include validation reason in error messages
+    - Format errors consistently
+    - _Requirements: 12.6, 15.4_
+  - [ ] 10.3 Write property test for input format validation
+    - **Property 21: Input Format Validation**
+    - **Validates: Requirements 12.2, 12.3, 12.4, 12.5**
+  - [ ] 10.4 Write property test for validation error messages
+    - **Property 22: Validation Error Messages**
+    - **Validates: Requirements 12.6, 15.4**
+  - [ ] 10.5 Write property test for required field validation
+    - **Property 1: Required Field Validation**
+    - **Validates: Requirements 1.2, 12.1**
+
+- [ ] 11. Implement security and authentication features
+  - [ ] 11.1 Implement credential generation
+    - Generate username if not provided (from full_name)
+    - Return plain-text password in response for admin
+    - Hash password before storage
+    - _Requirements: 7.1, 7.5_
+  - [ ] 11.2 Implement password change with display
+    - Update password in database
+    - Return new plain-text password in response
+    - _Requirements: 13.5_
+  - [ ] 11.3 Write property test for credential generation
+    - **Property 10: Credential Generation**
+    - **Validates: Requirements 7.1, 7.5**
+  - [ ] 11.4 Write property test for password hashing security
+    - **Property 11: Password Hashing Security**
+    - **Validates: Requirements 7.2, 7.3**
+  - [ ] 11.5 Write property test for role-based access
+    - **Property 12: Role-Based Access**
+    - **Validates: Requirements 7.4**
+  - [ ] 11.6 Write property test for password change display
+    - **Property 24: Password Change Display**
+    - **Validates: Requirements 13.5**
+
+- [ ] 12. Final checkpoint - Comprehensive testing
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 13. Integration and end-to-end testing
+  - [ ] 13.1 Write integration test for clinician creation flow
+    - Test complete flow: form submission → API call → database storage → response
+    - Verify user and clinician records created
+    - Verify credentials returned
+    - _Requirements: 1.3, 1.4, 7.1_
+  - [ ] 13.2 Write integration test for availability management
+    - Test creating availability slots
+    - Test updating availability slots
+    - Test deleting availability slots
+    - Verify slots persist correctly
+    - _Requirements: 6.7_
+  - [ ] 13.3 Write integration test for frontend display
+    - Test frontend queries database
+    - Test frontend displays clinician cards
+    - Test frontend filters work
+    - Test fallback to static files
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - [ ] 13.4 Write property test for clinician creation round-trip
+    - **Property 2: Clinician Creation Round-Trip**
+    - **Validates: Requirements 1.3, 1.4**
+  - [ ] 13.5 Write property test for duplicate phone rejection
+    - **Property 3: Duplicate Phone Rejection**
+    - **Validates: Requirements 1.5**
+  - [ ] 13.6 Write property test for legacy data display
+    - **Property 5: Legacy Data Display**
+    - **Validates: Requirements 4.3**
+  - [ ] 13.7 Write property test for clinician card display
+    - **Property 14: Clinician Card Display**
+    - **Validates: Requirements 8.2, 8.5**
+  - [ ] 13.8 Write property test for data source consistency
+    - **Property 19: Data Source Consistency**
+    - **Validates: Requirements 11.4**
+  - [ ] 13.9 Write property test for data source logging
+    - **Property 20: Data Source Logging**
+    - **Validates: Requirements 11.5**
+  - [ ] 13.10 Write property test for availability slot display
+    - **Property 26: Availability Slot Display**
+    - **Validates: Requirements 15.5**
+
+- [ ] 14. Documentation and deployment preparation
+  - [ ] 14.1 Update API documentation
+    - Document new fields in clinician endpoints
+    - Document availability endpoints
+    - Document upload endpoint
+    - Include request/response examples
+  - [ ] 14.2 Create migration guide
+    - Document how to run migration script
+    - Document how to verify migration success
+    - Document rollback procedure
+  - [ ] 14.3 Update admin panel user guide
+    - Document new specialization dropdown
+    - Document new qualification dropdown
+    - Document profile picture upload
+    - Document availability schedule builder
+    - Document credential viewing
+
+## Notes
+
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation
+- Property tests validate universal correctness properties
+- Unit tests validate specific examples and edge cases
+- Integration tests validate end-to-end flows
+- The migration script (task 9) can be run after all other tasks are complete
+- Backward compatibility is maintained throughout - static files remain as fallback

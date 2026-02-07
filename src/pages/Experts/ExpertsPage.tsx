@@ -7,7 +7,6 @@ import DoctorCard from "./Components/DoctorCard";
 import Testimonials from "./Components/Testimonials";
 import CompStatContact from "./Components/CompStatContact";
 import ExpertsFooter from "./Components/ExpertsFooter";
-import { doctors as staticDoctors } from "./data/doctors";
 import clinicianService from "../../services/clinicianService";
 import type { Doctor } from "./data/doctors";
 
@@ -35,63 +34,53 @@ export default function ExpertsPage() {
     try {
       setLoading(true);
 
-      // Check if user is authenticated before making API call
-      const token = localStorage.getItem("mibo_access_token");
-
-      if (!token) {
-        // No token, use static data immediately (experts page is public)
-        console.log("No authentication token, using static data");
-        setDoctors(staticDoctors);
-        setLoading(false);
-        setIsReady(true);
-        return;
-      }
-
+      // Fetch clinicians from database (public endpoint, no auth required)
       const clinicians = await clinicianService.getClinicians();
 
-      if (clinicians.length === 0) {
-        // Fallback to static data if no clinicians in database
-        console.log("No clinicians in database, using static data");
-        setDoctors(staticDoctors);
-      } else {
-        // Transform backend data to match Doctor interface
-        const transformedDoctors: Doctor[] = clinicians.map((c: any) => ({
+      // Transform backend data to match Doctor interface
+      const transformedDoctors: Doctor[] = clinicians.map((c: any) => {
+        // Handle specialization (can be string or array)
+        const specialization = Array.isArray(c.specialization)
+          ? c.specialization.join(", ")
+          : c.specialization || "";
+
+        // Handle qualification (can be string or array)
+        const qualification = Array.isArray(c.qualification)
+          ? c.qualification.join(", ")
+          : c.qualification || "";
+
+        return {
           id: parseInt(c.id),
-          name: c.fullName || c.full_name,
-          qualification: c.qualification || "",
-          designation: c.designation || c.specialization,
+          name: c.name || c.fullName || c.full_name || "",
+          qualification,
+          designation: c.designation || specialization,
           experience: `${c.yearsOfExperience || c.years_of_experience || 0}+ years`,
           expertise: c.expertise || [],
           image:
             c.profilePictureUrl ||
             c.profile_picture_url ||
             "/default-avatar.png",
-          location: (c.centreName || c.centre_name || "Bangalore") as
-            | "Bangalore"
-            | "Kochi"
-            | "Mumbai",
+          location: (c.primaryCentreName ||
+            c.primary_centre_name ||
+            c.centreName ||
+            c.centre_name ||
+            "Bangalore") as "Bangalore" | "Kochi" | "Mumbai",
           language: c.languages || ["English"],
           price: `₹${c.consultationFee || c.consultation_fee || 0}/session`,
           sessionTypes: getSessionTypes(
             c.consultationModes || c.consultation_modes || [],
           ),
-        }));
+        };
+      });
 
-        setDoctors(transformedDoctors);
-        console.log(
-          `Loaded ${transformedDoctors.length} clinicians from backend`,
-        );
-      }
+      setDoctors(transformedDoctors);
+      console.log(
+        `Loaded ${transformedDoctors.length} clinicians from database`,
+      );
     } catch (error: any) {
-      console.error("Failed to fetch clinicians:", error);
-
-      // Check if it's an auth error
-      if (error.response?.status === 401) {
-        console.log("Authentication failed, using static data");
-      }
-
-      // Always fallback to static data on error
-      setDoctors(staticDoctors);
+      console.error("Failed to fetch clinicians from database:", error);
+      // Show empty state - no fallback
+      setDoctors([]);
     } finally {
       setLoading(false);
       const timer = setTimeout(() => setIsReady(true), 100);

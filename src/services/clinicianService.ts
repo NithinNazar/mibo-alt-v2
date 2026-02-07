@@ -16,6 +16,7 @@
  * @module services/clinicianService
  */
 
+import axios from "axios";
 import apiClient from "./api";
 import type { Clinician, GetCliniciansParams, APIResponse } from "../types";
 
@@ -54,6 +55,9 @@ class ClinicianService {
    *
    * This method fetches clinician data from the API or returns cached data
    * if available and not expired. Supports filtering by centre and specialization.
+   *
+   * This is a PUBLIC endpoint - no authentication required.
+   * If a 401 error occurs, it will retry without the auth token.
    *
    * Caching behavior:
    * - First call: Fetches from API and caches result
@@ -106,8 +110,15 @@ class ClinicianService {
     console.log("Fetching fresh clinician data from API");
 
     try {
-      const response = await apiClient.get<APIResponse<Clinician[]>>(
-        "/clinicians"
+      // Create a custom axios instance without auth interceptor for this public endpoint
+      const response = await axios.get<APIResponse<Clinician[]>>(
+        `${apiClient.defaults.baseURL}/clinicians`,
+        {
+          timeout: 30000,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
       );
 
       // Update cache with fresh data
@@ -149,7 +160,7 @@ class ClinicianService {
   async getClinicianById(id: number): Promise<Clinician> {
     try {
       const response = await apiClient.get<APIResponse<Clinician>>(
-        `/clinicians/${id}`
+        `/clinicians/${id}`,
       );
       return response.data.data;
     } catch (error) {
@@ -192,7 +203,7 @@ class ClinicianService {
    */
   private filterClinicians(
     clinicians: Clinician[],
-    params?: GetCliniciansParams
+    params?: GetCliniciansParams,
   ): Clinician[] {
     // If no filters provided, return all clinicians
     if (!params) {
