@@ -187,21 +187,21 @@ export default function Step1SessionDetails({
 
   const [selectedClinician] = useState<Clinician | null>({
     id: realIds.clinicianId,
-    user_id: doctor.id,
-    full_name: doctor.name,
+    userId: doctor.id,
+    fullName: doctor.name,
     phone: "+919876543210",
     email: null,
-    primary_centre_id: realIds.centreId,
-    primary_centre_name: `Mibo ${doctor.location}`,
+    primaryCentreId: realIds.centreId,
+    primaryCentreName: `Mibo ${doctor.location}`,
     specialization: doctor.designation,
-    registration_number: null,
-    experience_years: parseInt(doctor.experience) || 5,
-    consultation_fee: 1600,
+    registrationNumber: null,
+    yearsOfExperience: parseInt(doctor.experience) || 5,
+    consultationFee: 1600,
     bio: null,
     qualification: null,
     expertise: [],
     languages: [],
-    is_active: true,
+    isActive: true,
   });
 
   const modes = ["In-person", "Video call", "Phone call"];
@@ -397,7 +397,7 @@ export default function Step1SessionDetails({
       time: selectedTime,
       doctorId: doctor?.id,
       clinicianId: selectedClinician.id,
-      clinicianName: selectedClinician.full_name,
+      clinicianName: selectedClinician.fullName,
       centreId: selectedCentre.id,
       centreName: selectedCentre.name,
       centreAddress: `${selectedCentre.address_line_1}${

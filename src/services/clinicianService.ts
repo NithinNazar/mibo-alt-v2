@@ -215,14 +215,18 @@ class ClinicianService {
       // Filter by centre ID (exact match)
       if (
         params.centreId !== undefined &&
-        clinician.primary_centre_id !== params.centreId
+        clinician.primaryCentreId !== params.centreId
       ) {
         return false;
       }
 
       // Filter by specialization (case-insensitive substring match)
       if (params.specialization) {
-        const specializationLower = clinician.specialization.toLowerCase();
+        // Handle both string and array specialization
+        const specializationStr = Array.isArray(clinician.specialization)
+          ? clinician.specialization.join(" ")
+          : clinician.specialization;
+        const specializationLower = specializationStr.toLowerCase();
         const searchLower = params.specialization.toLowerCase();
 
         if (!specializationLower.includes(searchLower)) {
