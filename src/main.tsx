@@ -33,6 +33,10 @@ import Bangalore from "./pages/Centers/Bangalore";
 import Kochi from "./pages/Centers/Kochi";
 import Mumbai from "./pages/Centers/Mumbai";
 
+// --- Landing Pages ---
+import BangaloreLanding from "./pages/Landing/BangaloreLanding";
+import KochiLanding from "./pages/Landing/KochiLanding";
+
 // --- Booking flow (index handles multi-step using :doctorId) ---
 import BookAppointment from "./pages/BookAppointment";
 
@@ -70,6 +74,9 @@ const App = () => {
           <Route path="/centres/bengaluru" element={<Bangalore />} />
           <Route path="/centres/kochi" element={<Kochi />} />
           <Route path="/centres/mumbai" element={<Mumbai />} />
+          {/* Landing Pages */}
+          <Route path="/bangalore" element={<BangaloreLanding />} />
+          <Route path="/kochi" element={<KochiLanding />} />
           {/* 👤 Auth & Profile */}
           {/* Auth route alias - redirect /auth to /patientAuth for backward compatibility */}
           <Route
