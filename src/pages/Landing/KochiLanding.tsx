@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
   Phone,
   MessageCircle,
@@ -24,7 +26,7 @@ import whoItsFor1 from "../../assets/whoitsfor1.png";
 import whoItsFor2 from "../../assets/whoitsfor2.png";
 import whoItsFor3 from "../../assets/whoitsfor3.png";
 
-const KochiLanding = () => {
+const BangaloreLanding = () => {
   const phoneNumber = "9083335000";
   const email = "reach@mibocare.com";
   const address =
@@ -157,11 +159,15 @@ const KochiLanding = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-miboLightGreen/20 to-white">
       {/* Floating Action Buttons */}
-      <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
+      <div
+        className="fixed bottom-8 right-8 z-[9999] flex flex-col gap-4"
+        style={{ position: "fixed", zIndex: 9999 }}
+      >
         <button
           onClick={handlePhoneClick}
           className="bg-miboGreen hover:bg-miboAccent text-white p-4 rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 group"
           aria-label="Call us"
+          style={{ position: "relative", zIndex: 9999 }}
         >
           <Phone className="w-6 h-6 group-hover:animate-pulse" />
         </button>
@@ -169,6 +175,7 @@ const KochiLanding = () => {
           onClick={handleWhatsAppClick}
           className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 group"
           aria-label="WhatsApp us"
+          style={{ position: "relative", zIndex: 9999 }}
         >
           <MessageCircle className="w-6 h-6 group-hover:animate-pulse" />
         </button>
@@ -203,11 +210,12 @@ const KochiLanding = () => {
             <img src={logo} alt="Mibo Logo" className="h-24 w-auto mb-4" />
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-miboGreen leading-tight">
-              Welcome to <span className="text-miboAccent">Mibo Kochi</span>
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+              <span className="text-[#30baa3]">Welcome to </span>
+              <span className="text-[#212154]">Mibo Kochi</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-miboText max-w-3xl font-light">
+            <p className="text-xl md:text-2xl text-miboText max-w-3xl font-semibold">
               Experience personalized mental health care at Mibo's Bengaluru
               centre — a serene space designed to help you heal, reflect, and
               grow.
@@ -217,7 +225,7 @@ const KochiLanding = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <button
                 onClick={handlePhoneClick}
-                className="bg-miboGreen hover:bg-miboAccent text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                className="bg-[#212154] hover:bg-[#1a1a46] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
                 Call Now: {phoneNumber}
@@ -237,10 +245,10 @@ const KochiLanding = () => {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             Why Choose Mibo Kochi?
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto font-semibold">
             Premier mental health care in India's Silicon Valley. From
             one-on-one therapy to psychiatry and wellness programs, Mibo offers
             evidence-based care designed around your goals.
@@ -250,14 +258,18 @@ const KochiLanding = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-white to-miboLightGreen/30 p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-miboAccent/20"
+                className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-[#212154]/15"
               >
                 <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                  {feature.icon}
+                  {React.cloneElement(feature.icon, {
+                    className: "w-12 h-12 text-[#30baa3]",
+                  })}
                 </div>
-                <h3 className="text-2xl font-bold text-miboGreen mb-4">
+
+                <h3 className="text-2xl font-bold text-[#212154] mb-4">
                   {feature.title}
                 </h3>
+
                 <p className="text-miboText text-lg leading-relaxed">
                   {feature.description}
                 </p>
@@ -268,11 +280,12 @@ const KochiLanding = () => {
       </section>
 
       {/* Services Section with Scrollable Cards */}
-      <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
+      <section className="py-20 bg-[#30baa3]/10">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             Our Comprehensive Services
           </h2>
+
           <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
             We are a mental health ecosystem that brings together multiple
             treatment options to create an experience that makes getting help
@@ -293,11 +306,14 @@ const KochiLanding = () => {
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                     />
                   </div>
+
                   <div className="p-6">
                     <div className="mb-4">{service.icon}</div>
-                    <h3 className="text-2xl font-bold text-miboGreen mb-3">
+
+                    <h3 className="text-2xl font-bold text-[#212154] mb-3">
                       {service.title}
                     </h3>
+
                     <p className="text-miboText leading-relaxed">
                       {service.description}
                     </p>
@@ -312,10 +328,11 @@ const KochiLanding = () => {
       {/* Mental Health Concerns Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             We Can Help With
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
             Our expert team specializes in treating a wide range of mental
             health concerns with compassion and evidence-based approaches.
           </p>
@@ -324,10 +341,11 @@ const KochiLanding = () => {
             {concerns.map((concern, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-miboLightGreen/30 to-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-miboAccent/20"
+                className="bg-[#30baa3]/14 p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-[#30baa3]/50"
               >
-                <CheckCircle className="w-8 h-8 text-miboAccent mx-auto mb-3" />
-                <p className="text-miboGreen font-semibold text-lg">
+                <CheckCircle className="w-8 h-8 text-[#212154] mx-auto mb-3" />
+
+                <p className="text-[#212154] font-semibold text-lg">
                   {concern}
                 </p>
               </div>
@@ -339,10 +357,11 @@ const KochiLanding = () => {
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             What Our Patients Say
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
             Real stories from real people who found healing and hope at Mibo.
           </p>
 
@@ -350,20 +369,22 @@ const KochiLanding = () => {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-miboLightGreen/30 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
+                className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
               >
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-5 h-5 fill-miboAccent text-miboAccent"
+                      className="w-5 h-5 fill-[#212154] text-[#212154]"
                     />
                   ))}
                 </div>
+
                 <p className="text-miboText text-lg italic mb-4 leading-relaxed">
                   "{testimonial.text}"
                 </p>
-                <p className="text-miboGreen font-semibold">
+
+                <p className="text-[#212154] font-semibold">
                   - {testimonial.author}
                 </p>
               </div>
@@ -375,10 +396,11 @@ const KochiLanding = () => {
       {/* Who It's For Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             Who It's For
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
             Mental health care for everyone, at every stage of life.
           </p>
 
@@ -386,7 +408,7 @@ const KochiLanding = () => {
             {whoItsFor.map((item, index) => (
               <div
                 key={index}
-                className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+                className="bg-gradient-to-br from-[#30baa3]/14 to-white rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
               >
                 <div className="h-64 overflow-hidden">
                   <img
@@ -395,10 +417,12 @@ const KochiLanding = () => {
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                   />
                 </div>
+
                 <div className="p-6 text-center">
-                  <h3 className="text-2xl font-bold text-miboGreen mb-2">
+                  <h3 className="text-2xl font-bold text-[#212154] mb-2">
                     {item.title}
                   </h3>
+
                   <p className="text-miboText">{item.description}</p>
                 </div>
               </div>
@@ -408,41 +432,45 @@ const KochiLanding = () => {
       </section>
 
       {/* Location Section */}
-      <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
+      <section className="py-20 bg-gradient-to-b from-[#212154]/8 to-white">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-miboGreen">
+              <h2 className="text-4xl md:text-5xl font-bold text-[#30baa3]">
                 Visit Our Kochi Centre
               </h2>
-              <p className="text-xl text-miboText leading-relaxed">
+
+              <p className="text-xl text-miboText leading-relaxed font-semibold">
                 Our modern facility in Jayanagar offers a peaceful sanctuary for
                 your mental health journey. Experience world-class care in a
                 comfortable setting.
               </p>
+
               <div className="space-y-4">
-                <div className="flex items-start gap-4 bg-miboLightGreen/30 p-6 rounded-2xl">
-                  <MapPin className="w-8 h-8 text-miboGreen flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-4 bg-[#30baa3]/14 p-6 rounded-2xl">
+                  <MapPin className="w-8 h-8 text-[#30baa3] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-bold text-miboGreen mb-2">
+                    <h3 className="text-xl font-bold text-[#30baa3] mb-2">
                       Address
                     </h3>
                     <p className="text-miboText">{address}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-miboLightGreen/30 p-6 rounded-2xl">
-                  <Phone className="w-8 h-8 text-miboGreen flex-shrink-0 mt-1" />
+
+                <div className="flex items-start gap-4 bg-[#30baa3]/14 p-6 rounded-2xl">
+                  <Phone className="w-8 h-8 text-[#30baa3] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-bold text-miboGreen mb-2">
+                    <h3 className="text-xl font-bold text-[#30baa3] mb-2">
                       Phone
                     </h3>
                     <p className="text-miboText">+91 {phoneNumber}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-miboLightGreen/30 p-6 rounded-2xl">
-                  <Mail className="w-8 h-8 text-miboGreen flex-shrink-0 mt-1" />
+
+                <div className="flex items-start gap-4 bg-[#30baa3]/14 p-6 rounded-2xl">
+                  <Mail className="w-8 h-8 text-[#30baa3] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-bold text-miboGreen mb-2">
+                    <h3 className="text-xl font-bold text-[#30baa3] mb-2">
                       Email
                     </h3>
                     <p className="text-miboText">{email}</p>
@@ -450,6 +478,7 @@ const KochiLanding = () => {
                 </div>
               </div>
             </div>
+
             <div className="rounded-3xl overflow-hidden shadow-2xl">
               <img
                 src={bangaloreImage}
@@ -464,20 +493,22 @@ const KochiLanding = () => {
       {/* How to Get Started Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-miboGreen mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
             How to Get Started
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
             Taking the first step is simple. Here's how you can begin your
             journey to better mental health.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white p-8 rounded-3xl shadow-xl text-center border-2 border-miboLightGreen/50">
-              <div className="bg-miboLightGreen/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Phone className="w-8 h-8 text-miboGreen" />
+            {/* Step 1 */}
+            <div className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl text-center border border-[#212154]/15">
+              <div className="bg-[#212154]/12 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Phone className="w-8 h-8 text-[#30baa3]" />
               </div>
-              <h3 className="text-2xl font-bold text-miboGreen mb-4">
+              <h3 className="text-2xl font-bold text-[#212154] mb-4">
                 1. Call or WhatsApp
               </h3>
               <p className="text-miboText leading-relaxed">
@@ -485,11 +516,13 @@ const KochiLanding = () => {
                 through the process.
               </p>
             </div>
-            <div className="bg-white p-8 rounded-3xl shadow-xl text-center border-2 border-miboLightGreen/50">
-              <div className="bg-miboLightGreen/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Calendar className="w-8 h-8 text-miboGreen" />
+
+            {/* Step 2 */}
+            <div className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl text-center border border-[#212154]/15">
+              <div className="bg-[#212154]/12 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Calendar className="w-8 h-8 text-[#30baa3]" />
               </div>
-              <h3 className="text-2xl font-bold text-miboGreen mb-4">
+              <h3 className="text-2xl font-bold text-[#212154] mb-4">
                 2. Book Appointment
               </h3>
               <p className="text-miboText leading-relaxed">
@@ -497,11 +530,13 @@ const KochiLanding = () => {
                 online or in-person.
               </p>
             </div>
-            <div className="bg-white p-8 rounded-3xl shadow-xl text-center border-2 border-miboLightGreen/50">
-              <div className="bg-miboLightGreen/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Heart className="w-8 h-8 text-miboGreen" />
+
+            {/* Step 3 */}
+            <div className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl text-center border border-[#212154]/15">
+              <div className="bg-[#212154]/12 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Heart className="w-8 h-8 text-[#30baa3]" />
               </div>
-              <h3 className="text-2xl font-bold text-miboGreen mb-4">
+              <h3 className="text-2xl font-bold text-[#212154] mb-4">
                 3. Start Your Journey
               </h3>
               <p className="text-miboText leading-relaxed">
@@ -514,23 +549,26 @@ const KochiLanding = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-miboGreen to-miboAccent text-white">
+      <section className="py-20 bg-gradient-to-br from-[#212154] to-[#1a1a46] text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Take the First Step Today
           </h2>
-          <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90">
+
+          <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90 font-semibold">
             Your mental health matters. Reach out to us and begin your journey
             to wellness. We're here to support you every step of the way.
           </p>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handlePhoneClick}
-              className="bg-white text-miboGreen px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
+              className="bg-white text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
             >
               <Phone className="w-5 h-5" />
               Call {phoneNumber}
             </button>
+
             <button
               onClick={handleWhatsAppClick}
               className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
@@ -543,7 +581,7 @@ const KochiLanding = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-miboDark text-white py-12">
+      <footer className="bg-[#212154] text-white py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
@@ -557,6 +595,7 @@ const KochiLanding = () => {
                 and innovation.
               </p>
             </div>
+
             <div>
               <h3 className="text-lg font-bold mb-4">Contact</h3>
               <div className="space-y-2 text-sm opacity-70">
@@ -568,11 +607,13 @@ const KochiLanding = () => {
                 </p>
               </div>
             </div>
+
             <div>
               <h3 className="text-lg font-bold mb-4">Location</h3>
               <p className="text-sm opacity-70 leading-relaxed">{address}</p>
             </div>
           </div>
+
           <div className="border-t border-white/20 pt-6 text-center">
             <p className="text-sm opacity-70">
               © 2024 Mibo Mental Health. All rights reserved.
@@ -594,4 +635,4 @@ const KochiLanding = () => {
   );
 };
 
-export default KochiLanding;
+export default BangaloreLanding;
