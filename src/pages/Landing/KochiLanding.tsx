@@ -584,16 +584,8 @@ const BangaloreLanding = () => {
       <footer className="bg-[#212154] text-white py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <img
-                src={logo}
-                alt="Mibo Logo"
-                className="h-12 w-auto mb-4 opacity-80"
-              />
-              <p className="text-sm opacity-70 leading-relaxed">
-                Redefining premium mental healthcare with compassion, science,
-                and innovation.
-              </p>
+            <div className="flex items-center justify-center bg-white rounded-2xl w-24 h-24 mb-4 shadow-sm">
+              <img src={logo} alt="Mibo Logo" className="h-12 w-auto" />
             </div>
 
             <div>
