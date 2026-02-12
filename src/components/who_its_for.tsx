@@ -1,8 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import meetingImage1 from "../assets/whoitsfor1.png";
-import meetingImage2 from "../assets/whoitsfor2.png";
-import meetingImage3 from "../assets/whoitsfor3.png";
+import familyImage from "../assets/mibo-family.jpg";
+import individualImage from "../assets/mibo-individual-counselling.jpg";
+import coupleImage from "../assets/mibo-couple.jpg";
+import childrenImage from "../assets/mibo_children.jpg";
+import corporateImage from "../assets/mibo-corporate.jpg";
 
 const CorporateLanding: React.FC = () => {
   const cards = [
@@ -10,31 +12,31 @@ const CorporateLanding: React.FC = () => {
       title: "For Families",
       description:
         "Personalized programs that help families strengthen communication, build resilience, and support each other.",
-      image: meetingImage1,
+      image: familyImage,
     },
     {
       title: "For Individuals",
       description:
         "Tailored experiences designed for self-growth, mental well-being, and achieving personal goals.",
-      image: meetingImage2,
+      image: individualImage,
     },
     {
       title: "For Couples",
       description:
         "Workshops and resources that help couples improve understanding, strengthen bonds, and grow together.",
-      image: meetingImage3,
+      image: coupleImage,
     },
     {
       title: "For Children",
       description:
         "Engaging and age-appropriate activities that support emotional development, creativity, and confidence.",
-      image: meetingImage3,
+      image: childrenImage,
     },
     {
       title: "For Corporates",
       description:
         "Enterprise-ready infrastructure designed to deliver real-time impact data, enabling tailored programs that drive measurable outcomes.",
-      image: meetingImage1,
+      image: corporateImage,
     },
   ];
 
@@ -78,7 +80,10 @@ const CorporateLanding: React.FC = () => {
                 <img
                   src={card.image}
                   alt={card.title}
-                  className="absolute bottom-0 right-0 w-60 h-auto object-cover rounded-br-3xl"
+                  className="absolute bottom-0 right-0 w-60 h-auto object-cover"
+                  style={{
+                    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+                  }}
                 />
               </motion.div>
             );

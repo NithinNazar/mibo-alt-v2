@@ -4,7 +4,7 @@ import { MapPin, Star } from "lucide-react";
 import { motion, type Variants, AnimatePresence } from "framer-motion";
 import bengaluruImg from "../assets/mibo_bangalore.jpg";
 import mumbaiImg from "../assets/mibo_mumbai.jpg";
-import kochiImg from "../assets/mibo_kochi.jpg";
+import kochiImg from "../assets/mibo-kochi-centre-1.jpg";
 
 const LocationCardsSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

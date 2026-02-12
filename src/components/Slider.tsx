@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import slide1 from "../assets/individual_therapy.jpg";
-import slide2 from "../assets/group_session.jpg";
+import slide1 from "../assets/mibo-individual-counselling.jpg";
+import slide2 from "../assets/mibo-group-therapy.jpg";
 import slide3 from "../assets/online_counselling.jpg";
 import slide4 from "../assets/famlily_therapy.jpg";
+import slide5 from "../assets/mibo-wellness-program.jpg";
 
 const PremiumSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -42,8 +43,7 @@ const PremiumSlider = () => {
     },
     {
       id: 5,
-      image:
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=600&fit=crop",
+      image: slide5,
       title: "Wellness Programs",
       subtitle: "Holistic mental health approach",
     },
@@ -102,7 +102,8 @@ const PremiumSlider = () => {
     const swipeThreshold = 50; // sensitivity
 
     if (Math.abs(deltaX) > swipeThreshold) {
-      if (deltaX > 0) nextSlide(); // swipe left → next
+      if (deltaX > 0)
+        nextSlide(); // swipe left → next
       else prevSlide(); // swipe right → previous
       pauseTemporarily(); // pause auto-scroll after swipe
     }

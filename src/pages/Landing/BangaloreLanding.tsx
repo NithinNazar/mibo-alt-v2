@@ -17,20 +17,38 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo1.png";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg";
-import therapyImage from "../../assets/individual_therapy.jpg";
 import groupImage from "../../assets/group_session.jpg";
-import familyImage from "../../assets/famlily_therapy.jpg";
+import familyImage from "../../assets/mibo-family.jpg";
 import onlineImage from "../../assets/online.jpg";
-import inPersonImage from "../../assets/In-person.jpg";
-import whoItsFor1 from "../../assets/whoitsfor1.png";
-import whoItsFor2 from "../../assets/whoitsfor2.png";
-import whoItsFor3 from "../../assets/whoitsfor3.png";
+import inPersonImage from "../../assets/mbo-inperson.jpg";
+import certifiedExpertBg from "../../assets/mibo-certified-expert.jpg";
+import supportBg from "../../assets/mibo-247-support.jpg";
+import locationBg from "../../assets/mibo-bangalore-centre-2.jpg";
+import provenBg from "../../assets/mibo-proven.jpg";
+import individualImage from "../../assets/mibo-individual-counselling.jpg";
+import coupleImage from "../../assets/mibo-couple.jpg";
+import bangaloreRec1 from "../../assets/mibo-bangalore-rec-1.jpg";
+import bangaloreRec2 from "../../assets/mibo-bangalore-rec-2.jpg";
+import bangaloreRec3 from "../../assets/mibo-bangalore-rec-3.jpg";
+import bangaloreRec4 from "../../assets/mibo-bangalore-rec-4.jpg";
 
 const BangaloreLanding = () => {
   const phoneNumber = "9083335000";
   const email = "reach@mibocare.com";
   const address =
     "22, 32nd E Cross Rd, near Carmel Convent School, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041";
+
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [touchStart, setTouchStart] = React.useState(0);
+  const [touchEnd, setTouchEnd] = React.useState(0);
+
+  const centreImages = [
+    bangaloreImage,
+    bangaloreRec1,
+    bangaloreRec2,
+    bangaloreRec3,
+    bangaloreRec4,
+  ];
 
   const handlePhoneClick = () => {
     window.location.href = `tel:${phoneNumber}`;
@@ -40,13 +58,49 @@ const BangaloreLanding = () => {
     window.open(`https://wa.me/91${phoneNumber}`, "_blank");
   };
 
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % centreImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + centreImages.length) % centreImages.length,
+    );
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      nextSlide();
+    }
+    if (touchStart - touchEnd < -75) {
+      prevSlide();
+    }
+  };
+
+  React.useEffect(() => {
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const services = [
     {
       icon: <Heart className="w-8 h-8 text-miboGreen" />,
       title: "Individual Counseling",
       description:
         "One-on-one sessions tailored to your unique needs with experienced therapists",
-      image: therapyImage,
+      image: individualImage,
     },
     {
       icon: <Users className="w-8 h-8 text-miboGreen" />,
@@ -84,24 +138,28 @@ const BangaloreLanding = () => {
       title: "Certified Experts",
       description:
         "Highly qualified psychologists, psychiatrists, and counselors with proven expertise",
+      bgImage: certifiedExpertBg,
     },
     {
       icon: <Clock className="w-12 h-12 text-miboAccent" />,
       title: "24/7 Support",
       description:
         "Round-the-clock assistance when you need it most, including emergency support",
+      bgImage: supportBg,
     },
     {
       icon: <MapPin className="w-12 h-12 text-miboAccent" />,
       title: "Central Location",
       description:
         "Conveniently located in Jayanagar, easily accessible from all parts of Bangalore",
+      bgImage: locationBg,
     },
     {
       icon: <CheckCircle className="w-12 h-12 text-miboAccent" />,
       title: "Proven Results",
       description:
         "Thousands of successful treatment outcomes with evidence-based therapeutic methods",
+      bgImage: provenBg,
     },
   ];
 
@@ -140,17 +198,17 @@ const BangaloreLanding = () => {
 
   const whoItsFor = [
     {
-      image: whoItsFor1,
+      image: individualImage,
       title: "Individuals",
       description: "Personal growth and mental wellness for everyone",
     },
     {
-      image: whoItsFor2,
+      image: coupleImage,
       title: "Couples",
       description: "Strengthen your relationship and communication",
     },
     {
-      image: whoItsFor3,
+      image: familyImage,
       title: "Families",
       description: "Build healthier family dynamics and connections",
     },
@@ -187,7 +245,7 @@ const BangaloreLanding = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${groupImage})`,
+            backgroundImage: `url(${bangaloreImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -211,11 +269,35 @@ const BangaloreLanding = () => {
 
             {/* Heading */}
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span className="text-[#30baa3]">Welcome to </span>
-              <span className="text-[#212154]">Mibo Bangalore</span>
+              <span
+                className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                style={{
+                  color: "#30baa3",
+                  textShadow: "0 0 30px rgba(255, 255, 255, 0.5)",
+                }}
+              >
+                Welcome to{" "}
+              </span>
+              <span
+                className="text-[#212154] drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                style={{
+                  filter: "brightness(1.5) saturate(1.1)",
+                  textShadow:
+                    "0 0 30px rgba(255, 255, 255, 0.6), 0 2px 4px rgba(255,255,255,0.8)",
+                }}
+              >
+                Mibo Bangalore
+              </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-miboText max-w-3xl font-semibold">
+            <p
+              className="text-xl md:text-2xl text-miboText max-w-3xl font-semibold"
+              style={{
+                filter: "brightness(1.3)",
+                textShadow:
+                  "0 0 20px rgba(255, 255, 255, 0.7), 0 2px 4px rgba(255,255,255,0.9)",
+              }}
+            >
               Experience personalized mental health care at Mibo's Bengaluru
               centre — a serene space designed to help you heal, reflect, and
               grow.
@@ -258,21 +340,32 @@ const BangaloreLanding = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-[#212154]/15"
+                className="relative bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-[#212154]/15 overflow-hidden"
               >
-                <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                  {React.cloneElement(feature.icon, {
-                    className: "w-12 h-12 text-[#30baa3]",
-                  })}
+                {/* Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-50"
+                  style={{
+                    backgroundImage: `url(${feature.bgImage})`,
+                  }}
+                ></div>
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    {React.cloneElement(feature.icon, {
+                      className: "w-12 h-12 text-[#30baa3]",
+                    })}
+                  </div>
+
+                  <h3 className="text-2xl font-bold text-[#212154] mb-4">
+                    {feature.title}
+                  </h3>
+
+                  <p className="text-miboText text-lg leading-relaxed font-semibold">
+                    {feature.description}
+                  </p>
                 </div>
-
-                <h3 className="text-2xl font-bold text-[#212154] mb-4">
-                  {feature.title}
-                </h3>
-
-                <p className="text-miboText text-lg leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
             ))}
           </div>
@@ -479,12 +572,80 @@ const BangaloreLanding = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src={bangaloreImage}
-                alt="Mibo Bangalore Centre"
-                className="w-full h-full object-cover"
-              />
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <div
+                className="relative w-full h-96 md:h-[500px]"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                {centreImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Mibo Bangalore Centre ${index + 1}`}
+                    className={`absolute w-full h-full object-cover transition-opacity duration-500 ${
+                      index === currentSlide ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                ))}
+
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#212154] p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+                  aria-label="Previous image"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#212154] p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+                  aria-label="Next image"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {centreImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? "bg-[#30baa3] w-8"
+                        : "bg-white/60 hover:bg-white/80"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

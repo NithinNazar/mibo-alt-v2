@@ -1,4 +1,4 @@
-import chattingImg from "../assets/chatting.jpg";
+import realCareImg from "../assets/mibo-real-care.jpg";
 import { motion, type Variants } from "framer-motion";
 
 export default function CareServiceComponent() {
@@ -81,7 +81,7 @@ export default function CareServiceComponent() {
             <motion.div variants={fadeInVariant} className="relative">
               <div className="w-80 h-96 bg-gradient-to-br from-amber-100 to-orange-200 rounded-3xl flex items-center justify-center">
                 <img
-                  src={chattingImg}
+                  src={realCareImg}
                   alt="Woman using mobile app"
                   className="w-full h-full object-cover rounded-3xl"
                 />
