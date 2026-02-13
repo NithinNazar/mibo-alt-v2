@@ -16,6 +16,7 @@ import {
   Star,
 } from "lucide-react";
 import logo from "../../assets/logo1.png";
+import heroImage from "../../assets/mibo-doc-pat.jpg";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg";
 import groupImage from "../../assets/group_session.jpg";
 import familyImage from "../../assets/mibo-family.jpg";
@@ -23,14 +24,23 @@ import onlineImage from "../../assets/online.jpg";
 import inPersonImage from "../../assets/mbo-inperson.jpg";
 import certifiedExpertBg from "../../assets/mibo-certified-expert.jpg";
 import supportBg from "../../assets/mibo-247-support.jpg";
-import locationBg from "../../assets/mibo-bangalore-centre-2.jpg";
-import provenBg from "../../assets/mibo-proven.jpg";
 import individualImage from "../../assets/mibo-individual-counselling.jpg";
 import coupleImage from "../../assets/mibo-couple.jpg";
 import bangaloreRec1 from "../../assets/mibo-bangalore-rec-1.jpg";
 import bangaloreRec2 from "../../assets/mibo-bangalore-rec-2.jpg";
 import bangaloreRec3 from "../../assets/mibo-bangalore-rec-3.jpg";
 import bangaloreRec4 from "../../assets/mibo-bangalore-rec-4.jpg";
+import bangaloreReal from "../../assets/mibo-bangalore-real.jpg";
+import miboReal1 from "../../assets/mibo-real-1.jpg";
+import miboReal2 from "../../assets/mibo-real-2.jpg";
+import miboReal3 from "../../assets/mibo-real-3.jpg";
+import miboReal4 from "../../assets/mibo-real-4.jpg";
+import miboReal5 from "../../assets/mibo-real-5.jpg";
+import miboReal6 from "../../assets/mibo-real-6.jpg";
+import miboReal7 from "../../assets/mibo-real-7.jpg";
+import confidentialImage from "../../assets/mibo-individual.jpg";
+import availabilityImage from "../../assets/mibo-avail.jpg";
+import whyChooseImage from "../../assets/mibo-why-choose.jpg";
 
 const BangaloreLanding = () => {
   const phoneNumber = "9083335000";
@@ -44,10 +54,18 @@ const BangaloreLanding = () => {
 
   const centreImages = [
     bangaloreImage,
+    bangaloreReal,
     bangaloreRec1,
     bangaloreRec2,
     bangaloreRec3,
     bangaloreRec4,
+    miboReal1,
+    miboReal2,
+    miboReal3,
+    miboReal4,
+    miboReal5,
+    miboReal6,
+    miboReal7,
   ];
 
   const handlePhoneClick = () => {
@@ -134,32 +152,32 @@ const BangaloreLanding = () => {
 
   const features = [
     {
-      icon: <Award className="w-12 h-12 text-miboAccent" />,
-      title: "Certified Experts",
+      icon: <Award className="w-12 h-12 text-[#212154]" />,
+      title: "Certified Psychologists & Psychiatrists",
       description:
         "Highly qualified psychologists, psychiatrists, and counselors with proven expertise",
       bgImage: certifiedExpertBg,
     },
     {
-      icon: <Clock className="w-12 h-12 text-miboAccent" />,
-      title: "24/7 Support",
+      icon: <CheckCircle className="w-12 h-12 text-[#212154]" />,
+      title: "Evidence-Based Treatment",
       description:
-        "Round-the-clock assistance when you need it most, including emergency support",
+        "Scientifically proven therapeutic approaches tailored to your unique needs and goals",
       bgImage: supportBg,
     },
     {
-      icon: <MapPin className="w-12 h-12 text-miboAccent" />,
-      title: "Central Location",
+      icon: <Shield className="w-12 h-12 text-[#212154]" />,
+      title: "100% Confidential Care",
       description:
-        "Conveniently located in Jayanagar, easily accessible from all parts of Bangalore",
-      bgImage: locationBg,
+        "Your privacy is our priority. All sessions are completely confidential and secure",
+      bgImage: confidentialImage,
     },
     {
-      icon: <CheckCircle className="w-12 h-12 text-miboAccent" />,
-      title: "Proven Results",
+      icon: <Clock className="w-12 h-12 text-[#212154]" />,
+      title: "Fast Appointment Availability",
       description:
-        "Thousands of successful treatment outcomes with evidence-based therapeutic methods",
-      bgImage: provenBg,
+        "Get help when you need it. Quick appointment scheduling with minimal wait times",
+      bgImage: availabilityImage,
     },
   ];
 
@@ -176,6 +194,21 @@ const BangaloreLanding = () => {
     },
     {
       text: "The support I received here was life-changing. Forever grateful to the entire team at Mibo.",
+      author: "Anonymous Patient",
+      rating: 5,
+    },
+    {
+      text: "Professional, caring, and effective. The therapist really understood my struggles and helped me work through them.",
+      author: "Anonymous Patient",
+      rating: 5,
+    },
+    {
+      text: "I was hesitant at first, but the team made me feel so comfortable. The progress I've made is incredible.",
+      author: "Anonymous Patient",
+      rating: 5,
+    },
+    {
+      text: "Excellent service and genuine care. The psychiatrist was thorough and the treatment plan really works.",
       author: "Anonymous Patient",
       rating: 5,
     },
@@ -245,76 +278,66 @@ const BangaloreLanding = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${bangaloreImage})`,
+            backgroundImage: `url(${heroImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         ></div>
 
-        {/* Gradient overlay - left visible, right faded */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-white/95"></div>
-
-        {/* Additional overlay for better text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#30baa3]/18 to-[#30baa3]/28"></div>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
 
         {/* Decorative Circles */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-miboAccent/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-miboGreen/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-miboLightGreen/30 rounded-full blur-2xl"></div>
 
         <div className="container mx-auto px-6 py-20 relative z-10">
-          <div className="flex flex-col items-center text-center space-y-8 animate-fadeIn">
+          <div className="flex flex-col items-start text-left space-y-6 max-w-3xl animate-fadeIn">
             {/* Logo */}
-            <img src={logo} alt="Mibo Logo" className="h-24 w-auto mb-4" />
+            <img src={logo} alt="Mibo Logo" className="h-20 w-auto mb-2" />
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span
-                className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                style={{
-                  color: "#30baa3",
-                  textShadow: "0 0 30px rgba(255, 255, 255, 0.5)",
-                }}
-              >
-                Welcome to{" "}
-              </span>
-              <span
-                className="text-[#212154] drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
-                style={{
-                  filter: "brightness(1.5) saturate(1.1)",
-                  textShadow:
-                    "0 0 30px rgba(255, 255, 255, 0.6), 0 2px 4px rgba(255,255,255,0.8)",
-                }}
-              >
-                Mibo Bangalore
-              </span>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight text-white">
+              Talk to a Mental Health Specialist in Bangalore Today
             </h1>
 
-            <p
-              className="text-xl md:text-2xl text-miboText max-w-3xl font-semibold"
-              style={{
-                filter: "brightness(1.3)",
-                textShadow:
-                  "0 0 20px rgba(255, 255, 255, 0.7), 0 2px 4px rgba(255,255,255,0.9)",
-              }}
-            >
-              Experience personalized mental health care at Mibo's Bengaluru
-              centre — a serene space designed to help you heal, reflect, and
-              grow.
+            <p className="text-xl md:text-2xl text-white/90 font-semibold">
+              Confidential therapy, psychiatry, and wellness care tailored to
+              you
             </p>
 
+            {/* Trust Badges */}
+            <div className="flex flex-wrap gap-4 text-white">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Users className="w-5 h-5 text-[#30baa3]" />
+                <span className="font-semibold">Trusted by 5000+ Patients</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Shield className="w-5 h-5 text-[#30baa3]" />
+                <span className="font-semibold">100% Confidential</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Award className="w-5 h-5 text-[#30baa3]" />
+                <span className="font-semibold">Certified Experts</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Heart className="w-5 h-5 text-[#30baa3]" />
+                <span className="font-semibold">No Judgement Support</span>
+              </div>
+            </div>
+
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
                 onClick={handlePhoneClick}
-                className="bg-[#212154] hover:bg-[#1a1a46] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
                 Call Now: {phoneNumber}
               </button>
               <button
                 onClick={handleWhatsAppClick}
-                className="bg-white hover:bg-miboLightGreen text-miboGreen px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 border-2 border-miboGreen"
+                className="bg-white hover:bg-gray-100 text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <MessageCircle className="w-5 h-5" />
                 Chat on WhatsApp
@@ -327,14 +350,25 @@ const BangaloreLanding = () => {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-8">
             Why Choose Mibo Bangalore?
           </h2>
-          <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto font-semibold">
-            Premier mental health care in India's Silicon Valley. From
-            one-on-one therapy to psychiatry and wellness programs, Mibo offers
-            evidence-based care designed around your goals.
-          </p>
+
+          {/* Image with overlay text */}
+          <div className="relative w-full max-w-2xl mx-auto h-96 md:h-[500px] rounded-3xl overflow-hidden mb-12 shadow-xl">
+            <img
+              src={whyChooseImage}
+              alt="Mibo Bangalore Centre"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#212154]/80 to-[#212154]/40 flex items-center justify-center px-6">
+              <p className="text-white text-lg md:text-2xl text-center max-w-xl font-semibold leading-relaxed">
+                Premier mental health care in India's Silicon Valley. From
+                one-on-one therapy to psychiatry and wellness programs, Mibo
+                offers evidence-based care designed around your goals.
+              </p>
+            </div>
+          </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
@@ -354,7 +388,7 @@ const BangaloreLanding = () => {
                 <div className="relative z-10">
                   <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                     {React.cloneElement(feature.icon, {
-                      className: "w-12 h-12 text-[#30baa3]",
+                      className: "w-12 h-12 text-[#212154]",
                     })}
                   </div>
 
@@ -447,6 +481,50 @@ const BangaloreLanding = () => {
         </div>
       </section>
 
+      {/* Need Help Now Section */}
+      <section className="py-20 bg-gradient-to-br from-[#30baa3]/10 to-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#212154] mb-6">
+              Need Help Now?
+            </h2>
+            <p className="text-xl text-miboText mb-10 font-semibold">
+              Our care team can guide you to the right specialist quickly.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300">
+                <Phone className="w-12 h-12 text-[#30baa3] mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-[#212154] mb-3">
+                  Call Now - Speak Immediately
+                </h3>
+                <button
+                  onClick={handlePhoneClick}
+                  className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
+                >
+                  <Phone className="w-5 h-5" />
+                  +91 {phoneNumber}
+                </button>
+              </div>
+
+              <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300">
+                <MessageCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-[#212154] mb-3">
+                  WhatsApp Now - Get Quick Response
+                </h3>
+                <button
+                  onClick={handleWhatsAppClick}
+                  className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {phoneNumber}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
         <div className="container mx-auto px-6">
@@ -458,30 +536,32 @@ const BangaloreLanding = () => {
             Real stories from real people who found healing and hope at Mibo.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 fill-[#212154] text-[#212154]"
-                    />
-                  ))}
+          <div className="overflow-x-auto pb-8 hide-scrollbar">
+            <div className="flex gap-6 min-w-max px-4">
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="w-96 bg-gradient-to-br from-[#212154]/8 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex-shrink-0"
+                >
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-5 h-5 fill-[#212154] text-[#212154]"
+                      />
+                    ))}
+                  </div>
+
+                  <p className="text-miboText text-lg italic mb-4 leading-relaxed">
+                    "{testimonial.text}"
+                  </p>
+
+                  <p className="text-[#212154] font-semibold">
+                    - {testimonial.author}
+                  </p>
                 </div>
-
-                <p className="text-miboText text-lg italic mb-4 leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-
-                <p className="text-[#212154] font-semibold">
-                  - {testimonial.author}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -568,6 +648,20 @@ const BangaloreLanding = () => {
                     </h3>
                     <p className="text-miboText">{email}</p>
                   </div>
+                </div>
+
+                {/* Map */}
+                <div className="rounded-2xl overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.google.com/maps?q=12.926886115826436,77.5959190482547&hl=en&z=15&output=embed"
+                    width="100%"
+                    height="300"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Mibo Bangalore Location"
+                  ></iframe>
                 </div>
               </div>
             </div>
