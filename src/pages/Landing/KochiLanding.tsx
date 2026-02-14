@@ -48,7 +48,7 @@ const BangaloreLanding = () => {
   const phoneNumber = "9083335000";
   const email = "reach@mibocare.com";
   const address =
-    "22, 32nd E Cross Rd, near Carmel Convent School, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041";
+    "13/1818, Kannanthodathu Rd, near Changampuzha Park Metro Station, Devankulangara, Mamangalam, Edappally, Kochi, Ernakulam, Kerala 682024";
 
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [touchStart, setTouchStart] = React.useState(0);
