@@ -77,6 +77,7 @@ export default function ExpertsPage() {
       console.log(
         `Loaded ${transformedDoctors.length} clinicians from database`,
       );
+      console.log("Sample clinician data:", transformedDoctors[0]);
     } catch (error: any) {
       console.error("Failed to fetch clinicians from database:", error);
       // Show empty state - no fallback
@@ -109,33 +110,39 @@ export default function ExpertsPage() {
     // Filter by category (role/designation)
     if (selectedCategory !== "All Experts") {
       filtered = filtered.filter((doc) => {
-        const designation = doc.designation.toLowerCase();
-        const qualification = doc.qualification.toLowerCase();
+        const designation = (doc.designation || "").toLowerCase();
+        const qualification = (doc.qualification || "").toLowerCase();
+        const specialization = (doc.designation || "").toLowerCase(); // designation contains specialization
 
         switch (selectedCategory) {
           case "Therapists":
             return (
               designation.includes("therapist") ||
               designation.includes("counselling") ||
-              designation.includes("counseling")
+              designation.includes("counseling") ||
+              specialization.includes("therapist")
             );
           case "Psychiatrists":
             return (
               designation.includes("psychiatrist") ||
               qualification.includes("psychiatry") ||
               qualification.includes("mbbs") ||
-              qualification.includes("md")
+              qualification.includes("md") ||
+              specialization.includes("psychiatrist")
             );
           case "Clinical Psychologists":
             return (
               designation.includes("clinical psychologist") ||
-              qualification.includes("clinical psychology")
+              qualification.includes("clinical psychology") ||
+              specialization.includes("clinical psychologist")
             );
           case "Counsellors":
             return (
               designation.includes("counsellor") ||
               designation.includes("counselor") ||
-              designation.includes("counselling psychologist")
+              designation.includes("counselling psychologist") ||
+              specialization.includes("counsellor") ||
+              specialization.includes("counselor")
             );
           default:
             return true;
@@ -176,7 +183,13 @@ export default function ExpertsPage() {
     }
 
     return filtered;
-  }, [selectedCategory, selectedFilters]);
+  }, [selectedCategory, selectedFilters, doctors]);
+
+  // Debug: Log filtering results
+  console.log("Total doctors:", doctors.length);
+  console.log("Filtered doctors:", filteredDoctors.length);
+  console.log("Selected category:", selectedCategory);
+  console.log("Selected filters:", selectedFilters);
 
   if (!isReady || loading) {
     return (

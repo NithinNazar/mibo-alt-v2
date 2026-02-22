@@ -112,7 +112,7 @@ class ClinicianService {
     try {
       // Create a custom axios instance without auth interceptor for this public endpoint
       const response = await axios.get<APIResponse<Clinician[]>>(
-        `${apiClient.defaults.baseURL}/clinicians`,
+        `${apiClient.defaults.baseURL}/users/clinicians`,
         {
           timeout: 30000,
           headers: {
@@ -160,7 +160,7 @@ class ClinicianService {
   async getClinicianById(id: number): Promise<Clinician> {
     try {
       const response = await apiClient.get<APIResponse<Clinician>>(
-        `/clinicians/${id}`,
+        `/users/clinicians/${id}`,
       );
       return response.data.data;
     } catch (error) {
