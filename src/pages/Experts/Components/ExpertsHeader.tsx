@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import miboIcon from "../../../assets/logo1.png";
+import miboIcon from "../../../assets/logo1.png?w=200&format=webp&quality=85";
 
 const ExpertsHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);

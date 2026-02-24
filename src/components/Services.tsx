@@ -5,14 +5,14 @@ import { motion, type Variants } from "framer-motion";
 import Lottie from "lottie-react";
 import screeningAnimation from "../assets/animations/MedicalAdd.json";
 
-import inPatientImg from "../assets/In-patient.jpg";
-import inPersonImg from "../assets/In-person.jpg";
-import onlineImg from "../assets/online.jpg";
+import inPatientImg from "../assets/In-patient.jpg?w=800&format=webp&quality=75";
+import inPersonImg from "../assets/In-person.jpg?w=800&format=webp&quality=75";
+import onlineImg from "../assets/online.jpg?w=800&format=webp&quality=75";
 
 const MentalHealthServices: React.FC = () => {
   const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState<string | null>(
-    "in-patient"
+    "in-patient",
   );
 
   const getServiceImage = (serviceId: string) => {

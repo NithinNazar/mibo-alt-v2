@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import { Heart, Users, Play, UserCheck } from "lucide-react";
 import Lottie from "lottie-react";
-import sampleVideo from "../assets/therapy and psychatry.mp4";
+const sampleVideo =
+  "https://ajadcreatives.com/wp-content/uploads/2026/02/therapy-and-psychatry.mp4";
 import offeringsAnimation from "../assets/animations/healthinsurance.json";
 
 const OfferingsAndTherapy = () => {

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication Skip Feature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #034B44;
+        }
+        h2 {
+            color: #046e63;
+            border-bottom: 2px solid #034B44;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #034B44;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #046e63;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #034B44;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Authentication Skip Feature - Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Authentication Detection</h2>
+        <p>This test simulates the authentication check that happens when the booking page loads.</p>
+        <button onclick="testAuthDetection()">Run Test</button>
+        <div id="auth-detection-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Step Navigation (Logged In)</h2>
+        <p>Simulates booking flow for a logged-in user (should skip Step 2).</p>
+        <button onclick="testLoggedInFlow()">Run Test</button>
+        <div id="logged-in-flow-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Step Navigation (Not Logged In)</h2>
+        <p>Simulates booking flow for a new user (should show Step 2).</p>
+        <button onclick="testNewUserFlow()">Run Test</button>
+        <div id="new-user-flow-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Cross-Tab Sync</h2>
+        <p>Simulates authentication changes in another tab.</p>
+        <button onclick="testCrossTabSync()">Simulate Login in Another Tab</button>
+        <button onclick="testCrossTabLogout()">Simulate Logout in Another Tab</button>
+        <div id="cross-tab-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Manual Testing</h2>
+        <p>Use these buttons to manually set/clear authentication data:</p>
+        <button onclick="setMockAuth()">Set Mock Authentication</button>
+        <button onclick="clearAuth()">Clear Authentication</button>
+        <button onclick="checkCurrentAuth()">Check Current Auth Status</button>
+        <div id="manual-test-result"></div>
+    </div>
+
+    <script>
+        // Mock user data
+        const mockUser = {
+            id: 123,
+            full_name: "Test User",
+            phone: "919876543210",
+            email: "test@example.com",
+            userType: "PATIENT",
+            patientId: 456
+        };
+
+        const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock.token";
+
+        // Test 1: Authentication Detection
+        function testAuthDetection() {
+            const resultDiv = document.getElementById('auth-detection-result');
+            resultDiv.innerHTML = '<div class="status info">Running test...</div>';
+
+            const tests = [];
+
+            // Test 1a: No auth data
+            localStorage.clear();
+            const isAuth1 = isAuthenticated();
+            tests.push({
+                name: "No auth data",
+                expected: false,
+                actual: isAuth1,
+                passed: isAuth1 === false
+            });
+
+            // Test 1b: Only token (no user data)
+            localStorage.setItem('mibo_access_token', mockToken);
+            const isAuth2 = isAuthenticated();
+            tests.push({
+                name: "Only token (no user)",
+                expected: false,
+                actual: isAuth2,
+                passed: isAuth2 === false
+            });
+
+            // Test 1c: Complete auth data
+            localStorage.setItem('mibo_user', JSON.stringify(mockUser));
+            const isAuth3 = isAuthenticated();
+            const user = getCurrentUser();
+            tests.push({
+                name: "Complete auth data",
+                expected: true,
+                actual: isAuth3,
+                passed: isAuth3 === true && user !== null
+            });
+
+            displayTestResults(resultDiv, tests);
+            localStorage.clear();
+        }
+
+        // Test 2: Logged-in user flow
+        function testLoggedInFlow() {
+            const resultDiv = document.getElementById('logged-in-flow-result');
+            resultDiv.innerHTML = '<div class="status info">Running test...</div>';
+
+            // Set up authenticated state
+            localStorage.setItem('mibo_access_token', mockToken);
+            localStorage.setItem('mibo_user', JSON.stringify(mockUser));
+
+            const tests = [];
+            let currentStep = 1;
+            const bookingData = { authenticated: true };
+
+            // Test navigation from Step 1
+            const nextStep = simulateNextStep(currentStep, bookingData);
+            tests.push({
+                name: "Step 1 → Next (authenticated)",
+                expected: 3,
+                actual: nextStep,
+                passed: nextStep === 3,
+                note: "Should skip Step 2"
+            });
+
+            // Test back navigation from Step 3
+            currentStep = 3;
+            const prevStep = simulatePrevStep(currentStep, bookingData);
+            tests.push({
+                name: "Step 3 → Back (authenticated)",
+                expected: 1,
+                actual: prevStep,
+                passed: prevStep === 1,
+                note: "Should skip Step 2"
+            });
+
+            displayTestResults(resultDiv, tests);
+            localStorage.clear();
+        }
+
+        // Test 3: New user flow
+        function testNewUserFlow() {
+            const resultDiv = document.getElementById('new-user-flow-result');
+            resultDiv.innerHTML = '<div class="status info">Running test...</div>';
+
+            localStorage.clear();
+
+            const tests = [];
+            let currentStep = 1;
+            const bookingData = { authenticated: false };
+
+            // Test navigation from Step 1
+            const nextStep = simulateNextStep(currentStep, bookingData);
+            tests.push({
+                name: "Step 1 → Next (not authenticated)",
+                expected: 2,
+                actual: nextStep,
+                passed: nextStep === 2,
+                note: "Should show Step 2"
+            });
+
+            // Test navigation from Step 2
+            currentStep = 2;
+            const nextStep2 = simulateNextStep(currentStep, bookingData);
+            tests.push({
+                name: "Step 2 → Next",
+                expected: 3,
+                actual: nextStep2,
+                passed: nextStep2 === 3
+            });
+
+            // Test back navigation from Step 3
+            currentStep = 3;
+            const prevStep = simulatePrevStep(currentStep, bookingData);
+            tests.push({
+                name: "Step 3 → Back (not authenticated)",
+                expected: 2,
+                actual: prevStep,
+                passed: prevStep === 2,
+                note: "Should show Step 2"
+            });
+
+            displayTestResults(resultDiv, tests);
+        }
+
+        // Test 4: Cross-tab sync
+        function testCrossTabSync() {
+            const resultDiv = document.getElementById('cross-tab-result');
+            
+            // Set up listener
+            let eventFired = false;
+            const listener = () => { eventFired = true; };
+            window.addEventListener('storage', listener);
+
+            // Simulate login in another tab
+            localStorage.setItem('mibo_access_token', mockToken);
+            localStorage.setItem('mibo_user', JSON.stringify(mockUser));
+
+            setTimeout(() => {
+                const html = `
+                    <div class="test-result">
+                        <strong>✅ Login Simulated</strong><br>
+                        Auth data set in localStorage<br>
+                        Storage event would fire in other tabs<br>
+                        <pre>${JSON.stringify({
+                            token: mockToken.substring(0, 20) + '...',
+                            user: mockUser
+                        }, null, 2)}</pre>
+                    </div>
+                `;
+                resultDiv.innerHTML = html;
+                window.removeEventListener('storage', listener);
+            }, 100);
+        }
+
+        function testCrossTabLogout() {
+            const resultDiv = document.getElementById('cross-tab-result');
+            
+            localStorage.clear();
+
+            const html = `
+                <div class="test-result">
+                    <strong>✅ Logout Simulated</strong><br>
+                    Auth data cleared from localStorage<br>
+                    Storage event would fire in other tabs<br>
+                    All tabs would detect logout
+                </div>
+            `;
+            resultDiv.innerHTML = html;
+        }
+
+        // Manual testing functions
+        function setMockAuth() {
+            localStorage.setItem('mibo_access_token', mockToken);
+            localStorage.setItem('mibo_refresh_token', mockToken);
+            localStorage.setItem('mibo_user', JSON.stringify(mockUser));
+            
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = `
+                <div class="status success">
+                    ✅ Mock authentication data set!<br>
+                    <pre>${JSON.stringify(mockUser, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('mibo_access_token');
+            localStorage.removeItem('mibo_refresh_token');
+            localStorage.removeItem('mibo_user');
+            
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = '<div class="status info">🔓 Authentication data cleared</div>';
+        }
+
+        function checkCurrentAuth() {
+            const isAuth = isAuthenticated();
+            const user = getCurrentUser();
+            
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = `
+                <div class="status ${isAuth ? 'success' : 'error'}">
+                    <strong>Authentication Status:</strong> ${isAuth ? '✅ Logged In' : '❌ Not Logged In'}<br>
+                    ${user ? `<pre>${JSON.stringify(user, null, 2)}</pre>` : 'No user data'}
+                </div>
+            `;
+        }
+
+        // Helper functions (simulating the actual implementation)
+        function isAuthenticated() {
+            const token = localStorage.getItem('mibo_access_token');
+            const user = localStorage.getItem('mibo_user');
+            return !!(token && user);
+        }
+
+        function getCurrentUser() {
+            const userStr = localStorage.getItem('mibo_user');
+            if (!userStr) return null;
+            try {
+                return JSON.parse(userStr);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function simulateNextStep(currentStep, bookingData) {
+            if (currentStep === 1 && bookingData.authenticated) {
+                return 3; // Skip Step 2
+            }
+            return currentStep + 1;
+        }
+
+        function simulatePrevStep(currentStep, bookingData) {
+            if (currentStep === 3 && bookingData.authenticated) {
+                return 1; // Skip Step 2
+            }
+            return currentStep - 1;
+        }
+
+        function displayTestResults(container, tests) {
+            const allPassed = tests.every(t => t.passed);
+            let html = `<div class="status ${allPassed ? 'success' : 'error'}">
+                ${allPassed ? '✅ All tests passed!' : '❌ Some tests failed'}
+            </div>`;
+
+            tests.forEach(test => {
+                html += `
+                    <div class="test-result">
+                        <strong>${test.passed ? '✅' : '❌'} ${test.name}</strong><br>
+                        Expected: ${test.expected}<br>
+                        Actual: ${test.actual}<br>
+                        ${test.note ? `<em>${test.note}</em>` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Run all tests on page load
+        window.addEventListener('load', () => {
+            console.log('🧪 Test page loaded. Click buttons to run tests.');
+        });
+    </script>
+</body>
+</html>

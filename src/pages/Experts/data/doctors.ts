@@ -6,7 +6,7 @@
  */
 
 export interface Doctor {
-  id: number;
+  id: number | string; // Support both string and number IDs from database
   name: string;
   qualification: string;
   designation: string;

@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import ShapeTitle from "./ShapeTitle";
 import FallbackImage from "../../../components/FallbackImage";
-import director from "../assets/director.png";
+import director from "../assets/director.png?w=600&format=webp&quality=85";
 
 const DirectorsNote: React.FC = () => {
   return (

@@ -1,6 +1,6 @@
 // src/pages/BookAppointment/Step1SessionDetails.tsx
 import type { Doctor } from "../Experts/data/doctors";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   MapPin,
   Video,
@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { Clinician, Centre, TimeSlot } from "../../types";
+import { API_BASE_URL } from "../../services/api";
 
 interface Props {
   doctor: Doctor;
@@ -169,7 +170,7 @@ export default function Step1SessionDetails({
     23: { clinicianId: 46, centreId: 3 }, // Dr. Dhruvi - Mumbai
   };
 
-  const realIds = doctorToClinicianMap[doctor.id] || {
+  const realIds = doctorToClinicianMap[Number(doctor.id)] || {
     clinicianId: 24,
     centreId: 1,
   };
@@ -187,7 +188,7 @@ export default function Step1SessionDetails({
 
   const [selectedClinician] = useState<Clinician | null>({
     id: realIds.clinicianId,
-    userId: doctor.id,
+    userId: Number(doctor.id),
     fullName: doctor.name,
     phone: "+919876543210",
     email: null,
@@ -206,6 +207,11 @@ export default function Step1SessionDetails({
 
   const modes = ["In-person", "Video call", "Phone call"];
 
+  // ========== API STATE FOR REAL SLOTS ==========
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+
   // ========== COMPUTED VALUES ==========
 
   /** Month availability map - for calendar UI */
@@ -214,79 +220,61 @@ export default function Step1SessionDetails({
     [calendarMonth],
   );
 
-  // ========== GENERATE MOCK TIME SLOTS ==========
+  // ========== FETCH REAL SLOTS FROM API ==========
   /**
-   * Generate realistic time slots for a selected date
-   * Creates slots that feel dynamic based on date
+   * Fetch available slots from backend when date is selected
    */
-  const generateMockSlots = (date: Date): TimeSlot[] => {
-    const dateKey = toISODateKey(date);
-    const availability = availabilityMap[dateKey] ?? "unavailable";
-
-    if (availability === "unavailable") return [];
-
-    const allSlots: TimeSlot[] = [];
-
-    // Morning slots (9:00 AM - 12:00 PM)
-    const morningSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"];
-
-    // Afternoon slots (2:00 PM - 5:00 PM)
-    const afternoonSlots = [
-      "14:00",
-      "14:30",
-      "15:00",
-      "15:30",
-      "16:00",
-      "16:30",
-    ];
-
-    // Evening slots (6:00 PM - 8:00 PM)
-    const eveningSlots = ["18:00", "18:30", "19:00", "19:30"];
-
-    // Combine all slots
-    const allTimes = [...morningSlots, ...afternoonSlots, ...eveningSlots];
-
-    // For "few" availability, randomly select some slots
-    if (availability === "few") {
-      // Select 4-6 random slots
-      const numSlots = 4 + (date.getDate() % 3);
-      const shuffled = [...allTimes].sort(() => Math.random() - 0.5);
-      const selectedTimes = shuffled.slice(0, numSlots).sort();
-
-      selectedTimes.forEach((time) => {
-        allSlots.push({
-          start_time: time,
-          end_time: time, // Not used in UI
-          available: true,
-        });
-      });
-    } else {
-      // For "available", show most slots
-      allTimes.forEach((time, index) => {
-        // Randomly make some unavailable (10% chance)
-        const isAvailable = (date.getDate() + index) % 10 !== 0;
-        allSlots.push({
-          start_time: time,
-          end_time: time,
-          available: isAvailable,
-        });
-      });
+  useEffect(() => {
+    if (!selectedDate || !selectedClinician || !selectedCentre) {
+      setAvailableSlots([]);
+      return;
     }
 
-    return allSlots;
-  };
+    const fetchSlots = async () => {
+      try {
+        setSlotsLoading(true);
+        setSlotsError(null);
 
-  /**
-   * Generate mock slots when date is selected
-   */
-  const mockSlots = useMemo(() => {
-    if (!selectedDate) return [];
-    return generateMockSlots(selectedDate);
-  }, [selectedDate, availabilityMap]);
+        // Format date as YYYY-MM-DD
+        const dateStr = toISODateKey(selectedDate);
+
+        // Call public API endpoint
+        const response = await fetch(
+          `${API_BASE_URL}/booking/available-slots?clinicianId=${selectedClinician.id}&centreId=${selectedCentre.id}&date=${dateStr}`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch slots");
+        }
+
+        const data = await response.json();
+
+        // API returns { success: true, data: { date, slots: [...] } }
+        const slots = data.data?.slots || [];
+
+        // Transform API response to match TimeSlot interface
+        const transformedSlots: TimeSlot[] = slots.map((slot: any) => ({
+          start_time: slot.startTime,
+          end_time: slot.endTime,
+          available: slot.available,
+        }));
+
+        setAvailableSlots(transformedSlots);
+      } catch (error) {
+        console.error("Error fetching slots:", error);
+        setSlotsError("Failed to load available slots");
+        setAvailableSlots([]);
+      } finally {
+        setSlotsLoading(false);
+      }
+    };
+
+    fetchSlots();
+  }, [selectedDate, selectedClinician, selectedCentre]);
 
   /**
    * Group available slots by period (Morning/Afternoon/Evening)
-   * Uses mock generated slots
+   * Uses REAL API data instead of mock
    */
   const slotsByPeriod = useMemo(() => {
     const grouped: Record<string, TimeSlot[]> = {
@@ -295,7 +283,7 @@ export default function Step1SessionDetails({
       Evening: [],
     };
 
-    mockSlots.forEach((slot) => {
+    availableSlots.forEach((slot) => {
       if (!slot.available) return;
 
       // Parse time to determine period
@@ -311,7 +299,7 @@ export default function Step1SessionDetails({
     });
 
     return grouped;
-  }, [mockSlots]);
+  }, [availableSlots]);
 
   /**
    * Get periods that have available slots
@@ -738,83 +726,112 @@ export default function Step1SessionDetails({
             </div>
           </div>
 
-          {/* Time groups with mock data */}
-          {selectedDate && availablePeriods.length > 0 && (
-            <div className="mt-4 space-y-4">
-              {availablePeriods.map((period) => {
-                const Icon =
-                  period === "Morning"
-                    ? Sunrise
-                    : period === "Afternoon"
-                      ? Sun
-                      : Moon;
-                const slots = slotsByPeriod[period];
-
-                return (
-                  <div key={period} className="mb-4 last:mb-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Icon
-                        className="w-4 h-4"
-                        style={{ color: MIBO.primary }}
-                      />
-                      <h4
-                        className="text-sm font-semibold"
-                        style={{ color: MIBO.primary }}
-                      >
-                        {period}
-                      </h4>
-                      <span className="text-xs text-gray-500">
-                        ({slots.length} slot{slots.length !== 1 ? "s" : ""})
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {slots.map((slot) => {
-                        const active = selectedTime === slot.start_time;
-                        return (
-                          <button
-                            key={slot.start_time}
-                            onClick={() => setSelectedTime(slot.start_time)}
-                            disabled={!slot.available}
-                            className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={
-                              active
-                                ? {
-                                    background: MIBO.primary,
-                                    color: "#fff",
-                                    borderColor: MIBO.primary,
-                                    transform: "scale(1.03)",
-                                  }
-                                : {}
-                            }
-                          >
-                            {slot.start_time}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+          {/* Time groups with real API data */}
+          {selectedDate && slotsLoading && (
+            <div className="mt-4 text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0a107d]"></div>
+              <p className="mt-2 text-sm text-gray-600">
+                Loading available slots...
+              </p>
             </div>
           )}
 
-          {/* If selected date has no availability */}
-          {selectedDate && availablePeriods.length === 0 && (
-            <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+          {selectedDate && slotsError && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-medium text-yellow-800">
-                    No slots available
+                  <p className="text-xs font-medium text-red-800">
+                    Error loading slots
                   </p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    No time slots are available for this date. Please select
-                    another date.
-                  </p>
+                  <p className="text-xs text-red-600 mt-1">{slotsError}</p>
                 </div>
               </div>
             </div>
           )}
+
+          {selectedDate &&
+            !slotsLoading &&
+            !slotsError &&
+            availablePeriods.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {availablePeriods.map((period) => {
+                  const Icon =
+                    period === "Morning"
+                      ? Sunrise
+                      : period === "Afternoon"
+                        ? Sun
+                        : Moon;
+                  const slots = slotsByPeriod[period];
+
+                  return (
+                    <div key={period} className="mb-4 last:mb-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon
+                          className="w-4 h-4"
+                          style={{ color: MIBO.primary }}
+                        />
+                        <h4
+                          className="text-sm font-semibold"
+                          style={{ color: MIBO.primary }}
+                        >
+                          {period}
+                        </h4>
+                        <span className="text-xs text-gray-500">
+                          ({slots.length} slot{slots.length !== 1 ? "s" : ""})
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {slots.map((slot) => {
+                          const active = selectedTime === slot.start_time;
+                          return (
+                            <button
+                              key={slot.start_time}
+                              onClick={() => setSelectedTime(slot.start_time)}
+                              disabled={!slot.available}
+                              className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={
+                                active
+                                  ? {
+                                      background: MIBO.primary,
+                                      color: "#fff",
+                                      borderColor: MIBO.primary,
+                                      transform: "scale(1.03)",
+                                    }
+                                  : {}
+                              }
+                            >
+                              {slot.start_time}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+          {/* If selected date has no availability */}
+          {selectedDate &&
+            !slotsLoading &&
+            !slotsError &&
+            availablePeriods.length === 0 && (
+              <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-medium text-yellow-800">
+                      No slots available
+                    </p>
+                    <p className="text-xs text-yellow-600 mt-1">
+                      No time slots are available for this date. Please select
+                      another date.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
       </div>
 

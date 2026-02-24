@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import FallbackImage from "../../../components/FallbackImage";
-import banner from "../assets/banner.jpg";
+import banner from "../assets/banner.jpg?w=1200&format=webp&quality=75";
 
 const HeroSection: React.FC = () => {
   return (

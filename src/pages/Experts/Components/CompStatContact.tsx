@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import isoLogo from "../assets/iso.jpeg";
-import hipaaLogo from "../assets/hippa.jpeg";
-import euLogo from "../assets/eu.jpeg";
+import isoLogo from "../assets/iso.jpeg?w=200&format=webp&quality=85";
+import hipaaLogo from "../assets/hippa.jpeg?w=200&format=webp&quality=85";
+import euLogo from "../assets/eu.jpeg?w=200&format=webp&quality=85";
 
 export default function CompStatContact() {
   return (

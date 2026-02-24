@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "../assets/logo1.png"; // your PNG logo
+import logo from "../assets/logo1.png?w=200&format=webp&quality=85"; // your PNG logo
 
 interface PremiumSplashScreenProps {
   onComplete: () => void;
@@ -8,7 +8,7 @@ interface PremiumSplashScreenProps {
 const PremiumSplashScreen = ({ onComplete }: PremiumSplashScreenProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [animationPhase, setAnimationPhase] = useState<"enter" | "reveal">(
-    "enter"
+    "enter",
   );
 
   useEffect(() => {

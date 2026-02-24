@@ -1,4 +1,4 @@
-import realCareImg from "../assets/mibo-real-care.jpg";
+import realCareImg from "../assets/mibo-real-care.jpg?w=800&format=webp&quality=75";
 import { motion, type Variants } from "framer-motion";
 
 export default function CareServiceComponent() {

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { inPatientContent } from "./InPatientData";
 import { useNavigate } from "react-router-dom";
-import heroImage from "../../../assets/inpatientservice.jpg";
+import heroImage from "../../../assets/inpatientservice.jpg?w=1200&format=webp&quality=75";
 import ExpertsHeader from "../../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../../Experts/Components/ExpertsFooter";
 

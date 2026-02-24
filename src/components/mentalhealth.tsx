@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import sampleVideo from "../assets/mental-wellness.mp4"; // ✅ update if you rename the video
+const sampleVideo =
+  "https://ajadcreatives.com/wp-content/uploads/2026/02/mental-wellness.mp4";
 
 const containerVariants = {
   hidden: {},

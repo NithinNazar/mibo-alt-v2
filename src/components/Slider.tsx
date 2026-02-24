@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import slide1 from "../assets/mibo-individual-counselling.jpg";
-import slide2 from "../assets/mibo-group-therapy.jpg";
-import slide3 from "../assets/online_counselling.jpg";
-import slide4 from "../assets/famlily_therapy.jpg";
-import slide5 from "../assets/mibo-wellness-program.jpg";
+import slide1 from "../assets/mibo-individual-counselling.jpg?w=1200&format=webp&quality=75";
+import slide2 from "../assets/mibo-group-therapy.jpg?w=1200&format=webp&quality=75";
+import slide3 from "../assets/online_counselling.jpg?w=1200&format=webp&quality=75";
+import slide4 from "../assets/famlily_therapy.jpg?w=1200&format=webp&quality=75";
+import slide5 from "../assets/mibo-wellness-program.jpg?w=1200&format=webp&quality=75";
 
 const PremiumSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

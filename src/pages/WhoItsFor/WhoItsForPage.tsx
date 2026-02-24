@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import * as Icons from "lucide-react";
 import { whoItsForContent } from "./WhoItsForContent";
-import whoItsForHero from "../../assets/whoitsfor.jpg";
+import whoItsForHero from "../../assets/whoitsfor.jpg?w=1200&format=webp&quality=75";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../Experts/Components/ExpertsFooter";
 

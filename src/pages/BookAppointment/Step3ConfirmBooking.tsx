@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import authService from "../../services/authService";
 import {
   ArrowLeft,
   Loader2,
@@ -26,8 +27,11 @@ export default function Step3ConfirmBooking({
   const navigate = useNavigate();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>("review");
   const [error, setError] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+
+  // Pre-fill user data if already authenticated
+  const currentUser = authService.getCurrentUser();
+  const [fullName, setFullName] = useState(currentUser?.full_name || "");
+  const [email, setEmail] = useState(currentUser?.email || "");
 
   /**
    * Handle payment confirmation - Real Razorpay integration with NEW booking flow

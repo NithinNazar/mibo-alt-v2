@@ -45,7 +45,7 @@ export interface AuthTokens {
  * Represents a healthcare professional who provides consultations
  */
 export interface Clinician {
-  id: number;
+  id: number | string; // Support both string and number IDs from database
   userId: number;
   fullName: string;
   phone: string;

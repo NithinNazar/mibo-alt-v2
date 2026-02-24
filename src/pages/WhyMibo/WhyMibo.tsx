@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { whyMiboContent } from "./WhyMiboContent";
 import * as Icons from "lucide-react";
-import heroImg from "../../assets/whymibo.jpg";
+import heroImg from "../../assets/whymibo.jpg?w=1200&format=webp&quality=75";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../Experts/Components/ExpertsFooter";
 

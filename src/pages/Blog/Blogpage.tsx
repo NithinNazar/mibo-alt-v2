@@ -3,7 +3,7 @@ import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../Experts/Components/ExpertsFooter";
 
 import { motion } from "framer-motion";
-import groupSession from "../../assets/group_session.jpg";
+import groupSession from "../../assets/group_session.jpg?w=1200&format=webp&quality=75";
 import { blogTitle, blogContent } from "./blogContent";
 
 export default function Blogpage() {

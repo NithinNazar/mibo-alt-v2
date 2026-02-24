@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MessageCircle, ChevronDown } from "lucide-react";
 // import { Menu, X, MessageCircle, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import miboIcon from "../../assets/logo1.png";
+import miboIcon from "../../assets/logo1.png?w=200&format=webp&quality=85";
 
 const ProfileHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);

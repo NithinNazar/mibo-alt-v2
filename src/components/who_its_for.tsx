@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import familyImage from "../assets/mibo-family.jpg";
-import individualImage from "../assets/mibo-individual-counselling.jpg";
-import coupleImage from "../assets/mibo-couple.jpg";
-import childrenImage from "../assets/mibo_children.jpg";
-import corporateImage from "../assets/mibo-corporate.jpg";
+import familyImage from "../assets/mibo-family.jpg?w=600&format=webp&quality=75";
+import individualImage from "../assets/mibo-individual-counselling.jpg?w=600&format=webp&quality=75";
+import coupleImage from "../assets/mibo-couple.jpg?w=600&format=webp&quality=75";
+import childrenImage from "../assets/mibo_children.jpg?w=600&format=webp&quality=75";
+import corporateImage from "../assets/mibo-corporate.jpg?w=600&format=webp&quality=75";
 
 const CorporateLanding: React.FC = () => {
   const cards = [

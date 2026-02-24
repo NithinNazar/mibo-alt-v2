@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Phone, MessageCircle, Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import miboIcon from "../assets/logo1.png";
-import homeVideo from "../assets/home_video.mp4";
+import miboIcon from "../assets/logo1.png?w=200&format=webp&quality=85";
+const homeVideo =
+  "https://ishviontech.com/wp-content/uploads/2026/02/home_video.mp4";
 import PremiumSlider from "../components/Slider";
 import MentalHealthCard from "./mentalhealth";
 import authService from "../services/authService";

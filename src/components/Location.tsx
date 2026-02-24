@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Star } from "lucide-react";
 import { motion, type Variants, AnimatePresence } from "framer-motion";
-import bengaluruImg from "../assets/mibo_bangalore.jpg";
-import mumbaiImg from "../assets/mibo_mumbai.jpg";
-import kochiImg from "../assets/mibo-kochi-centre-1.jpg";
+import bengaluruImg from "../assets/mibo_bangalore.jpg?w=800&format=webp&quality=75";
+import mumbaiImg from "../assets/mibo_mumbai.jpg?w=800&format=webp&quality=75";
+import kochiImg from "../assets/mibo-kochi-centre-1.jpg?w=800&format=webp&quality=75";
 
 const LocationCardsSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

@@ -50,7 +50,7 @@ export default function ExpertsPage() {
           : c.qualification || "";
 
         return {
-          id: parseInt(c.id),
+          id: c.id, // Keep original ID format (string or number)
           name: c.name || c.fullName || c.full_name || "",
           qualification,
           designation: c.designation || specialization,

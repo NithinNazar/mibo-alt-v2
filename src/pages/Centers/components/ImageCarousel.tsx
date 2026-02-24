@@ -3,12 +3,12 @@ import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Import images
-import bangalore1 from "../assets/bangalore1.jpg";
-import bangalore2 from "../assets/bangalore2.jpg";
-import kochi1 from "../assets/kochi1.jpg";
-import kochi2 from "../assets/kochi2.jpg";
-import mumbai1 from "../assets/mumbai1.jpg";
-import mumbai2 from "../assets/mumbai2.jpg";
+import bangalore1 from "../assets/bangalore1.jpg?w=800&format=webp&quality=75";
+import bangalore2 from "../assets/bangalore2.jpg?w=800&format=webp&quality=75";
+import kochi1 from "../assets/kochi1.jpg?w=800&format=webp&quality=75";
+import kochi2 from "../assets/kochi2.jpg?w=800&format=webp&quality=75";
+import mumbai1 from "../assets/mumbai1.jpg?w=800&format=webp&quality=75";
+import mumbai2 from "../assets/mumbai2.jpg?w=800&format=webp&quality=75";
 
 interface CarouselProps {
   city: string;

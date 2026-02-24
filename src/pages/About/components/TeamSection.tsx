@@ -2,10 +2,10 @@ import React from "react";
 import ShapeTitle from "./ShapeTitle";
 import FallbackImage from "../../../components/FallbackImage";
 
-import team1 from "../assets/team1.png";
-import team2 from "../assets/team2.png";
-import team3 from "../assets/team3.png";
-import team4 from "../assets/team4.png";
+import team1 from "../assets/team1.png?w=400&format=webp&quality=85";
+import team2 from "../assets/team2.png?w=400&format=webp&quality=85";
+import team3 from "../assets/team3.png?w=400&format=webp&quality=85";
+import team4 from "../assets/team4.png?w=400&format=webp&quality=85";
 
 const TeamSection: React.FC = () => {
   const teamRow1 = [team1, team2, team3, team4];
