@@ -114,6 +114,9 @@ class ClinicianService {
       const response = await axios.get<APIResponse<Clinician[]>>(
         `${apiClient.defaults.baseURL}/users/clinicians`,
         {
+          params: {
+            isActive: true, // Only fetch active clinicians for public display
+          },
           timeout: 30000,
           headers: {
             "Content-Type": "application/json",
