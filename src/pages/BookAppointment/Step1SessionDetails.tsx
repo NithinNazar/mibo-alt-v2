@@ -419,13 +419,17 @@ export default function Step1SessionDetails({
           ? "PHONE"
           : "IN_PERSON";
 
+    // Use real data from API
+    const durationMinutes = selectedClinician.defaultDurationMinutes || 50;
+    const consultationFee = selectedClinician.consultationFee || 1600;
+
     setBookingData({
       ...bookingData,
       mode: selectedMode,
       appointmentType,
-      duration: "50 mins",
-      durationMinutes: 50,
-      price: 1600,
+      duration: `${durationMinutes} mins`,
+      durationMinutes: durationMinutes,
+      price: consultationFee,
       date: selectedDate.toISOString(),
       time: selectedTime,
       doctorId: doctor?.id,
@@ -682,39 +686,48 @@ export default function Step1SessionDetails({
               </div>
             </div>
 
-            {/* Location (unchanged) */}
-            <div className="bg-white rounded-xl p-4 shadow-md">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-5 h-5" style={{ color: MIBO.primary }} />
-                <h3 className="font-semibold">Location</h3>
+            {/* Location - Dynamic from API */}
+            {selectedCentre && (
+              <div className="bg-white rounded-xl p-4 shadow-md">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-5 h-5" style={{ color: MIBO.primary }} />
+                  <h3 className="font-semibold">Location</h3>
+                </div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {selectedCentre.name}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {selectedCentre.address_line_1}
+                  {selectedCentre.address_line_2 &&
+                    `, ${selectedCentre.address_line_2}`}
+                </p>
               </div>
-              <p className="text-sm text-gray-700">
-                Mibo Mental Health Centre —{" "}
-                {doctor.name.split(" ")[1] ?? "City"}
-              </p>
-            </div>
+            )}
 
             {/* ----------------- NEW REDESIGN BEGINS ----------------- */}
 
-            {/* Session Duration (compact, price on right) */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="text-sm">
-                  <span
-                    className="font-semibold"
+            {/* Session Duration - Dynamic from API */}
+            {selectedClinician && (
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">
+                    <span
+                      className="font-semibold"
+                      style={{ color: MIBO.primary }}
+                    >
+                      {selectedClinician.defaultDurationMinutes || 50} mins, 1
+                      session
+                    </span>
+                  </div>
+                  <div
+                    className="text-sm font-semibold"
                     style={{ color: MIBO.primary }}
                   >
-                    50 mins, 1 session
-                  </span>
-                </div>
-                <div
-                  className="text-sm font-semibold"
-                  style={{ color: MIBO.primary }}
-                >
-                  ₹1600 / session
+                    ₹{selectedClinician.consultationFee || 1600} / session
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Date and Time (single block like Amaha) */}
             <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100">
