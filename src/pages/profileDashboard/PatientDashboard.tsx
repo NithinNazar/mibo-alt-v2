@@ -388,7 +388,7 @@ export default function PatientDashboard() {
                         <p className="font-medium">
                           {new Date(
                             appointment.scheduled_start_at,
-                          ).toLocaleDateString("en-IN", {
+                          ).toLocaleDateString(undefined, {
                             weekday: "long",
                             day: "numeric",
                             month: "long",
@@ -409,7 +409,7 @@ export default function PatientDashboard() {
                         <p className="font-medium">
                           {new Date(
                             appointment.scheduled_start_at,
-                          ).toLocaleTimeString("en-IN", {
+                          ).toLocaleTimeString(undefined, {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}{" "}
