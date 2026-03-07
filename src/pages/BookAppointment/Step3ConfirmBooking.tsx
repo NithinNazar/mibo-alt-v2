@@ -40,6 +40,22 @@ export default function Step3ConfirmBooking({
    * Step 2: Create payment order
    * Step 3: Open Razorpay modal
    */
+
+  const convertToUTC = (date:string, time:string) => {
+  const [year, month, day] = date.split("-");
+  const [hour, minute] = time.split(":");
+
+  const localDate = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute)
+  );
+
+  return localDate.toISOString();
+}
+
   const handleConfirmPayment = async () => {
     // Validate name and email
     if (!fullName.trim()) {
@@ -98,6 +114,7 @@ export default function Step3ConfirmBooking({
         appointmentDate: bookingData.date.split("T")[0], // "2026-01-10"
         appointmentTime: bookingData.time, // "10:00"
         appointmentType: bookingData.appointmentType, // "ONLINE" or "IN_PERSON"
+        appointmentDateUTC: convertToUTC(bookingData.date.split("T")[0], bookingData.time)
       };
 
       console.log("📤 Sending appointment payload:", appointmentPayload);
