@@ -2,7 +2,6 @@ import React from "react";
 
 import {
   Phone,
-  MessageCircle,
   MapPin,
   Clock,
   Award,
@@ -16,7 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
-import heroImage from "../../assets/mibo-doc-pat.jpg?w=1200&format=webp&quality=75";
+import heroImage from "../../assets/mibo-doc-pat.jpg?w=1920&format=webp&quality=90";
 import kochiImage from "../../assets/mibo-kochi-centre-2.jpg?w=1200&format=webp&quality=75";
 import therapyImage from "../../assets/mibo-individual-counselling.jpg?w=600&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -28,20 +27,20 @@ import supportBg from "../../assets/mibo-247-support.jpg?w=800&format=webp&quali
 import individualImage from "../../assets/mibo-individual-counselling.jpg?w=600&format=webp&quality=75";
 import coupleImage from "../../assets/mibo-couple.jpg?w=600&format=webp&quality=75";
 import bangaloreRec1 from "../../assets/mibo-bangalore-rec-1.jpg?w=600&format=webp&quality=75";
-import bangaloreRec2 from "../../assets/mibo-bangalore-rec-2.jpg?w=600&format=webp&quality=75";
-import bangaloreRec3 from "../../assets/mibo-bangalore-rec-3.jpg?w=600&format=webp&quality=75";
+import bangaloreRec2 from "../../assets/mibo-bangalore-rec-2.JPG?w=600&format=webp&quality=75";
+import bangaloreRec3 from "../../assets/mibo-bangalore-rec-3.JPG?w=600&format=webp&quality=75";
 import bangaloreRec4 from "../../assets/mibo-bangalore-rec-4.jpg?w=600&format=webp&quality=75";
 import kochiReal1 from "../../assets/mibo-kochi-real-1.jpg?w=600&format=webp&quality=75";
 import kochiReal2 from "../../assets/mibo-kochi-real-2.jpg?w=600&format=webp&quality=75";
-import miboReal1 from "../../assets/mibo-real-1.jpg?w=600&format=webp&quality=75";
-import miboReal2 from "../../assets/mibo-real-2.jpg?w=600&format=webp&quality=75";
+import miboReal1 from "../../assets/mibo-real-1.JPG?w=600&format=webp&quality=75";
+import miboReal2 from "../../assets/mibo-real-2.JPG?w=600&format=webp&quality=75";
 import miboReal3 from "../../assets/mibo-real-3.jpg?w=600&format=webp&quality=75";
 import miboReal4 from "../../assets/mibo-real-4.jpg?w=600&format=webp&quality=75";
 import miboReal5 from "../../assets/mibo-real-5.jpg?w=600&format=webp&quality=75";
 import miboReal6 from "../../assets/mibo-real-6.jpg?w=600&format=webp&quality=75";
 import miboReal7 from "../../assets/mibo-real-7.jpg?w=600&format=webp&quality=75";
 import confidentialImage from "../../assets/mibo-individual.jpg?w=600&format=webp&quality=75";
-import availabilityImage from "../../assets/mibo-avail.jpg?w=600&format=webp&quality=75";
+import availabilityImage from "../../assets/mibo-avail.JPG?w=600&format=webp&quality=75";
 import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&quality=75";
 
 const BangaloreLanding = () => {
@@ -72,11 +71,7 @@ const BangaloreLanding = () => {
   ];
 
   const handlePhoneClick = () => {
-    window.location.href = `tel:${phoneNumber}`;
-  };
-
-  const handleWhatsAppClick = () => {
-    window.open(`https://wa.me/91${phoneNumber}`, "_blank");
+    window.location.href = `tel:9083335000`;
   };
 
   const nextSlide = () => {
@@ -252,9 +247,9 @@ const BangaloreLanding = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-miboLightGreen/20 to-white">
-      {/* Floating Action Buttons */}
+      {/* Floating Action Button */}
       <div
-        className="fixed bottom-8 right-8 z-[9999] flex flex-col gap-4"
+        className="fixed bottom-8 right-8 z-[9999]"
         style={{ position: "fixed", zIndex: 9999 }}
       >
         <button
@@ -264,14 +259,6 @@ const BangaloreLanding = () => {
           style={{ position: "relative", zIndex: 9999 }}
         >
           <Phone className="w-6 h-6 group-hover:animate-pulse" />
-        </button>
-        <button
-          onClick={handleWhatsAppClick}
-          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 group"
-          aria-label="WhatsApp us"
-          style={{ position: "relative", zIndex: 9999 }}
-        >
-          <MessageCircle className="w-6 h-6 group-hover:animate-pulse" />
         </button>
       </div>
 
@@ -329,21 +316,14 @@ const BangaloreLanding = () => {
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
                 onClick={handlePhoneClick}
                 className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
-                Call Now: {phoneNumber}
-              </button>
-              <button
-                onClick={handleWhatsAppClick}
-                className="bg-white hover:bg-gray-100 text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Chat on WhatsApp
+                Call Now: 9083335000
               </button>
             </div>
           </div>
@@ -495,8 +475,8 @@ const BangaloreLanding = () => {
               Our care team can guide you to the right specialist quickly.
             </p>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="flex justify-center">
+              <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 max-w-md w-full">
                 <Phone className="w-12 h-12 text-[#30baa3] mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-[#212154] mb-3">
                   Call Now - Speak Immediately
@@ -506,21 +486,7 @@ const BangaloreLanding = () => {
                   className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
                 >
                   <Phone className="w-5 h-5" />
-                  +91 {phoneNumber}
-                </button>
-              </div>
-
-              <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300">
-                <MessageCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-[#212154] mb-3">
-                  WhatsApp Now - Get Quick Response
-                </h3>
-                <button
-                  onClick={handleWhatsAppClick}
-                  className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  {phoneNumber}
+                  +91 9083335000
                 </button>
               </div>
             </div>
@@ -818,21 +784,13 @@ const BangaloreLanding = () => {
             to wellness. We're here to support you every step of the way.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <button
               onClick={handlePhoneClick}
               className="bg-white text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
             >
               <Phone className="w-5 h-5" />
               Call {phoneNumber}
-            </button>
-
-            <button
-              onClick={handleWhatsAppClick}
-              className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
-            >
-              <MessageCircle className="w-5 h-5" />
-              WhatsApp Us
             </button>
           </div>
         </div>
