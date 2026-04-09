@@ -101,7 +101,7 @@ class AuthService {
       "/patient-auth/send-otp",
       {
         phone,
-      }
+      },
     );
     return response.data;
   }
@@ -144,7 +144,7 @@ class AuthService {
     phone: string,
     otp: string,
     full_name?: string,
-    email?: string
+    email?: string,
   ): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
       "/patient-auth/verify-otp",
@@ -153,7 +153,7 @@ class AuthService {
         otp,
         full_name,
         email,
-      }
+      },
     );
 
     // Extract tokens and user data from response
@@ -168,7 +168,7 @@ class AuthService {
       JSON.stringify({
         ...user,
         patientId: patient.id,
-      })
+      }),
     );
 
     // Dispatch custom event to notify components of auth change
@@ -294,6 +294,49 @@ class AuthService {
    */
   getRefreshToken(): string | null {
     return localStorage.getItem("mibo_refresh_token");
+  }
+
+  /**
+   * NEW: Login with username and password (for Razorpay verification)
+   *
+   * This provides an alternative login method using username and password
+   * instead of phone OTP. Used for testing and Razorpay verification.
+   *
+   * @param username - Username
+   * @param password - Password
+   * @returns Promise with user data and authentication tokens
+   * @throws {AxiosError} If credentials are invalid
+   */
+  async loginWithPassword(
+    username: string,
+    password: string,
+  ): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>(
+      "/patient-auth/login-with-password",
+      {
+        username,
+        password,
+      },
+    );
+
+    // Extract tokens and user data from response
+    const { accessToken, refreshToken, user, patient } = response.data.data;
+
+    // Store authentication data in localStorage
+    localStorage.setItem("mibo_access_token", accessToken);
+    localStorage.setItem("mibo_refresh_token", refreshToken);
+    localStorage.setItem(
+      "mibo_user",
+      JSON.stringify({
+        ...user,
+        patientId: patient.id,
+      }),
+    );
+
+    // Dispatch custom event to notify components of auth change
+    window.dispatchEvent(new Event("authChange"));
+
+    return response.data;
   }
 }
 

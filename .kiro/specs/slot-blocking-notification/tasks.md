@@ -1,0 +1,399 @@
+# Implementation Plan: Slot Blocking and Patient Notification System
+
+## Overview
+
+This implementation plan breaks down the slot blocking and patient notification feature into discrete, actionable coding tasks. The feature enables administrators to block appointment slots and automatically notifies affected patients through their dashboard. Implementation follows a bottom-up approach: database layer → repositories → services → controllers → frontend components.
+
+## Tasks
+
+- [x] 1. Set up database schema and migrations
+  - [x] 1.1 Create blocked_slots table migration
+    - Write migration file to create blocked_slots table with all columns, constraints, and indexes
+    - Include unique constraint on (clinician_id, centre_id, blocked_date, start_time, end_time)
+    - Add CHECK constraints for valid_time_range and no_past_blocking
+    - Create indexes: idx_blocked_slots_clinician_date, idx_blocked_slots_centre, idx_blocked_slots_date_range, idx_blocked_slots_admin
+    - _Requirements: 1.2, 1.3, 1.5, 11.1_
+  - [x] 1.2 Create patient_notifications table migration
+    - Write migration file to create patient_notifications table with all columns and indexes
+    - Create indexes: idx_patient_notifications_patient, idx_patient_notifications_unread, idx_patient_notifications_type, idx_patient_notifications_appointment
+    - _Requirements: 5.1, 5.3, 5.4, 6.1_
+  - [x] 1.3 Create slot_blocking_audit table migration
+    - Write migration file to create slot_blocking_audit table with all columns and indexes
+    - Add CHECK constraint for action_type IN ('BLOCK', 'UNBLOCK')
+    - Create indexes: idx_slot_audit_blocked_slot, idx_slot_audit_admin, idx_slot_audit_action, idx_slot_audit_created
+    - _Requirements: 10.1, 10.2, 10.3_
+  - [x] 1.4 Create appointments table extension migration
+    - Write migration file to add refund_eligible, refund_status, refund_initiated_at, and blocked_slot_id columns to appointments table
+    - Add CHECK constraint for refund_status values
+    - Create indexes: idx_appointments_refund_status, idx_appointments_blocked_slot
+    - Add 'CANCELLED_BY_ADMIN' value to appointment_status enum if not exists
+    - _Requirements: 7.1, 12.1, 12.4_
+
+- [x] 2. Implement TypeScript types and interfaces
+  - [x] 2.1 Create slot-blocking types file
+    - Create backend/src/types/slot-blocking.types.ts with all interfaces from design
+    - Define BlockedSlot, BlockSlotRequest, BlockMultipleSlotsRequest, BlockClinicianDayRequest interfaces
+    - Define BlockResult, AffectedPatient, PatientNotification, SlotAuditData interfaces
+    - Define NotificationType enum and BlockedSlotFilters interface
+    - _Requirements: 1.2, 2.1, 3.1, 4.1, 5.1_
+
+- [x] 3. Implement repository layer
+  - [x] 3.1 Create Slot Repository with blocking operations
+    - Create backend/src/repositories/slot.repository.ts
+    - Implement findSlotById, findSlotsByIds, findSlotsByClinicianAndDate methods
+    - Implement blockSlot method with database transaction and locking (FOR UPDATE)
+    - Implement unblockSlot method
+    - Implement findBlockedSlots with filter support
+    - Implement lockSlotForUpdate method for concurrent access control
+    - _Requirements: 1.2, 1.3, 1.4, 1.5, 9.2, 9.4, 13.2, 15.3_
+  - [ ]\*
+    3.2 Write property tests for Slot Repository
+    - **Property 1: Slot Blocking Persistence** - Verify blocked slot persists with all required fields
+    - **Property 3: Slot Attribute Preservation** - Verify blocking doesn't modify slot attributes
+    - **Property 16: Unblocking Restores Availability** - Verify unblocking sets correct fields
+    - **Property 30: Concurrent Blocking Prevention** - Verify only one concurrent block succeeds
+    - **Validates: Requirements 1.2, 1.3, 1.5, 9.2, 9.4, 15.1**
+  - [x] 3.3 Create Patient Notification Repository
+    - Create backend/src/repositories/patient-notification.repository.ts
+    - Implement createNotification method
+    - Implement getNotificationsByPatient with filter support (unread_only, date_range)
+    - Implement markAsRead method
+    - Implement getUnreadCount method
+    - _Requirements: 5.1, 5.3, 5.4, 6.1, 6.4, 14.1, 14.2_
+  - [ ]\* 3.4 Write property tests for Patient Notification Repository
+    - **Property 7: Patient Notification Creation** - Verify notification created with correct fields
+    - **Property 9: Unread Notification Retrieval** - Verify unread notifications are retrieved
+    - **Property 10: Notification Read Status Transition** - Verify read status updates correctly
+    - **Property 27: Notification Read/Unread Retrieval** - Verify both read and unread returned
+    - **Property 29: Notification Chronological Ordering** - Verify notifications ordered by created_at DESC
+    - **Validates: Requirements 5.1, 5.3, 6.1, 6.4, 14.1, 14.4**
+  - [x] 3.5 Create Audit Repository
+    - Create backend/src/repositories/audit.repository.ts
+    - Implement logSlotAction method to create audit entries
+    - Implement getSlotHistory method to retrieve audit trail for a slot
+    - Implement getAdminActions method with filter support
+    - _Requirements: 10.1, 10.2, 10.3, 10.4_
+  - [ ]\* 3.6 Write property tests for Audit Repository
+    - **Property 19: Audit Log Creation** - Verify audit entry created with all required fields
+    - **Property 20: Audit History Completeness** - Verify all actions returned in chronological order
+    - **Validates: Requirements 10.1, 10.2, 10.3, 10.4**
+
+- [x] 4. Implement service layer
+  - [x] 4.1 Create Slot Blocking Service with core operations
+    - Create backend/src/services/slot-blocking.service.ts
+    - Implement blockSlot method with validation, transaction management, and notification triggering
+    - Validate slot is not in the past (Property 21)
+    - Use database transaction to ensure atomicity
+    - Call notification service for affected patients
+    - Call audit service to log action
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 5.1, 10.1, 11.1_
+  - [ ]\* 4.2 Write property tests for blockSlot
+    - **Property 2: Blocked Slot Booking Prevention** - Verify blocked slots reject new bookings
+    - **Property 21: Past Slot Blocking Rejection** - Verify past slots are rejected
+    - **Validates: Requirements 1.4, 11.1**
+  - [x] 4.3 Implement bulk blocking operations in Slot Blocking Service
+    - Implement blockMultipleSlots method with partial failure handling
+    - Process each slot individually, collect successes and failures
+    - Return BlockResult with blocked_count, failed_count, and detailed results
+    - _Requirements: 2.1, 2.2, 2.3, 2.4_
+  - [ ]\* 4.4 Write property tests for bulk blocking
+    - **Property 4: Bulk Blocking Partial Failure Handling** - Verify partial failures don't prevent other blocks
+    - **Validates: Requirements 2.4**
+  - [x] 4.5 Implement day blocking in Slot Blocking Service
+    - Implement blockClinicianDay method
+    - Query all slots for clinician on specified date
+    - Block all slots (both booked and unbooked)
+    - Return BlockResult with all affected slots
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+  - [ ]\* 4.6 Write property tests for day blocking
+    - **Property 5: Clinician Day Blocking Completeness** - Verify all slots for clinician/date are blocked
+    - **Validates: Requirements 3.2, 3.3**
+  - [x] 4.7 Implement affected patient identification
+    - Implement getAffectedPatients method
+    - Query appointments with status in ('BOOKED', 'CONFIRMED', 'RESCHEDULED') for given slots
+    - Join with patient and clinician tables to get names and contact info
+    - Include payment status and refund eligibility
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [ ]\* 4.8 Write property tests for affected patient identification
+    - **Property 6: Affected Patient Identification** - Verify correct patients identified with complete info
+    - **Validates: Requirements 4.1, 4.2, 4.3**
+  - [x] 4.9 Implement unblocking in Slot Blocking Service
+    - Implement unblockSlot method
+    - Validate slot is currently blocked
+    - Update blocked_slots record with unblock timestamp and admin ID
+    - Log audit entry
+    - Do NOT restore cancelled appointments
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
+  - [ ]\* 4.10 Write property tests for unblocking
+    - **Property 17: Unblocked Slot Booking Availability** - Verify unblocked slots accept new bookings
+    - **Property 18: Unblocking Does Not Restore Appointments** - Verify cancelled appointments stay cancelled
+    - **Validates: Requirements 9.3, 9.5**
+  - [x] 4.11 Implement slot filtering and search
+    - Implement getBlockedSlots method with comprehensive filters
+    - Support filtering by clinician_id, centre_id, date_range, is_blocked, blocked_by_admin_id
+    - Support searching by patient name or appointment ID
+    - Join with admin, clinician, and centre tables for display names
+    - _Requirements: 13.1, 13.2, 13.3, 13.4_
+  - [ ]\* 4.12 Write property tests for filtering and search
+    - **Property 24: Blocked Slot Filtering** - Verify filters return only matching slots
+    - **Property 25: Blocked Slot Search** - Verify search returns only matching appointments
+    - **Property 26: Blocked Slot Result Completeness** - Verify results include reason and admin info
+    - **Validates: Requirements 13.2, 13.3, 13.4**
+
+- [ ] 5. Implement appointment cancellation logic
+  - [x] 5.1 Create appointment cancellation handler
+    - Create method to update appointment status to 'CANCELLED_BY_ADMIN'
+    - Preserve original appointment details (patient_id, clinician_id, times)
+    - Set blocked_slot_id reference
+    - Keep payment_status unchanged
+    - Update refund_eligible and refund_status for paid appointments
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 12.1, 12.4_
+  - [ ]\* 5.2 Write property tests for appointment cancellation
+    - **Property 11: Appointment Cancellation on Blocking** - Verify status updated to CANCELLED_BY_ADMIN
+    - **Property 12: Appointment Detail Preservation** - Verify patient/clinician/time unchanged
+    - **Property 13: Payment Status Independence** - Verify payment fields unchanged
+    - **Property 22: Refund Eligibility Flagging** - Verify refund fields set correctly for paid appointments
+    - **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 12.1, 12.4**
+
+- [x] 6. Implement notification system
+  - [x] 6.1 Create notification service
+    - Create backend/src/services/notification.service.ts
+    - Implement createBlockingNotification method
+    - Build notification message with appointment date, time, clinician name
+    - Include blocking reason in message
+    - Include refund information for paid appointments
+    - Set notification_type to 'APPOINTMENT_BLOCKED'
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 8.3, 12.2, 12.3_
+  - [ ]\* 6.2 Write property tests for notification service
+    - **Property 8: Notification Content Completeness** - Verify notification includes appointment details
+    - **Property 14: Blocking Reason Storage** - Verify reason stored in blocked_slots
+    - **Property 15: Blocking Reason in Notification** - Verify reason included in notification message
+    - **Property 23: Refund Information in Notification** - Verify refund info included when eligible
+    - **Validates: Requirements 5.2, 8.2, 8.3, 12.2, 12.3**
+
+- [x] 7. Implement backend API controllers
+  - [x] 7.1 Create Slot Blocking Controller
+    - Create backend/src/controllers/slot-blocking.controller.ts
+    - Implement POST /api/admin/slots/block endpoint
+    - Implement POST /api/admin/slots/block-multiple endpoint
+    - Implement POST /api/admin/slots/block-day endpoint
+    - Implement POST /api/admin/slots/unblock/:slotId endpoint
+    - Implement GET /api/admin/slots/blocked endpoint with query filters
+    - Implement POST /api/admin/slots/affected-patients endpoint
+    - Add admin authentication middleware to all endpoints
+    - Add input validation middleware
+    - _Requirements: 1.1, 2.1, 3.1, 4.1, 9.1, 13.1_
+  - [ ]\* 7.2 Write unit tests for Slot Blocking Controller
+    - Test authentication and authorization
+    - Test input validation (missing fields, invalid formats)
+    - Test error responses (400, 403, 404, 409, 500)
+    - Test successful responses with correct data structure
+    - _Requirements: 1.1, 2.1, 3.1, 9.1_
+  - [x] 7.3 Create Patient Notification Controller
+    - Create backend/src/controllers/patient-notification.controller.ts
+    - Implement GET /api/patient/notifications endpoint with query params (limit, offset, unread_only)
+    - Implement PUT /api/patient/notifications/:notificationId/read endpoint
+    - Implement GET /api/patient/notifications/unread-count endpoint
+    - Add patient authentication middleware
+    - Ensure patients can only access their own notifications
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 14.1, 14.2_
+  - [ ]\* 7.4 Write unit tests for Patient Notification Controller
+    - Test patient authentication
+    - Test authorization (patients can't access other patients' notifications)
+    - Test query parameter handling
+    - Test pagination
+    - _Requirements: 6.1, 6.4_
+
+- [ ] 8. Implement error handling and validation
+  - [ ] 8.1 Create validation middleware
+    - Create backend/src/middleware/slot-blocking-validation.ts
+    - Implement validators for date format (YYYY-MM-DD)
+    - Implement validators for time format (HH:MM:SS)
+    - Implement validator for time range (start_time < end_time)
+    - Implement validator for past date rejection
+    - Implement validator for required fields
+    - _Requirements: 11.1_
+  - [ ] 8.2 Create error handling utilities
+    - Create backend/src/utils/slot-blocking-errors.ts
+    - Define custom error classes for all error categories
+    - ValidationError, ConflictError, AuthorizationError, NotFoundError
+    - Implement error response formatter
+    - _Requirements: All error scenarios from design_
+  - [ ]\* 8.3 Write unit tests for validation and error handling
+    - Test each validation rule
+    - Test error response format consistency
+    - Test error code mapping
+
+- [ ] 9. Implement concurrency control
+  - [ ] 9.1 Add database locking to critical operations
+    - Update slot blocking operations to use SELECT FOR UPDATE
+    - Wrap multi-step operations in database transactions
+    - Implement retry logic for deadlock scenarios
+    - Add timeout handling for long-running locks
+    - _Requirements: 15.1, 15.2, 15.3_
+  - [ ]\* 9.2 Write property tests for concurrency control
+    - **Property 31: Concurrent Block-Book Race Condition** - Verify mutual exclusion between blocking and booking
+    - **Validates: Requirements 15.2**
+  - [ ]\* 9.3 Write integration tests for concurrent operations
+    - Test multiple simultaneous block requests on same slot
+    - Test simultaneous block and book requests
+    - Test bulk blocking with overlapping slots
+    - Verify no deadlocks occur
+    - _Requirements: 15.1, 15.2_
+
+- [ ] 10. Checkpoint - Backend implementation complete
+  - Ensure all backend tests pass, ask the user if questions arise.
+
+- [ ] 11. Implement Admin Panel UI components
+  - [ ] 11.1 Create SlotBlockingPanel component
+    - Create mibo-admin/src/components/slot-management/SlotBlockingPanel.tsx
+    - Display slot calendar/list view
+    - Add block button for individual slots
+    - Add bulk select functionality
+    - Add day blocking option
+    - Integrate with backend API endpoints
+    - _Requirements: 1.1, 2.1, 3.1_
+  - [ ] 11.2 Create AffectedPatientsModal component
+    - Create mibo-admin/src/components/slot-management/AffectedPatientsModal.tsx
+    - Display list of affected patients before blocking confirmation
+    - Show patient name, appointment time, contact info
+    - Show count of affected appointments
+    - Show "No patients affected" message when applicable
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [ ] 11.3 Create BlockingReasonInput component
+    - Create mibo-admin/src/components/slot-management/BlockingReasonInput.tsx
+    - Text field for entering blocking reason
+    - Show default message "Clinician unavailable" as placeholder
+    - Character limit indicator (200 chars)
+    - _Requirements: 8.1, 8.2, 8.4_
+  - [ ] 11.4 Create BlockedSlotsTable component
+    - Create mibo-admin/src/components/slot-management/BlockedSlotsTable.tsx
+    - Display table of blocked slots with columns: date, time, clinician, reason, blocked by, actions
+    - Add unblock button for each slot
+    - Show slot history on row click
+    - _Requirements: 9.1, 10.4, 13.4_
+  - [ ] 11.5 Create SlotFilters component
+    - Create mibo-admin/src/components/slot-management/SlotFilters.tsx
+    - Add filters for clinician, date range, blocking status
+    - Add search input for patient name or appointment ID
+    - Implement filter state management
+    - _Requirements: 13.1, 13.2, 13.3_
+  - [ ]\* 11.6 Write component tests for Admin Panel
+    - Test component rendering
+    - Test user interactions (button clicks, form submissions)
+    - Test API integration with mocked responses
+    - Test error handling and display
+
+- [ ] 12. Implement Patient Dashboard UI components
+  - [ ] 12.1 Create NotificationBell component
+    - Create mibo_version-2/src/components/notifications/NotificationBell.tsx
+    - Display bell icon in header
+    - Show unread count badge
+    - Fetch unread count on mount and periodically
+    - Toggle NotificationPanel on click
+    - _Requirements: 6.5_
+  - [ ] 12.2 Create NotificationPanel component
+    - Create mibo_version-2/src/components/notifications/NotificationPanel.tsx
+    - Dropdown panel showing recent notifications (last 5)
+    - Display notification title, message preview, and timestamp
+    - Visual indicator for unread notifications
+    - "View All" link to NotificationList page
+    - Mark as read on view
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - [ ] 12.3 Create NotificationList component
+    - Create mibo_version-2/src/components/notifications/NotificationList.tsx
+    - Full page view of all notifications
+    - Display complete notification details
+    - Show appointment details (date, time, clinician) for APPOINTMENT_BLOCKED type
+    - Show refund status for eligible appointments
+    - Pagination support
+    - _Requirements: 6.1, 6.2, 6.3, 12.3, 14.1_
+  - [ ] 12.4 Create NotificationFilters component
+    - Create mibo_version-2/src/components/notifications/NotificationFilters.tsx
+    - Date range filter
+    - Read/unread filter
+    - Notification type filter
+    - _Requirements: 14.2_
+  - [ ]\* 12.5 Write component tests for Patient Dashboard
+    - Test notification display
+    - Test read/unread state transitions
+    - Test filtering functionality
+    - Test API integration with mocked responses
+
+- [x] 13. Integrate notification system with existing appointment flow
+  - [x] 13.1 Update appointment booking validation
+    - Modify existing booking service to check blocked_slots table
+    - Reject bookings on blocked slots with appropriate error
+    - Add concurrent access control to booking flow
+    - _Requirements: 1.4, 15.2_
+  - [ ]\* 13.2 Write integration tests for booking-blocking interaction
+    - Test booking rejection on blocked slots
+    - Test concurrent block and book operations
+    - _Requirements: 1.4, 15.2_
+
+- [x] 14. Add API routes to backend server
+  - [x] 14.1 Register slot blocking routes
+    - Add routes to backend/src/routes/index.ts or appropriate router file
+    - Mount /api/admin/slots routes with admin authentication
+    - Mount /api/patient/notifications routes with patient authentication
+    - _Requirements: All API endpoints_
+
+- [x] 15. Integrate components into existing applications
+  - [x] 15.1 Add SlotBlockingPanel to Admin Panel navigation
+    - Update mibo-admin navigation to include "Slot Management" menu item
+    - Create route for slot management page
+    - Import and render SlotBlockingPanel component
+    - _Requirements: 1.1, 2.1, 3.1_
+  - [x] 15.2 Add NotificationBell to Patient Dashboard header
+    - Update mibo_version-2 header component to include NotificationBell
+    - Create route for notifications page
+    - Import and render NotificationList component
+    - _Requirements: 6.1, 6.5_
+
+- [ ] 16. Add database migration execution
+  - [ ] 16.1 Create migration runner script
+    - Add migration files to backend/migrations/ directory
+    - Update migration runner to execute new migrations in order
+    - Test migrations on development database
+    - _Requirements: All database schema changes_
+
+- [ ] 17. Final checkpoint - Integration testing
+  - [ ] 17.1 Test end-to-end slot blocking flow
+    - Admin blocks slot → appointment cancelled → patient receives notification
+    - Verify all database records created correctly
+    - Verify audit trail complete
+    - _Requirements: All requirements_
+  - [ ] 17.2 Test bulk blocking scenarios
+    - Block multiple slots with mixed success/failure
+    - Block entire day for clinician
+    - Verify partial failure handling
+    - _Requirements: 2.4, 3.2, 3.3_
+  - [ ] 17.3 Test unblocking and re-booking flow
+    - Unblock slot → verify available for booking → book slot
+    - Verify cancelled appointments not restored
+    - _Requirements: 9.3, 9.5_
+  - [ ] 17.4 Test concurrent operations
+    - Multiple admins blocking same slot
+    - Admin blocking while patient booking
+    - Verify no race conditions or deadlocks
+    - _Requirements: 15.1, 15.2_
+  - [ ] 17.5 Test notification display and interaction
+    - Patient logs in → sees unread count → views notifications → marks as read
+    - Verify notification content includes all required details
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [ ] 18. Final checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+## Notes
+
+- Tasks marked with `*` are optional testing tasks and can be skipped for faster MVP delivery
+- Each task references specific requirements for traceability
+- Property tests validate universal correctness properties across all inputs
+- Unit tests validate specific examples, edge cases, and error conditions
+- Integration tests validate end-to-end flows and component interactions
+- Checkpoints ensure incremental validation at key milestones
+- All database operations use transactions to ensure atomicity
+- Concurrent access control uses database-level locking (SELECT FOR UPDATE)
+- Error handling follows consistent format across all endpoints
+- Frontend components integrate with existing authentication and routing

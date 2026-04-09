@@ -250,12 +250,18 @@ export default function Step1SessionDetails({
     doctor.experience,
   ]);
 
-  const modes = ["In-person", "Video call", "Phone call"];
+  const modes = ["In-person", "Video call"];
 
   // ========== API STATE FOR REAL SLOTS ==========
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsError, setSlotsError] = useState<string | null>(null);
+
+  // ========== API STATE FOR DATES WITH SLOTS ==========
+  const [datesWithSlots, setDatesWithSlots] = useState<
+    { date: string; slotCount: number }[]
+  >([]);
+  const [datesLoading, setDatesLoading] = useState(false);
 
   // ========== COMPUTED VALUES ==========
 
@@ -264,6 +270,60 @@ export default function Step1SessionDetails({
     () => makeMonthAvailability(calendarMonth),
     [calendarMonth],
   );
+
+  // ========== FETCH DATES WITH SLOTS FROM API ==========
+  /**
+   * Fetch dates with available slots for the next 60 days
+   */
+  useEffect(() => {
+    if (!selectedClinician || !selectedCentre) {
+      setDatesWithSlots([]);
+      return;
+    }
+
+    const fetchDatesWithSlots = async () => {
+      try {
+        setDatesLoading(true);
+
+        const today = new Date();
+        const endDate = new Date(today);
+        endDate.setDate(today.getDate() + 60); // Next 60 days
+
+        const startDateStr = toISODateKey(today);
+        const endDateStr = toISODateKey(endDate);
+
+        console.log(
+          `Fetching dates with slots for clinician ${selectedClinician.id}, centre ${selectedCentre.id}, from ${startDateStr} to ${endDateStr}`,
+        );
+
+        const response = await fetch(
+          `${API_BASE_URL}/booking/dates-with-slots?clinicianId=${selectedClinician.id}&centreId=${selectedCentre.id}&startDate=${startDateStr}&endDate=${endDateStr}`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dates with slots");
+        }
+
+        const data = await response.json();
+        console.log("Dates with slots response:", data);
+        setDatesWithSlots(data.data || []);
+
+        // Auto-select first available date if no date is selected
+        if (!selectedDate && data.data && data.data.length > 0) {
+          const firstDate = new Date(data.data[0].date + "T00:00:00");
+          setSelectedDate(firstDate);
+          console.log("Auto-selected first available date:", firstDate);
+        }
+      } catch (error) {
+        console.error("Error fetching dates with slots:", error);
+        setDatesWithSlots([]);
+      } finally {
+        setDatesLoading(false);
+      }
+    };
+
+    fetchDatesWithSlots();
+  }, [selectedClinician, selectedCentre]);
 
   // ========== FETCH REAL SLOTS FROM API ==========
   /**
@@ -355,36 +415,23 @@ export default function Step1SessionDetails({
     );
   }, [slotsByPeriod]);
 
-  /** Horizontal pills: show next 10 days starting today */
+  /** Horizontal pills: show dates with available slots */
   const dateStrip = useMemo(() => {
-    const days: {
-      date: Date;
-      key: string;
-      availability: Availability;
-      slots: number;
-    }[] = [];
-    const today = new Date();
-    for (let i = 0; i < 10; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      const key = toISODateKey(d);
-      // if month changed, compute on that month too
-      const map =
-        d.getMonth() === calendarMonth.getMonth() &&
-        d.getFullYear() === calendarMonth.getFullYear()
-          ? availabilityMap
-          : makeMonthAvailability(startOfMonth(d));
-      const av = map[key] ?? "unavailable";
-      const slots =
-        av === "unavailable"
-          ? 0
-          : av === "few"
-            ? ((d.getDate() % 3) + 1) * 2
-            : ((d.getDate() % 4) + 2) * 2; // 2–8
-      days.push({ date: d, key, availability: av, slots });
+    if (datesWithSlots.length === 0) {
+      return [];
     }
-    return days;
-  }, [availabilityMap, calendarMonth]);
+
+    return datesWithSlots.map(({ date, slotCount }) => {
+      const d = new Date(date + "T00:00:00"); // Parse as local date
+      const key = toISODateKey(d);
+      return {
+        date: d,
+        key,
+        availability: "available" as Availability,
+        slots: slotCount,
+      };
+    });
+  }, [datesWithSlots]);
 
   // periodsForSelected removed - now using availablePeriods from real API data
 
@@ -492,6 +539,9 @@ export default function Step1SessionDetails({
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       {doctor.location} • {doctor.sessionTypes}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {selectedClinician?.bio || "Bio"}
                     </div>
                   </div>
                 </div>
@@ -750,58 +800,79 @@ export default function Step1SessionDetails({
 
               {/* Horizontal date pills (no cutoff at top) */}
               <div className="relative">
-                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
-                  {dateStrip.map(({ date, key, availability, slots }) => {
-                    const { top, mid } = formatShort(date);
-                    const disabled = availability === "unavailable";
-                    const selected = selectedDate
-                      ? sameYMD(date, selectedDate)
-                      : false;
+                {datesLoading && (
+                  <div className="text-center py-4">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#0a107d]"></div>
+                    <p className="mt-2 text-xs text-gray-600">
+                      Loading available dates...
+                    </p>
+                  </div>
+                )}
 
-                    const base =
-                      "flex flex-col items-center justify-center px-4 py-3 min-w-[92px] rounded-xl border text-center transition-all duration-200";
-                    let cls = "";
-                    if (disabled) {
-                      cls =
-                        "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed";
-                    } else if (selected) {
-                      cls = "scale-[1.03] shadow-md text-gray-900";
-                    } else {
-                      cls =
-                        "bg-white border-gray-300 text-gray-700 hover:shadow-md";
-                    }
+                {!datesLoading && dateStrip.length === 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-medium text-yellow-800">
+                          No slots available
+                        </p>
+                        <p className="text-xs text-yellow-600 mt-1">
+                          No appointment slots are currently available for this
+                          clinician.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-                    return (
-                      <button
-                        key={key}
-                        disabled={disabled}
-                        onClick={() => {
-                          setSelectedDate(date);
-                          setSelectedTime("");
-                        }}
-                        className={`${base} ${cls}`}
-                        style={
-                          selected
-                            ? {
-                                background: MIBO.accent,
-                                borderColor: MIBO.primary,
-                              }
-                            : {}
-                        }
-                      >
-                        <span className="font-medium text-xs">{top}</span>
-                        <span className="text-[13px]">{mid}</span>
-                        <span
-                          className={`text-[11px] ${
-                            disabled ? "text-gray-400" : "text-gray-500"
-                          }`}
+                {!datesLoading && dateStrip.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
+                    {dateStrip.map(({ date, key, availability, slots }) => {
+                      const { top, mid } = formatShort(date);
+                      const disabled = availability === "unavailable";
+                      const selected = selectedDate
+                        ? sameYMD(date, selectedDate)
+                        : false;
+
+                      const base =
+                        "flex flex-col items-center justify-center px-4 py-3 min-w-[92px] rounded-xl border text-center transition-all duration-200";
+                      let cls = "";
+                      if (disabled) {
+                        cls =
+                          "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed";
+                      } else if (selected) {
+                        cls = "scale-[1.03] shadow-md text-gray-900";
+                      } else {
+                        cls =
+                          "bg-white border-gray-300 text-gray-700 hover:shadow-md";
+                      }
+
+                      return (
+                        <button
+                          key={key}
+                          disabled={disabled}
+                          onClick={() => {
+                            setSelectedDate(date);
+                            setSelectedTime("");
+                          }}
+                          className={`${base} ${cls}`}
+                          style={
+                            selected
+                              ? {
+                                  background: MIBO.accent,
+                                  borderColor: MIBO.primary,
+                                }
+                              : {}
+                          }
                         >
-                          {slots > 0 ? `${slots} slots` : "No slots"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                          <span className="font-medium text-xs">{top}</span>
+                          <span className="text-[13px]">{mid}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Time groups with real API data */}
@@ -984,21 +1055,14 @@ export default function Step1SessionDetails({
                         className="inline-block w-2.5 h-2.5 rounded-full"
                         style={{ background: MIBO.primary }}
                       />
-                      Available
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="inline-block w-2.5 h-2.5 rounded-full"
-                        style={{ background: MIBO.accent }}
-                      />
-                      Few slots
+                      Slots available
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <span
                         className="inline-block w-2.5 h-2.5 rounded-full"
                         style={{ background: MIBO.gray }}
                       />
-                      Unavailable
+                      No slots
                     </span>
                   </div>
                 </div>
@@ -1018,6 +1082,7 @@ export default function Step1SessionDetails({
                     availabilityMap={availabilityMap}
                     selectedDate={selectedDate}
                     onPick={handleChooseCalendarDay}
+                    datesWithSlots={datesWithSlots}
                   />
                 </div>
 
@@ -1038,32 +1103,38 @@ function CalendarMonthGrid({
   availabilityMap,
   selectedDate,
   onPick,
+  datesWithSlots,
 }: {
   month: Date;
   availabilityMap: Record<string, Availability>;
   selectedDate: Date | null;
   onPick: (day: Date, status: Availability) => void;
+  datesWithSlots: { date: string; slotCount: number }[];
 }) {
   const first = startOfMonth(month);
   const last = endOfMonth(month);
-  const days: { date: Date; status: Availability }[] = [];
+  const days: { date: Date; status: Availability; hasSlots: boolean }[] = [];
+
+  // Create a map of dates with slots for quick lookup
+  const slotsMap = new Map(datesWithSlots.map((d) => [d.date, d.slotCount]));
 
   // Pad empty cells before 1st
   const startPad = first.getDay();
   for (let i = 0; i < startPad; i++) {
-    days.push({ date: new Date(NaN), status: "unavailable" });
+    days.push({ date: new Date(NaN), status: "unavailable", hasSlots: false });
   }
   // Actual days
   for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
     const date = new Date(d);
     const key = toISODateKey(date);
-    const status = availabilityMap[key] ?? "unavailable";
-    days.push({ date, status });
+    const hasSlots = slotsMap.has(key);
+    const status = hasSlots ? "available" : "unavailable";
+    days.push({ date, status, hasSlots });
   }
 
   return (
     <div className="grid grid-cols-7 gap-2">
-      {days.map(({ date, status }, idx) => {
+      {days.map(({ date, status, hasSlots }, idx) => {
         if (isNaN(date.getTime())) {
           return <div key={`pad-${idx}`} />;
         }
@@ -1071,7 +1142,7 @@ function CalendarMonthGrid({
         const isPast =
           date <
           new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const disabled = status === "unavailable" || isPast;
+        const disabled = !hasSlots || isPast;
         const isSelected = selectedDate ? sameYMD(date, selectedDate) : false;
 
         return (
@@ -1089,18 +1160,15 @@ function CalendarMonthGrid({
     `}
           >
             <div className="text-[13px] font-medium">{date.getDate()}</div>
-            <span
-              className="mt-1 inline-block w-2.5 h-2.5 rounded-full"
-              style={{
-                background:
-                  status === "available"
-                    ? MIBO.primary
-                    : status === "few"
-                      ? MIBO.accent
-                      : MIBO.gray,
-                opacity: disabled ? 0.6 : 1,
-              }}
-            />
+            {hasSlots && (
+              <span
+                className="mt-1 inline-block w-2.5 h-2.5 rounded-full"
+                style={{
+                  background: MIBO.primary,
+                  opacity: disabled ? 0.6 : 1,
+                }}
+              />
+            )}
           </button>
         );
       })}

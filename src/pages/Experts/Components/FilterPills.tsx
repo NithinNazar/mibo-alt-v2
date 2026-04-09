@@ -44,7 +44,7 @@ function Dropdown({ options, selected, onChange, position }: DropdownProps) {
         ))}
       </motion.div>
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }
 
@@ -91,7 +91,15 @@ export default function FilterPills({
       "Child Anxiety",
       "Adolescent Issues",
     ],
-    Language: ["English", "Hindi", "Kannada", "Malayalam", "Tamil", "Marathi"],
+    Language: [
+      "English",
+      "Hindi",
+      "Kannada",
+      "Malayalam",
+      "Tamil",
+      "Telugu",
+      "Marathi",
+    ],
     Price: ["₹1600/session"],
   };
 

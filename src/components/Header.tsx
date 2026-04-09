@@ -100,7 +100,18 @@ const Header = () => {
               : "transform scale-0 opacity-0"
           }`}
         >
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300">
+          <button
+            onClick={() => (window.location.href = "tel:9083335000")}
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
+          >
+            <Phone size={20} />
+          </button>
+          <button
+            onClick={() =>
+              (window.location.href = "https://wa.me/919083335000")
+            }
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
+          >
             <MessageCircle size={20} />
           </button>
 
@@ -256,10 +267,18 @@ const Header = () => {
               : "transform translate-x-8 opacity-0"
           }`}
         >
-          <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110">
+          <button
+            onClick={() => (window.location.href = "tel:9083335000")}
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110"
+          >
             <Phone size={18} />
           </button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110">
+          <button
+            onClick={() =>
+              (window.location.href = "https://wa.me/919083335000")
+            }
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110"
+          >
             <MessageCircle size={18} />
           </button>
 

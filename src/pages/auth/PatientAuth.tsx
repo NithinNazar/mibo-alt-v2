@@ -7,11 +7,18 @@ import authService from "../../services/authService";
 const PatientAuth = () => {
   const navigate = useNavigate();
 
+  // Login method toggle
+  const [loginMethod, setLoginMethod] = useState<"phone" | "username">("phone");
+
   // Phone + OTP credentials
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+
+  // Username + Password credentials
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   // New user details
   const [fullName, setFullName] = useState("");
@@ -97,7 +104,7 @@ const PatientAuth = () => {
         phoneWithCountryCode,
         otp,
         fullName.trim() || undefined,
-        email.trim() || undefined
+        email.trim() || undefined,
       );
 
       setSuccess("Login successful! Redirecting...");
@@ -114,6 +121,44 @@ const PatientAuth = () => {
       setError(errorMessage);
       setOtp(""); // Clear OTP on error
       otpRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Login with username and password
+   */
+  const handleUsernameLogin = async () => {
+    if (!username.trim()) {
+      setError("Please enter your username");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    try {
+      await authService.loginWithPassword(username.trim(), password);
+
+      setSuccess("Login successful! Redirecting...");
+
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        navigate("/profileDashboard");
+      }, 1000);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        "Invalid username or password. Please try again.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -180,183 +225,273 @@ const PatientAuth = () => {
           Patient Sign In / Sign Up
         </h2>
         <p className="text-sm text-gray-600 text-center mb-6">
-          {otpSent
-            ? "Enter the OTP sent to your WhatsApp"
-            : "Enter your phone number to receive OTP via WhatsApp"}
+          {loginMethod === "phone"
+            ? otpSent
+              ? "Enter the OTP sent to your WhatsApp"
+              : "Enter your phone number to receive OTP via WhatsApp"
+            : "Enter your username and password to login"}
         </p>
 
+        {/* Login Method Toggle */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => {
+              setLoginMethod("phone");
+              setError("");
+              setSuccess("");
+            }}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              loginMethod === "phone"
+                ? "bg-[#2fbfa8] text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Login with Phone
+          </button>
+          <button
+            onClick={() => {
+              setLoginMethod("username");
+              setError("");
+              setSuccess("");
+              setOtpSent(false);
+            }}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              loginMethod === "username"
+                ? "bg-[#2fbfa8] text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Login with Username
+          </button>
+        </div>
+
         {/* Phone + OTP Login */}
-        <div className="flex flex-col gap-4">
-          {/* Phone Number Input */}
-          {!otpSent && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                    +91
-                  </span>
-                  <input
-                    type="tel"
-                    placeholder="9876543210"
-                    className="w-full border rounded-lg pl-14 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
-                    value={phone}
-                    onChange={(e) =>
-                      setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
-                    }
-                    disabled={loading}
-                    maxLength={10}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter your 10-digit mobile number
-                </p>
-              </div>
-
-              <button
-                onClick={handleSendOtp}
-                disabled={loading || phone.length !== 10}
-                className="bg-[#2fbfa8] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#27a693] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Sending OTP...
-                  </>
-                ) : (
-                  "Send OTP via WhatsApp"
-                )}
-              </button>
-            </>
-          )}
-
-          {/* OTP Input */}
-          {otpSent && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                  Enter 6-Digit OTP
-                </label>
-                <div className="flex gap-2 justify-center">
-                  {[0, 1, 2, 3, 4, 5].map((i) => (
+        {loginMethod === "phone" && (
+          <div className="flex flex-col gap-4">
+            {/* Phone Number Input */}
+            {!otpSent && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                      +91
+                    </span>
                     <input
-                      key={i}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      ref={(el) => {
-                        if (el) otpRefs.current[i] = el;
-                      }}
-                      className="w-12 h-12 border-2 rounded-lg text-center text-lg font-semibold focus:ring-2 focus:ring-[#2fbfa8] focus:border-[#2fbfa8]"
-                      value={otp[i] || ""}
-                      onChange={(e) => handleOtpChange(e.target.value, i)}
-                      onKeyDown={(e) => handleOtpKeyDown(e, i)}
+                      type="tel"
+                      placeholder="9876543210"
+                      className="w-full border rounded-lg pl-14 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                      value={phone}
+                      onChange={(e) =>
+                        setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                      }
                       disabled={loading}
+                      maxLength={10}
                     />
-                  ))}
-                </div>
-              </div>
-
-              {/* New User Details */}
-              {isNewUser && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="space-y-3 pt-2"
-                >
-                  <p className="text-sm text-[#2a1470] font-medium text-center">
-                    Welcome! Please provide your details
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter your 10-digit mobile number
                   </p>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your full name"
-                      className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email (optional)
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="your.email@example.com"
-                      className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-                </motion.div>
-              )}
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-2 pt-2">
                 <button
-                  onClick={handleOtpLogin}
-                  disabled={loading || otp.length !== 6}
-                  className="bg-[#2a1470] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#24105f] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  onClick={handleSendOtp}
+                  disabled={loading || phone.length !== 10}
+                  className="bg-[#2fbfa8] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#27a693] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      Verifying...
+                      Sending OTP...
                     </>
                   ) : (
-                    "Verify & Continue"
+                    "Send OTP via WhatsApp"
                   )}
                 </button>
+              </>
+            )}
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleChangeNumber}
-                    disabled={loading}
-                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-all disabled:opacity-50"
-                  >
-                    Change Number
-                  </button>
-                  <button
-                    onClick={handleSendOtp}
-                    disabled={loading}
-                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-all disabled:opacity-50"
-                  >
-                    Resend OTP
-                  </button>
+            {/* OTP Input */}
+            {otpSent && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                    Enter 6-Digit OTP
+                  </label>
+                  <div className="flex gap-2 justify-center">
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <input
+                        key={i}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        ref={(el) => {
+                          if (el) otpRefs.current[i] = el;
+                        }}
+                        className="w-12 h-12 border-2 rounded-lg text-center text-lg font-semibold focus:ring-2 focus:ring-[#2fbfa8] focus:border-[#2fbfa8]"
+                        value={otp[i] || ""}
+                        onChange={(e) => handleOtpChange(e.target.value, i)}
+                        onKeyDown={(e) => handleOtpKeyDown(e, i)}
+                        disabled={loading}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
 
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-            >
-              {error}
-            </motion.div>
-          )}
+                {/* New User Details */}
+                {isNewUser && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="space-y-3 pt-2"
+                  >
+                    <p className="text-sm text-[#2a1470] font-medium text-center">
+                      Welcome! Please provide your details
+                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your full name"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email (optional)
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="your.email@example.com"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                  </motion.div>
+                )}
 
-          {/* Success Message */}
-          {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm"
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    onClick={handleOtpLogin}
+                    disabled={loading || otp.length !== 6}
+                    className="bg-[#2a1470] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#24105f] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        Verifying...
+                      </>
+                    ) : (
+                      "Verify & Continue"
+                    )}
+                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleChangeNumber}
+                      disabled={loading}
+                      className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-all disabled:opacity-50"
+                    >
+                      Change Number
+                    </button>
+                    <button
+                      onClick={handleSendOtp}
+                      disabled={loading}
+                      className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-all disabled:opacity-50"
+                    >
+                      Resend OTP
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Username + Password Login */}
+        {loginMethod === "username" && (
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your username"
+                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && username && password) {
+                    handleUsernameLogin();
+                  }
+                }}
+              />
+            </div>
+
+            <button
+              onClick={handleUsernameLogin}
+              disabled={loading || !username || !password}
+              className="bg-[#2a1470] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#24105f] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {success}
-            </motion.div>
-          )}
-        </div>
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mt-4"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mt-4"
+          >
+            {success}
+          </motion.div>
+        )}
 
         {/* Help Text */}
         <div className="mt-6 text-center">

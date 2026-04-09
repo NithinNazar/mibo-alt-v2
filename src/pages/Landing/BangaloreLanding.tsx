@@ -40,6 +40,10 @@ import miboReal7 from "../../assets/mibo-real-7.jpg?w=600&format=webp&quality=75
 import confidentialImage from "../../assets/mibo-individual.jpg?w=600&format=webp&quality=75";
 import availabilityImage from "../../assets/mibo-avail.JPG?w=600&format=webp&quality=75";
 import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&quality=75";
+import drMiller from "./Dr. Miller.webp";
+import drSrinivas from "./Dr. Srinivas Reddy.webp";
+import shifana from "./Shifana Sidheeque.webp";
+import yashaswini from "./Yashaswini.webp";
 
 const BangaloreLanding = () => {
   const phoneNumber = "9083335000";
@@ -68,7 +72,7 @@ const BangaloreLanding = () => {
   ];
 
   const handlePhoneClick = () => {
-    window.location.href = `tel:9083335000`;
+    window.location.href = `tel:+919083335000`;
   };
 
   const nextSlide = () => {
@@ -242,6 +246,33 @@ const BangaloreLanding = () => {
     },
   ];
 
+  const experts = [
+    {
+      image: drMiller,
+      name: "Dr. Miller A M",
+      specialization:
+        "Consultant Psychiatrist, 5+ Years of Expereince In mergency Psychiaty, Community care and Queer mental health.",
+    },
+    {
+      image: drSrinivas,
+      name: "Dr. Srinivas Reddy V",
+      specialization:
+        "Consultant Psychiatrist, 15+ Years Of Experience In Adult Psychiatry & De-addiction",
+    },
+    {
+      image: shifana,
+      name: "Shifana Sidheeque TK ",
+      specialization:
+        "Clinical Psychologist, 4+ Years Of Experience In CBT, DBT,Schema Therapy, SFBT Behaviour modification",
+    },
+    {
+      image: yashaswini,
+      name: "Ms. Yashaswini",
+      specialization:
+        "Clinical Psychologist, 3+ Years Of Experience In CBT, DBT,Mindfullness Approach",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-miboLightGreen/20 to-white">
       {/* Floating Action Button */}
@@ -285,12 +316,13 @@ const BangaloreLanding = () => {
 
             {/* Heading */}
             <h1 className="text-4xl md:text-6xl font-bold leading-tight text-white">
-              Talk to a Mental Health Specialist in Bangalore Today
+              Psychologists & Psychiatrists in Bangalore, Talk to a Mental
+              Health Expert Today
             </h1>
 
             <p className="text-xl md:text-2xl text-white/90 font-semibold">
-              Confidential therapy, psychiatry, and wellness care tailored to
-              you
+              Consult experienced psychologists and psychiatrists in Bangalore
+              for therapy, counselling and mental health treatment.
             </p>
 
             {/* Trust Badges */}
@@ -320,7 +352,7 @@ const BangaloreLanding = () => {
                 className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
-                Call Now: 9083335000
+                Call Now: +91 9083335000
               </button>
             </div>
           </div>
@@ -455,6 +487,46 @@ const BangaloreLanding = () => {
                 <p className="text-[#212154] font-semibold text-lg">
                   {concern}
                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      {/* Meet Our Experts Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+            Meet Our Psychologists & Psychiatrists
+          </h2>
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+            Our experienced mental health professionals are dedicated to
+            providing compassionate and evidence-based care.
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {experts.map((expert, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden text-center"
+              >
+                <div className="h-64 overflow-hidden">
+                  <img
+                    src={expert.image}
+                    alt={expert.name}
+                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-[#212154] mb-1">
+                    {expert.name}
+                  </h3>
+
+                  <p className="text-miboText font-semibold">
+                    {expert.specialization}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -787,7 +859,7 @@ const BangaloreLanding = () => {
               className="bg-white text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
             >
               <Phone className="w-5 h-5" />
-              Call {phoneNumber}
+              Call +91 {phoneNumber}
             </button>
           </div>
         </div>

@@ -13,6 +13,8 @@ export default defineConfig({
         quality: "75", // Good quality with significant size reduction
         w: "800", // Max width 800px
       }),
+      // Exclude GIF files from processing to preserve animation
+      exclude: /\.gif$/,
     }),
   ],
   // For AWS S3/CloudFront deployment, use root path

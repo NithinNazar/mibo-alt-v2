@@ -1,9 +1,9 @@
 const categories = [
   "All Experts",
-  "Therapists",
-  "Psychiatrists",
   "Clinical Psychologists",
+  "Psychiatrists",
   "Counsellors",
+  "Therapists",
 ];
 
 interface CategoryScrollProps {

@@ -27,6 +27,7 @@ import PatientDashboard from "./pages/profileDashboard/PatientDashboard";
 import PatientAuth from "./pages/auth/PatientAuth";
 import AllAppointments from "./pages/profileDashboard/AllAppointments";
 import ProfileSettings from "./pages/profileDashboard/ProfileSettings";
+import { NotificationList } from "./components/Notifications/NotificationList";
 
 // --- Centres ---
 import Bangalore from "./pages/Centers/Bangalore";
@@ -86,6 +87,7 @@ const App = () => {
           <Route path="/patientAuth" element={<PatientAuth />} />
           <Route path="/profileDashboard" element={<PatientDashboard />} />
           <Route path="/appointments" element={<AllAppointments />} />
+          <Route path="/notifications" element={<NotificationList />} />
           <Route path="/profile-settings" element={<ProfileSettings />} />
           {/*  Booking Flow (book for a specific doctor) */}
           <Route
