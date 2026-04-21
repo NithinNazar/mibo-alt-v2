@@ -1,0 +1,73 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Calendar Date Selection Failure
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases - calendar dates with available slots that don't trigger selection
+  - Test that clicking calendar dates with available slots triggers `handleChooseCalendarDay` and closes modal
+  - Mock `datesWithSlots` data with future dates that have slots
+  - Simulate calendar date button clicks using React Testing Library
+  - Assert that `onPick` function is called with correct date and status parameters
+  - Assert that modal closes after date selection
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found to understand root cause (e.g., "Calendar date click does not trigger handleChooseCalendarDay")
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.2, 1.3, 1.4_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Non-Calendar Date Selection Behavior
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for horizontal date strip clicks
+  - Observe behavior on UNFIXED code for time slot selection after date selection
+  - Observe behavior on UNFIXED code for calendar month navigation
+  - Observe behavior on UNFIXED code for modal open/close without date selection
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements
+  - Test that horizontal date strip selection continues to work correctly
+  - Test that time slot selection after choosing a date continues to work
+  - Test that calendar month navigation continues to display correct months
+  - Test that closing modal without selecting preserves previously selected date
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [ ] 3. Fix calendar dates clickability issue
+  - [x] 3.1 Implement the fix in CalendarMonthGrid component
+    - Fix date key matching to ensure `toISODateKey(date)` format matches `datesWithSlots` array format
+    - Add logging to compare key formats between API response and calendar generation
+    - Normalize date formats to ensure consistent key matching in `slotsMap.has(key)`
+    - Fix slot detection logic to correctly calculate `hasSlots` boolean
+    - Verify `slotsMap.has(key)` works correctly with proper date keys
+    - Fix disabled state logic to ensure available dates are not incorrectly marked as disabled
+    - Review and correct `const disabled = !hasSlots || isPast;` calculation
+    - Improve past date detection to handle timezone and date boundary issues
+    - Add debug logging to identify exact failure points
+    - Add safeguards for malformed API data and provide fallback behavior
+    - _Bug_Condition: isBugCondition(input) where input.date has available slots and user clicks calendar date button_
+    - _Expected_Behavior: Calendar date selection triggers handleChooseCalendarDay, updates selectedDate, and closes modal_
+    - _Preservation: Horizontal date strip selection, time slot selection, calendar navigation, and modal behavior remain unchanged_
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 3.4_
+
+  - [x] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Calendar Date Selection Success
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - _Requirements: 2.1, 2.2, 2.4_
+
+  - [x] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** - Non-Calendar Date Selection Behavior
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix (no regressions)
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

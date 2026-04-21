@@ -38,6 +38,7 @@
     "@eslint/js": "^9.33.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/axios-mock-adapter": "1.9.0",
     "@types/node": "^24.7.0",
     "@types/react": "^19.1.10",

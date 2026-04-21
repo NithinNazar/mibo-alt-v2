@@ -1,0 +1,87 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Slots Not Persisted on Clinician Update
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases - editing an existing clinician with time slots created via calendar picker
+  - Test that when `editingClinician !== null` AND `timeSlotsByDate.size > 0` AND user clicks "Update Clinician", the availability API is called and slots are persisted
+  - The test assertions should verify:
+    - Network request to `PUT /users/clinicians/:id/availability` is made
+    - Database contains the new availability rules after update
+    - Reopening the modal shows the created slots
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found:
+    - Network tab shows only `PUT /users/clinicians/:id` call, no availability call
+    - Database has no new records in `clinician_availability_rules` table
+    - Modal reopens with empty slots despite creation
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 2.1, 2.2_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Profile Update Without Slots Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (updates without slot modifications)
+  - Write property-based tests capturing observed behavior patterns:
+    - For all clinician profile updates where `timeSlotsByDate.size === 0`, verify only profile update API is called
+    - For all clinician profile field changes (name, specialization, fee), verify updates persist correctly
+    - For all clinician list views, verify display remains correct
+    - For all existing slot retrievals, verify data returns correctly
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [x] 3. Fix for clinician slots persistence
+  - [x] 3.1 Implement the fix in handleSubmit function
+    - Locate `handleSubmit` function in `mibo-admin/src/modules/staff/pages/CliniciansPage.tsx` (approximately line 750)
+    - After the `updateClinician` API call in edit mode, add conditional logic to check if `timeSlotsByDate.size > 0`
+    - If slots exist, convert them to availability rules format:
+      - Map `AvailabilitySlot.consultationMode` to `AvailabilityRule.mode`
+      - Add `centreId` from `formData.primaryCentreId`
+      - Add `slotDurationMinutes` from `sessionLength` state variable
+      - Remove `id` field (not needed for backend)
+    - Call `clinicianService.updateAvailability(editingClinician.id, availabilityRules)` with the converted rules
+    - Wrap availability update in try-catch for error handling
+    - Update success toast message to indicate both profile and availability were updated when slots are present
+    - Ensure `isCreating` loading state covers both API calls
+    - _Bug_Condition: isBugCondition(input) where input.editingClinician !== null AND input.timeSlotsByDate.size > 0 AND input.action === "submit"_
+    - _Expected_Behavior: slotsPersistedToDatabase(result) AND slotsVisibleOnModalReopen(result) AND availabilityAPIWasCalled(result)_
+    - _Preservation: Profile updates without slot modifications must work exactly as before, no unnecessary availability API calls_
+    - _Requirements: 1.1, 1.2, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [x] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Slots Persist on Update
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify:
+      - Network tab shows both `PUT /users/clinicians/:id` and `PUT /users/clinicians/:id/availability` calls
+      - Database contains the new availability rules
+      - Reopening modal displays the created slots
+      - Frontend booking page shows the slots for the clinician
+    - _Requirements: 2.1, 2.2, 2.3, 2.4_
+
+  - [x] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** - Non-Slot Updates Unchanged
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix:
+      - Profile updates without slots work correctly
+      - No unnecessary availability API calls when slots not modified
+      - Existing slot retrieval and display functionality unchanged
+      - Appointment booking for existing slots continues to work
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Verify all exploration and preservation tests pass
+  - Manually test the complete flow: edit clinician → add slots → update → reopen modal → verify slots visible
+  - Test mixed updates: change profile fields AND add slots → verify both are saved
+  - Test error scenarios: verify appropriate error messages if availability update fails
+  - Ask the user if questions arise
