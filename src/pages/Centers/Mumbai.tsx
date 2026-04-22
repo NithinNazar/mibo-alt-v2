@@ -6,8 +6,7 @@ import HeroSection from "./components/HeroSection";
 import SectionTitle from "./components/SectionTitle";
 import ImageCarousel from "./components/ImageCarousel";
 import ConditionPills from "./components/ConditionPills";
-import TopPsychiatrists from "./components/TopPsychiatrists";
-import TopTherapists from "./components/TopTherapists";
+import MeetOurExperts from "./components/MeetOurExperts";
 import Testimonials from "./components/Testimonials";
 import Achievements from "./components/Achievements";
 import AddressSection from "./components/AddressSection";
@@ -43,9 +42,9 @@ const Mumbai: React.FC = () => {
         <ConditionPills />
       </section>
 
-      {/* Top Rated Psychiatrists & Therapists */}
-      <TopPsychiatrists city="Mumbai" />
-      <TopTherapists city="Mumbai" />
+      {/* Meet Our Psychologists & Psychiatrists */}
+      <MeetOurExperts city="Mumbai" />
+
       <BookAppointmentButton onClick={handleBookAppointment} />
 
       {/* Testimonials & Achievements */}
