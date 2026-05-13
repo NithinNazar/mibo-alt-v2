@@ -49,6 +49,18 @@ const monthNames = [
   "December",
 ] as const;
 
+/**
+ * Convert 24-hour time format to 12-hour format with AM/PM
+ * @param time24 - Time in HH:MM format (e.g., "14:00")
+ * @returns Time in 12-hour format (e.g., "2:00 PM")
+ */
+const formatTime12Hour = (time24: string): string => {
+  const [hours, minutes] = time24.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const hours12 = hours % 12 || 12; // Convert 0 to 12 for midnight
+  return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
+};
+
 type Availability = "available" | "few" | "unavailable";
 
 function startOfMonth(d: Date) {
@@ -381,7 +393,7 @@ export default function Step1SessionDetails({
 
   /**
    * Group available slots by period (Morning/Afternoon/Evening)
-   * Uses REAL API data instead of mock
+   * Uses REAL API data and includes booked slots (marked as unavailable)
    */
   const slotsByPeriod = useMemo(() => {
     const grouped: Record<string, TimeSlot[]> = {
@@ -391,8 +403,7 @@ export default function Step1SessionDetails({
     };
 
     availableSlots.forEach((slot) => {
-      if (!slot.available) return;
-
+      // Include ALL slots (both available and booked)
       // Parse time to determine period
       const hour = parseInt(slot.start_time.split(":")[0]);
 
@@ -472,6 +483,9 @@ export default function Step1SessionDetails({
     const durationMinutes = selectedClinician.defaultDurationMinutes || 50;
     const consultationFee = selectedClinician.consultationFee || 1600;
 
+    // Format date as YYYY-MM-DD to avoid timezone issues
+    const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
     setBookingData({
       ...bookingData,
       mode: selectedMode,
@@ -479,7 +493,7 @@ export default function Step1SessionDetails({
       duration: `${durationMinutes} mins`,
       durationMinutes: durationMinutes,
       price: consultationFee,
-      date: selectedDate.toISOString(),
+      date: dateString,
       time: selectedTime,
       doctorId: doctor?.id,
       clinicianId: selectedClinician.id,
@@ -936,16 +950,24 @@ export default function Step1SessionDetails({
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {slots.map((slot) => {
                               const active = selectedTime === slot.start_time;
+                              const isBooked = !slot.available;
+
                               return (
                                 <button
                                   key={slot.start_time}
-                                  onClick={() =>
-                                    setSelectedTime(slot.start_time)
-                                  }
-                                  disabled={!slot.available}
-                                  className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                  onClick={() => {
+                                    if (!isBooked) {
+                                      setSelectedTime(slot.start_time);
+                                    }
+                                  }}
+                                  disabled={isBooked}
+                                  className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm ${
+                                    isBooked
+                                      ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
+                                      : "hover:shadow-md"
+                                  }`}
                                   style={
-                                    active
+                                    active && !isBooked
                                       ? {
                                           background: MIBO.primary,
                                           color: "#fff",
@@ -955,7 +977,16 @@ export default function Step1SessionDetails({
                                       : {}
                                   }
                                 >
-                                  {slot.start_time}
+                                  <div className="flex flex-col items-center">
+                                    <span>
+                                      {formatTime12Hour(slot.start_time)}
+                                    </span>
+                                    {isBooked && (
+                                      <span className="text-xs text-gray-400 mt-0.5">
+                                        Booked
+                                      </span>
+                                    )}
+                                  </div>
                                 </button>
                               );
                             })}

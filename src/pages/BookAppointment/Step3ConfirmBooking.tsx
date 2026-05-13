@@ -41,20 +41,38 @@ export default function Step3ConfirmBooking({
    * Step 3: Open Razorpay modal
    */
 
-  const convertToUTC = (date:string, time:string) => {
-  const [year, month, day] = date.split("-");
-  const [hour, minute] = time.split(":");
+  const convertToUTC = (date: string, time: string) => {
+    const [year, month, day] = date.split("-");
+    const [hour, minute] = time.split(":");
 
-  const localDate = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hour),
-    Number(minute)
-  );
+    const localDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+    );
 
-  return localDate.toISOString();
-}
+    return localDate.toISOString();
+  };
+
+  // Helper function to parse date string (YYYY-MM-DD) without timezone issues
+  const parseLocalDate = (dateString: string) => {
+    const [year, month, day] = dateString.split("-");
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  };
+
+  /**
+   * Convert 24-hour time format to 12-hour format with AM/PM
+   * @param time24 - Time in HH:MM format (e.g., "14:00")
+   * @returns Time in 12-hour format (e.g., "2:00 PM")
+   */
+  const formatTime12Hour = (time24: string): string => {
+    const [hours, minutes] = time24.split(":").map(Number);
+    const period = hours >= 12 ? "PM" : "AM";
+    const hours12 = hours % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
+  };
 
   const handleConfirmPayment = async () => {
     // Validate name and email
@@ -111,10 +129,10 @@ export default function Step3ConfirmBooking({
       const appointmentPayload = {
         clinicianId: parseInt(bookingData.clinicianId),
         centreId: parseInt(bookingData.centreId),
-        appointmentDate: bookingData.date.split("T")[0], // "2026-01-10"
+        appointmentDate: bookingData.date, // Already in "YYYY-MM-DD" format
         appointmentTime: bookingData.time, // "10:00"
         appointmentType: bookingData.appointmentType, // "ONLINE" or "IN_PERSON"
-        appointmentDateUTC: convertToUTC(bookingData.date.split("T")[0], bookingData.time)
+        appointmentDateUTC: convertToUTC(bookingData.date, bookingData.time),
       };
 
       console.log("📤 Sending appointment payload:", appointmentPayload);
@@ -391,13 +409,16 @@ export default function Step3ConfirmBooking({
                   Appointment Details
                 </p>
                 <p className="text-xs text-blue-700">
-                  {new Date(bookingData.date).toLocaleDateString("en-IN", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}{" "}
-                  at {bookingData.time}
+                  {parseLocalDate(bookingData.date).toLocaleDateString(
+                    "en-IN",
+                    {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    },
+                  )}{" "}
+                  at {formatTime12Hour(bookingData.time)}
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
                   {bookingData.clinicianName} • {bookingData.mode}
@@ -559,12 +580,12 @@ export default function Step3ConfirmBooking({
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Date & Time</span>
               <span className="font-medium text-right">
-                {new Date(bookingData.date).toLocaleDateString("en-IN", {
+                {parseLocalDate(bookingData.date).toLocaleDateString("en-IN", {
                   day: "2-digit",
                   month: "short",
                   year: "numeric",
                 })}{" "}
-                • {bookingData.time}
+                • {formatTime12Hour(bookingData.time)}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">

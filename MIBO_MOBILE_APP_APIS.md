@@ -320,31 +320,52 @@
   "clinicianId": "58",
   "centreId": "1",
   "appointmentDate": "2026-04-07",
-  "startTime": "09:00",
-  "endTime": "10:00",
-  "consultationMode": "IN_PERSON",
-  "reasonForVisit": "Anxiety management",
+  "appointmentTime": "09:00",
+  "appointmentType": "IN_PERSON",
+  "appointmentDateUTC": "2026-04-07T03:30:00.000Z",
   "notes": "First time consultation"
 }
 ```
+
+**Field Descriptions**:
+
+- `clinicianId` (required): ID of the clinician
+- `centreId` (required): ID of the centre
+- `appointmentDate` (required): Date in YYYY-MM-DD format (local date)
+- `appointmentTime` (required): Time in HH:MM format (local time, 24-hour)
+- `appointmentType` (required): Either "ONLINE" or "IN_PERSON"
+- `appointmentDateUTC` (required): Full UTC timestamp in ISO 8601 format
+- `notes` (optional): Additional notes for the appointment
 
 **Response**:
 
 ```json
 {
   "success": true,
+  "message": "Appointment created successfully",
   "data": {
-    "appointmentId": "456",
-    "clinicianName": "Dr. Anet Augustine",
-    "appointmentDate": "2026-04-07",
-    "startTime": "09:00",
-    "endTime": "10:00",
-    "consultationFee": 3000,
-    "status": "PENDING_PAYMENT",
+    "appointment": {
+      "id": "456",
+      "clinicianId": "58",
+      "clinicianName": "Dr. Anet Augustine",
+      "appointmentDate": "2026-04-07",
+      "appointmentTime": "09:00",
+      "appointmentType": "IN_PERSON",
+      "consultationFee": 3000,
+      "status": "PENDING_PAYMENT",
+      "centreName": "Mibo Bangalore"
+    },
     "razorpayOrderId": "order_xyz123"
   }
 }
 ```
+
+**Important Notes**:
+
+- `appointmentDateUTC` must be in ISO 8601 format (e.g., "2026-04-07T03:30:00.000Z")
+- Convert local date/time to UTC before sending
+- The backend will validate that the appointment is in the future
+- After creating appointment, proceed to payment using the returned `razorpayOrderId`
 
 ---
 
