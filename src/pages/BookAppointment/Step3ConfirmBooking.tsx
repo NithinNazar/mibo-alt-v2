@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import {
@@ -32,6 +32,68 @@ export default function Step3ConfirmBooking({
   const currentUser = authService.getCurrentUser();
   const [fullName, setFullName] = useState(currentUser?.full_name || "");
   const [email, setEmail] = useState(currentUser?.email || "");
+
+  // Registration fee state
+  const [registrationFee, setRegistrationFee] = useState<number>(0);
+  const [hasPaidRegistrationFee, setHasPaidRegistrationFee] =
+    useState<boolean>(true);
+  const [loadingFeeStatus, setLoadingFeeStatus] = useState<boolean>(true);
+
+  // Patient notes state
+  const [patientNotes, setPatientNotes] = useState<string>("");
+
+  // Fetch registration fee status on mount
+  useEffect(() => {
+    const fetchRegistrationFeeStatus = async () => {
+      try {
+        setLoadingFeeStatus(true);
+        const accessToken = localStorage.getItem("mibo_access_token");
+
+        if (!accessToken) {
+          // User not logged in yet, assume new user
+          setHasPaidRegistrationFee(false);
+          setRegistrationFee(100);
+          setLoadingFeeStatus(false);
+          return;
+        }
+
+        const apiBaseUrl =
+          import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
+
+        const response = await fetch(
+          `${apiBaseUrl}/payments/registration-fee-status`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setHasPaidRegistrationFee(data.data.hasPaidRegistrationFee);
+          setRegistrationFee(data.data.registrationFee);
+        } else {
+          // If API fails, assume new user for safety
+          setHasPaidRegistrationFee(false);
+          setRegistrationFee(100);
+        }
+      } catch (error) {
+        console.error("Error fetching registration fee status:", error);
+        // If error, assume new user for safety
+        setHasPaidRegistrationFee(false);
+        setRegistrationFee(100);
+      } finally {
+        setLoadingFeeStatus(false);
+      }
+    };
+
+    fetchRegistrationFeeStatus();
+  }, []);
+
+  // Calculate total amount
+  const consultationFee = bookingData.amount || bookingData.price || 1600;
+  const totalAmount = consultationFee + registrationFee;
 
   /**
    * Handle payment confirmation - Real Razorpay integration with NEW booking flow
@@ -133,6 +195,7 @@ export default function Step3ConfirmBooking({
         appointmentTime: bookingData.time, // "10:00"
         appointmentType: bookingData.appointmentType, // "ONLINE" or "IN_PERSON"
         appointmentDateUTC: convertToUTC(bookingData.date, bookingData.time),
+        patientNotes: patientNotes.trim() || undefined, // Add patient notes
       };
 
       console.log("📤 Sending appointment payload:", appointmentPayload);
@@ -390,7 +453,7 @@ export default function Step3ConfirmBooking({
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Amount Paid</span>
               <span className="font-semibold text-green-700">
-                ₹{bookingData.amount || bookingData.price || 1600}
+                ₹{totalAmount}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -514,6 +577,41 @@ export default function Step3ConfirmBooking({
           </div>
         </div>
 
+        {/* Patient Notes Section */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-[#034B44]/10 rounded-full flex items-center justify-center">
+              <FileText className="w-6 h-6 text-[#034B44]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Additional Notes</h3>
+              <p className="text-xs text-gray-500">
+                Optional - Share any special needs or conditions
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Your Notes <span className="text-gray-400">(Optional)</span>
+            </label>
+            <textarea
+              value={patientNotes}
+              onChange={(e) => setPatientNotes(e.target.value)}
+              placeholder="E.g., First time consultation, anxiety about specific topics, preferred communication style, etc."
+              rows={4}
+              maxLength={500}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors resize-none"
+            />
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-gray-500">
+                Help your clinician prepare for your session
+              </p>
+              <p className="text-xs text-gray-400">{patientNotes.length}/500</p>
+            </div>
+          </div>
+        </div>
+
         {/* Payment Summary Card */}
         <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
           <div className="flex items-center gap-3 mb-4">
@@ -526,24 +624,62 @@ export default function Step3ConfirmBooking({
             </div>
           </div>
 
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="text-sm text-gray-600">Consultation Fee</span>
-              <span className="font-semibold">
-                ₹{bookingData.amount || bookingData.price || 1600}
-              </span>
+          {loadingFeeStatus ? (
+            <div className="text-center py-4">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#034B44]"></div>
+              <p className="text-xs text-gray-600 mt-2">Calculating fees...</p>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="text-sm text-gray-600">Platform Fee</span>
-              <span className="font-semibold text-green-600">FREE</span>
-            </div>
-            <div className="flex items-center justify-between py-3 bg-[#034B44]/5 rounded-lg px-3">
-              <span className="font-bold text-[#034B44]">Total Amount</span>
-              <span className="font-bold text-2xl text-[#034B44]">
-                ₹{bookingData.amount || bookingData.price || 1600}
-              </span>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">
+                    Consultation Fee
+                  </span>
+                  <span className="font-semibold">₹{consultationFee}</span>
+                </div>
+
+                {!hasPaidRegistrationFee && registrationFee > 0 && (
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-600">
+                        One-time Registration Fee
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        (First time booking)
+                      </span>
+                    </div>
+                    <span className="font-semibold">₹{registrationFee}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Platform Fee</span>
+                  <span className="font-semibold text-green-600">FREE</span>
+                </div>
+
+                <div className="flex items-center justify-between py-3 bg-[#034B44]/5 rounded-lg px-3">
+                  <span className="font-bold text-[#034B44]">Total Amount</span>
+                  <span className="font-bold text-2xl text-[#034B44]">
+                    ₹{totalAmount}
+                  </span>
+                </div>
+              </div>
+
+              {!hasPaidRegistrationFee && registrationFee > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-blue-800">
+                      This is your first booking with Mibo. A one-time
+                      registration fee of ₹{registrationFee} will be added to
+                      your consultation fee.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
             <div className="flex items-start gap-2">
@@ -606,11 +742,11 @@ export default function Step3ConfirmBooking({
         )}
         <button
           onClick={handleConfirmPayment}
-          disabled={!fullName.trim()}
+          disabled={!fullName.trim() || loadingFeeStatus}
           className="w-full py-4 bg-[#034B44] text-white font-bold rounded-full hover:bg-[#046e63] transition-all shadow-lg flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <CreditCard className="w-5 h-5" />
-          Confirm & Pay ₹{bookingData.amount || bookingData.price || 1600}
+          {loadingFeeStatus ? "Loading..." : `Confirm & Pay ₹${totalAmount}`}
         </button>
         <p className="text-xs text-center text-gray-500 mt-3">
           By confirming, you agree to our terms and conditions
