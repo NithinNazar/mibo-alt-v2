@@ -952,22 +952,13 @@ export default function Step1SessionDetails({
                               const active = selectedTime === slot.start_time;
                               const isBooked = !slot.available;
 
-                              return (
+                              return isBooked ? null : (
                                 <button
                                   key={slot.start_time}
-                                  onClick={() => {
-                                    if (!isBooked) {
-                                      setSelectedTime(slot.start_time);
-                                    }
-                                  }}
-                                  disabled={isBooked}
-                                  className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm ${
-                                    isBooked
-                                      ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
-                                      : "hover:shadow-md"
-                                  }`}
+                                  onClick={() => setSelectedTime(slot.start_time)}
+                                  className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md"
                                   style={
-                                    active && !isBooked
+                                    active
                                       ? {
                                           background: MIBO.primary,
                                           color: "#fff",
@@ -977,16 +968,7 @@ export default function Step1SessionDetails({
                                       : {}
                                   }
                                 >
-                                  <div className="flex flex-col items-center">
-                                    <span>
-                                      {formatTime12Hour(slot.start_time)}
-                                    </span>
-                                    {isBooked && (
-                                      <span className="text-xs text-gray-400 mt-0.5">
-                                        Booked
-                                      </span>
-                                    )}
-                                  </div>
+                                  {formatTime12Hour(slot.start_time)}
                                 </button>
                               );
                             })}
