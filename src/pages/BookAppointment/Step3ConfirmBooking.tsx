@@ -11,6 +11,7 @@ import {
   AlertCircle,
   User,
   Mail,
+  FileText,
 } from "lucide-react";
 
 interface Step3ConfirmBookingProps {
@@ -451,7 +452,21 @@ export default function Step3ConfirmBooking({
               </span>
             </div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Amount Paid</span>
+              <span className="text-sm text-gray-600">Consultation Fee</span>
+              <span className="font-semibold text-green-700">
+                ₹{consultationFee}
+              </span>
+            </div>
+            {!hasPaidRegistrationFee && registrationFee > 0 && (
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Registration Fee</span>
+                <span className="font-semibold text-green-700">
+                  ₹{registrationFee}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between mb-2 pt-2 border-t border-green-200">
+              <span className="text-sm text-gray-600">Total Amount Paid</span>
               <span className="font-semibold text-green-700">
                 ₹{totalAmount}
               </span>
