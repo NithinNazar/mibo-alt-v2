@@ -70,7 +70,7 @@ apiClient.interceptors.request.use(
  * Response Interceptor
  *
  * Handles API response errors and implements automatic error handling:
- * - 401 Unauthorized: Clear tokens and redirect to login
+ * - 401 Unauthorized: Try to refresh token, then retry request
  * - Network errors: Return user-friendly error message
  * - Other errors: Pass through for component-level handling
  *
@@ -84,24 +84,76 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
     // Handle 401 Unauthorized - token expired or invalid
-    if (error.response?.status === 401) {
-      console.warn(
-        "Authentication failed - clearing tokens and redirecting to login",
-      );
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-      // Clear all authentication data
-      localStorage.removeItem("mibo_access_token");
-      localStorage.removeItem("mibo_refresh_token");
-      localStorage.removeItem("mibo_user");
+      try {
+        // Get refresh token from localStorage
+        const refreshToken = localStorage.getItem("mibo_refresh_token");
 
-      // Redirect to authentication page
-      // Only redirect if not already on auth page to prevent loops
-      if (!window.location.pathname.includes("/patientAuth")) {
-        window.location.href = "/patientAuth";
+        if (!refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
+        console.log("🔄 Access token expired, attempting to refresh...");
+
+        // Call refresh token endpoint
+        const response = await axios.post(
+          `${API_BASE_URL}/patient-auth/refresh-token`,
+          {
+            refreshToken,
+          },
+        );
+
+        // Extract new access token from response
+        const authData = response.data.data || response.data;
+        const { accessToken } = authData;
+
+        if (!accessToken) {
+          throw new Error("No access token in refresh response");
+        }
+
+        // Store new access token
+        localStorage.setItem("mibo_access_token", accessToken);
+
+        // Update the failed request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+
+        console.log(
+          "✅ Token refreshed successfully, retrying original request",
+        );
+
+        // Retry the original request with new token
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh token failed or expired - logout user
+        console.warn(
+          "Token refresh failed - clearing tokens and redirecting to login",
+        );
+
+        // Clear all authentication data
+        localStorage.removeItem("mibo_access_token");
+        localStorage.removeItem("mibo_refresh_token");
+        localStorage.removeItem("mibo_user");
+
+        // Dispatch auth change event
+        window.dispatchEvent(new Event("authChange"));
+
+        // Redirect to authentication page
+        // Only redirect if not already on auth page to prevent loops
+        if (!window.location.pathname.includes("/patientAuth")) {
+          window.location.href = "/patientAuth";
+        }
+
+        return Promise.reject(refreshError);
       }
-
-      return Promise.reject(error);
     }
 
     // Handle network errors (no response from server)

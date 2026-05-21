@@ -31,7 +31,7 @@ describe("API Client", () => {
     // Mock localStorage
     const localStorageMock: { [key: string]: string } = {};
     Storage.prototype.getItem = vi.fn(
-      (key: string) => localStorageMock[key] || null
+      (key: string) => localStorageMock[key] || null,
     );
     Storage.prototype.setItem = vi.fn((key: string, value: string) => {
       localStorageMock[key] = value;
@@ -119,15 +119,101 @@ describe("API Client", () => {
     });
   });
 
-  describe("Response Interceptor - 401 Error Handling", () => {
-    it("should clear tokens and redirect on 401 Unauthorized", async () => {
+  describe("Response Interceptor - 401 Error Handling & Token Refresh", () => {
+    it("should refresh token and retry request on 401 Unauthorized", async () => {
       // Arrange: Set up tokens in localStorage
-      localStorage.setItem("mibo_access_token", "expired-token");
-      localStorage.setItem("mibo_refresh_token", "expired-refresh");
+      const oldAccessToken = "expired-access-token";
+      const refreshToken = "valid-refresh-token";
+      const newAccessToken = "new-access-token";
+
+      localStorage.setItem("mibo_access_token", oldAccessToken);
+      localStorage.setItem("mibo_refresh_token", refreshToken);
       localStorage.setItem(
         "mibo_user",
-        JSON.stringify({ id: 1, name: "Test" })
+        JSON.stringify({ id: 1, name: "Test" }),
       );
+
+      // Mock 401 response on first call
+      let callCount = 0;
+      mock.onGet("/protected-endpoint").reply((config) => {
+        callCount++;
+        if (callCount === 1) {
+          // First call fails with 401
+          return [401, { success: false, message: "Token expired" }];
+        }
+        // Second call (after refresh) succeeds
+        expect(config.headers?.Authorization).toBe(`Bearer ${newAccessToken}`);
+        return [200, { success: true, data: "Protected data" }];
+      });
+
+      // Mock refresh token endpoint
+      mock.onPost("/patient-auth/refresh-token").reply((config) => {
+        const body = JSON.parse(config.data);
+        expect(body.refreshToken).toBe(refreshToken);
+        return [
+          200,
+          {
+            success: true,
+            data: { accessToken: newAccessToken },
+          },
+        ];
+      });
+
+      // Act: Make API call
+      const response = await apiClient.get("/protected-endpoint");
+
+      // Assert: Request should succeed after token refresh
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toBe("Protected data");
+
+      // Assert: New token should be stored
+      expect(localStorage.getItem("mibo_access_token")).toBe(newAccessToken);
+
+      // Assert: Should have made 2 calls (initial + retry)
+      expect(callCount).toBe(2);
+    });
+
+    it("should clear tokens and redirect when refresh token fails", async () => {
+      // Arrange: Set up tokens in localStorage
+      localStorage.setItem("mibo_access_token", "expired-token");
+      localStorage.setItem("mibo_refresh_token", "invalid-refresh");
+      localStorage.setItem(
+        "mibo_user",
+        JSON.stringify({ id: 1, name: "Test" }),
+      );
+
+      // Mock 401 response
+      mock.onGet("/protected-endpoint").reply(401, {
+        success: false,
+        message: "Unauthorized",
+      });
+
+      // Mock refresh token endpoint failure
+      mock.onPost("/patient-auth/refresh-token").reply(401, {
+        success: false,
+        message: "Invalid refresh token",
+      });
+
+      // Act & Assert: API call should fail
+      try {
+        await apiClient.get("/protected-endpoint");
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        // Assert: Tokens should be cleared
+        expect(localStorage.getItem("mibo_access_token")).toBeNull();
+        expect(localStorage.getItem("mibo_refresh_token")).toBeNull();
+        expect(localStorage.getItem("mibo_user")).toBeNull();
+
+        // Assert: Should redirect to /patientAuth
+        expect(window.location.href).toBe("/patientAuth");
+      }
+    });
+
+    it("should clear tokens and redirect when no refresh token available", async () => {
+      // Arrange: Set up access token but no refresh token
+      localStorage.setItem("mibo_access_token", "expired-token");
+      localStorage.removeItem("mibo_refresh_token");
 
       // Mock 401 response
       mock.onGet("/protected-endpoint").reply(401, {
@@ -142,20 +228,21 @@ describe("API Client", () => {
       } catch (error) {
         // Assert: Tokens should be cleared
         expect(localStorage.getItem("mibo_access_token")).toBeNull();
-        expect(localStorage.getItem("mibo_refresh_token")).toBeNull();
-        expect(localStorage.getItem("mibo_user")).toBeNull();
 
-        // Assert: Should redirect to /auth
-        expect(window.location.href).toBe("/auth");
+        // Assert: Should redirect to /patientAuth
+        expect(window.location.href).toBe("/patientAuth");
       }
     });
 
-    it("should not redirect if already on auth page", async () => {
-      // Arrange: Set current path to /auth
+    it("should not redirect if already on patientAuth page", async () => {
+      // Arrange: Set current path to /patientAuth
       Object.defineProperty(window.location, "pathname", {
-        value: "/auth",
+        value: "/patientAuth",
         writable: true,
       });
+
+      localStorage.setItem("mibo_access_token", "expired-token");
+      localStorage.removeItem("mibo_refresh_token");
 
       // Mock 401 response
       mock.onGet("/test").reply(401);
@@ -167,6 +254,43 @@ describe("API Client", () => {
       } catch (error) {
         // Assert: Should not change href (prevent redirect loop)
         expect(window.location.href).toBe("");
+      }
+    });
+
+    it("should not retry request twice on 401", async () => {
+      // Arrange: Set up tokens
+      localStorage.setItem("mibo_access_token", "expired-token");
+      localStorage.setItem("mibo_refresh_token", "refresh-token");
+
+      let refreshCallCount = 0;
+      let endpointCallCount = 0;
+
+      // Mock endpoint that always returns 401
+      mock.onGet("/always-401").reply(() => {
+        endpointCallCount++;
+        return [401, { success: false, message: "Unauthorized" }];
+      });
+
+      // Mock refresh token endpoint
+      mock.onPost("/patient-auth/refresh-token").reply(() => {
+        refreshCallCount++;
+        return [
+          200,
+          {
+            success: true,
+            data: { accessToken: "new-token" },
+          },
+        ];
+      });
+
+      // Act & Assert
+      try {
+        await apiClient.get("/always-401");
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        // Assert: Should only refresh once and retry once
+        expect(refreshCallCount).toBe(1);
+        expect(endpointCallCount).toBe(2); // Initial + 1 retry
       }
     });
   });
@@ -246,7 +370,7 @@ describe("API Client", () => {
 
       // Act: Call with retry logic
       const response = await apiCallWithRetry(() =>
-        apiClient.get("/flaky-endpoint")
+        apiClient.get("/flaky-endpoint"),
       );
 
       // Assert: Should have retried and eventually succeeded
@@ -268,7 +392,7 @@ describe("API Client", () => {
 
       // Act: Call with retry logic
       const response = await apiCallWithRetry(() =>
-        apiClient.get("/network-test")
+        apiClient.get("/network-test"),
       );
 
       // Assert: Should have retried
@@ -304,7 +428,7 @@ describe("API Client", () => {
       expect(apiClient.defaults.baseURL).toBeDefined();
       expect(
         apiClient.defaults.baseURL?.includes("localhost") ||
-          apiClient.defaults.baseURL?.includes("api")
+          apiClient.defaults.baseURL?.includes("api"),
       ).toBe(true);
     });
 
@@ -316,7 +440,7 @@ describe("API Client", () => {
     it("should have JSON content type header", () => {
       // Assert: Check default headers
       expect(apiClient.defaults.headers["Content-Type"]).toBe(
-        "application/json"
+        "application/json",
       );
     });
   });

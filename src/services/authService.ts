@@ -297,6 +297,51 @@ class AuthService {
   }
 
   /**
+   * Refresh access token using refresh token
+   *
+   * Manually refresh the access token using the stored refresh token.
+   * This is automatically handled by the API interceptor, but can be
+   * called manually if needed.
+   *
+   * @returns Promise with new access token
+   * @throws {AxiosError} If refresh token is invalid or expired
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   const result = await authService.refreshAccessToken();
+   *   console.log("Token refreshed successfully");
+   * } catch (error) {
+   *   console.error("Token refresh failed, user needs to re-login");
+   * }
+   * ```
+   */
+  async refreshAccessToken(): Promise<{ accessToken: string }> {
+    const refreshToken = this.getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    const response = await apiClient.post<{
+      success: boolean;
+      data: { accessToken: string };
+    }>("/patient-auth/refresh-token", {
+      refreshToken,
+    });
+
+    const { accessToken } = response.data.data;
+
+    // Update stored access token
+    localStorage.setItem("mibo_access_token", accessToken);
+
+    // Dispatch custom event to notify components of token refresh
+    window.dispatchEvent(new Event("authChange"));
+
+    return { accessToken };
+  }
+
+  /**
    * NEW: Login with username and password (for Razorpay verification)
    *
    * This provides an alternative login method using username and password
