@@ -68,6 +68,14 @@ export default function PatientDashboard() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
 
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
+
+  const showSnackbar = (message: string) => {
+    setSnackbar({ message, visible: true });
+    setTimeout(() => setSnackbar({ message: "", visible: false }), 3000);
+  };
+
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -128,7 +136,7 @@ export default function PatientDashboard() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to cancel appointment");
+        throw new Error(data?.error?.message || "Failed to cancel appointment");
       }
 
       // Reload dashboard data
@@ -140,7 +148,20 @@ export default function PatientDashboard() {
       setCancelReason("");
     } catch (err: any) {
       console.error("Cancellation error:", err);
-      setCancelError(err.message || "Failed to cancel appointment");
+      const msg: string = err.message || "Failed to cancel appointment";
+      const snackbarMessages = [
+        "Cancellation already requested",
+        "Cannot cancel completed appointment",
+        "Appointment is already cancelled",
+      ];
+      if (snackbarMessages.some((s) => msg.toLowerCase().includes(s.toLowerCase()))) {
+        setShowCancelModal(false);
+        setSelectedAppointment(null);
+        setCancelReason("");
+        showSnackbar(msg);
+      } else {
+        setCancelError(msg);
+      }
     } finally {
       setIsCancelling(false);
     }
@@ -501,7 +522,7 @@ export default function PatientDashboard() {
                     <span>
                       Status:{" "}
                       <span className="font-medium text-green-600">
-                        Confirmed
+                        {appointment.status}
                       </span>
                     </span>
                   </div>
@@ -658,6 +679,13 @@ export default function PatientDashboard() {
               </button>
             </div>
           </motion.div>
+        </div>
+      )}
+
+      {/* Snackbar */}
+      {snackbar.visible && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm px-5 py-3 rounded-xl shadow-lg">
+          {snackbar.message}
         </div>
       )}
     </>
