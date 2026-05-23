@@ -16,7 +16,6 @@
  * @module services/clinicianService
  */
 
-import axios from "axios";
 import apiClient from "./api";
 import type { Clinician, GetCliniciansParams, APIResponse } from "../types";
 
@@ -49,6 +48,13 @@ class ClinicianService {
    * @private
    */
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  /**
+   * API timeout in milliseconds (30 seconds)
+   * Increased to handle slow database queries on production
+   * @private
+   */
+  private readonly API_TIMEOUT = 30000; // 30 seconds
 
   /**
    * Get all clinicians with optional filters
@@ -102,25 +108,32 @@ class ClinicianService {
 
     // If cache is valid, use cached data
     if (isCacheValid) {
-      console.log("Using cached clinician data");
+      if (import.meta.env.DEV) {
+        console.log("Using cached clinician data");
+      }
       return this.filterClinicians(this.cache.data!, params);
     }
 
     // Cache is invalid or expired, fetch fresh data from API
-    console.log("Fetching fresh clinician data from API");
+    if (import.meta.env.DEV) {
+      console.log("Fetching fresh clinician data from API");
+    }
 
     try {
-      // Create a custom axios instance without auth interceptor for this public endpoint
-      const response = await axios.get<APIResponse<Clinician[]>>(
-        `${apiClient.defaults.baseURL}/users/clinicians`,
+      // Use the configured apiClient which handles base URL and auth properly
+      // Force Accept-Encoding header to handle gzip properly
+      const response = await apiClient.get<APIResponse<Clinician[]>>(
+        "/users/clinicians",
         {
           params: {
             isActive: true, // Only fetch active clinicians for public display
           },
-          timeout: 30000,
+          timeout: this.API_TIMEOUT,
           headers: {
-            "Content-Type": "application/json",
+            "Accept-Encoding": "gzip, deflate, br",
+            Accept: "application/json",
           },
+          decompress: true, // Explicitly enable decompression
         },
       );
 
@@ -132,6 +145,15 @@ class ClinicianService {
       return this.filterClinicians(this.cache.data, params);
     } catch (error) {
       console.error("Failed to fetch clinicians:", error);
+
+      // If we have stale cache data, return it as fallback
+      if (this.cache.data !== null) {
+        if (import.meta.env.DEV) {
+          console.log("API failed, using stale cache as fallback");
+        }
+        return this.filterClinicians(this.cache.data, params);
+      }
+
       throw error;
     }
   }
@@ -189,7 +211,9 @@ class ClinicianService {
   clearCache(): void {
     this.cache.data = null;
     this.cache.timestamp = null;
-    console.log("Clinician cache cleared");
+    if (import.meta.env.DEV) {
+      console.log("Clinician cache cleared");
+    }
   }
 
   /**

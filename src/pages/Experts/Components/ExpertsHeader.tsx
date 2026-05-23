@@ -9,7 +9,7 @@ const ExpertsHeader = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
+    const timer = setTimeout(() => setIsVisible(true), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -39,7 +39,7 @@ const ExpertsHeader = () => {
     <header
       className={`w-full fixed top-0 left-0 z-50 
       bg-white shadow-sm border-b border-gray-100 
-      transition-all duration-1000 ease-out
+      transition-all duration-500 ease-out
       ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
@@ -47,7 +47,7 @@ const ExpertsHeader = () => {
       <div className="max-w-[1480px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 flex-wrap gap-y-2">
         {/* Logo */}
         <div
-          className={`flex items-center flex-shrink-0 transition-all duration-800 delay-300 ease-out ${
+          className={`flex items-center flex-shrink-0 transition-all duration-400 delay-100 ease-out ${
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
           }`}
         >
@@ -62,7 +62,7 @@ const ExpertsHeader = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`flex items-center gap-2 lg:hidden ml-auto transition-all duration-600 delay-500 ease-out ${
+          className={`flex items-center gap-2 lg:hidden ml-auto transition-all duration-300 delay-150 ease-out ${
             isVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"
           }`}
         >
@@ -95,7 +95,7 @@ const ExpertsHeader = () => {
 
         {/* Desktop Navigation */}
         <nav
-          className={`hidden lg:flex flex-grow justify-center gap-6 text-sm font-medium transition-all duration-800 delay-400 ease-out ${
+          className={`hidden lg:flex flex-grow justify-center gap-6 text-sm font-medium transition-all duration-400 delay-150 ease-out ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
@@ -135,7 +135,7 @@ const ExpertsHeader = () => {
 
         {/* Desktop Actions */}
         <div
-          className={`hidden lg:flex items-center gap-3 flex-shrink-0 transition-all duration-800 delay-600 ease-out ${
+          className={`hidden lg:flex items-center gap-3 flex-shrink-0 transition-all duration-400 delay-200 ease-out ${
             isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
           }`}
         >

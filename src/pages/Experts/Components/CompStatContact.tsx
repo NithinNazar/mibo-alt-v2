@@ -1,9 +1,16 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 import isoLogo from "../assets/iso.jpeg?w=200&format=webp&quality=85";
 import hipaaLogo from "../assets/hippa.jpeg?w=200&format=webp&quality=85";
 import euLogo from "../assets/eu.jpeg?w=200&format=webp&quality=85";
 
 export default function CompStatContact() {
+  const [imagesLoaded, setImagesLoaded] = useState({
+    iso: false,
+    hipaa: false,
+    eu: false,
+  });
+
   return (
     <div className="flex flex-col w-full">
       {/* --- MIBO IS COMPLIANT WITH --- */}
@@ -18,24 +25,53 @@ export default function CompStatContact() {
           Mibo Is Compliant With
         </h2>
         <div className="flex justify-center items-center gap-8 flex-wrap">
-          <img
-            src={isoLogo}
-            alt="ISO Certified"
-            className="h-12 w-auto object-contain border-none align-middle"
-            style={{ display: "inline-block" }}
-          />
-          <img
-            src={hipaaLogo}
-            alt="HIPAA Compliant"
-            className="h-12 w-auto object-contain border-none align-middle"
-            style={{ display: "inline-block" }}
-          />
-          <img
-            src={euLogo}
-            alt="EU Data Protection"
-            className="h-12 w-auto object-contain border-none align-middle"
-            style={{ display: "inline-block" }}
-          />
+          <div className="relative h-12 w-24">
+            {!imagesLoaded.iso && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+            )}
+            <img
+              src={isoLogo}
+              alt="ISO Certified"
+              loading="lazy"
+              onLoad={() => setImagesLoaded((prev) => ({ ...prev, iso: true }))}
+              className={`h-12 w-auto object-contain border-none align-middle transition-opacity duration-300 ${
+                imagesLoaded.iso ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ display: "inline-block" }}
+            />
+          </div>
+          <div className="relative h-12 w-24">
+            {!imagesLoaded.hipaa && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+            )}
+            <img
+              src={hipaaLogo}
+              alt="HIPAA Compliant"
+              loading="lazy"
+              onLoad={() =>
+                setImagesLoaded((prev) => ({ ...prev, hipaa: true }))
+              }
+              className={`h-12 w-auto object-contain border-none align-middle transition-opacity duration-300 ${
+                imagesLoaded.hipaa ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ display: "inline-block" }}
+            />
+          </div>
+          <div className="relative h-12 w-24">
+            {!imagesLoaded.eu && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+            )}
+            <img
+              src={euLogo}
+              alt="EU Data Protection"
+              loading="lazy"
+              onLoad={() => setImagesLoaded((prev) => ({ ...prev, eu: true }))}
+              className={`h-12 w-auto object-contain border-none align-middle transition-opacity duration-300 ${
+                imagesLoaded.eu ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ display: "inline-block" }}
+            />
+          </div>
         </div>
       </motion.section>
 

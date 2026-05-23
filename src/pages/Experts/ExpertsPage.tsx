@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import ExpertsHeader from "./Components/ExpertsHeader";
 import CategoryScroll from "./Components/CategoryScroll";
@@ -26,6 +26,9 @@ export default function ExpertsPage() {
     Price: [],
   });
 
+  // Ref for the scrollable container to fix initial scroll position
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     // Scroll instantly to top before showing content
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -51,7 +54,7 @@ export default function ExpertsPage() {
           ? c.qualification.join(", ")
           : c.qualification || "";
 
-        return {
+        const transformed = {
           id: c.id, // Keep original ID format (string or number)
           name: c.name || c.fullName || c.full_name || "",
           qualification,
@@ -73,15 +76,29 @@ export default function ExpertsPage() {
             c.consultationModes || c.consultation_modes || [],
           ),
         };
+
+        return transformed;
       });
 
       setDoctors(transformedDoctors);
-      console.log(
-        `Loaded ${transformedDoctors.length} clinicians from database`,
-      );
-      console.log("Sample clinician data:", transformedDoctors[0]);
+
+      // Reset scroll position to start after data loads
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollLeft = 0;
+        }
+      }, 100);
     } catch (error: any) {
       console.error("Failed to fetch clinicians from database:", error);
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        timeout: error.config?.timeout,
+      });
       // Show empty state - no fallback
       setDoctors([]);
     } finally {
@@ -105,46 +122,43 @@ export default function ExpertsPage() {
 
   /**
    * Filter doctors based on category and selected filters
+   * Optimized with early returns and reduced string operations
    */
   const filteredDoctors = useMemo(() => {
     let filtered = [...doctors];
 
     // Filter by category (role/designation)
     if (selectedCategory !== "All Experts") {
+      const categoryLower = selectedCategory.toLowerCase();
       filtered = filtered.filter((doc) => {
         const designation = (doc.designation || "").toLowerCase();
         const qualification = (doc.qualification || "").toLowerCase();
-        const specialization = (doc.designation || "").toLowerCase(); // designation contains specialization
 
+        // Use switch for better performance than multiple if statements
         switch (selectedCategory) {
           case "Therapists":
             return (
               designation.includes("therapist") ||
               designation.includes("counselling") ||
-              designation.includes("counseling") ||
-              specialization.includes("therapist")
+              designation.includes("counseling")
             );
           case "Psychiatrists":
             return (
               designation.includes("psychiatrist") ||
               qualification.includes("psychiatry") ||
               qualification.includes("mbbs") ||
-              qualification.includes("md") ||
-              specialization.includes("psychiatrist")
+              qualification.includes("md")
             );
           case "Clinical Psychologists":
             return (
               designation.includes("clinical psychologist") ||
-              qualification.includes("clinical psychology") ||
-              specialization.includes("clinical psychologist")
+              qualification.includes("clinical psychology")
             );
           case "Counsellors":
             return (
               designation.includes("counsellor") ||
               designation.includes("counselor") ||
-              designation.includes("counselling psychologist") ||
-              specialization.includes("counsellor") ||
-              specialization.includes("counselor")
+              designation.includes("counselling psychologist")
             );
           default:
             return true;
@@ -187,19 +201,16 @@ export default function ExpertsPage() {
     return filtered;
   }, [selectedCategory, selectedFilters, doctors]);
 
-  // Debug: Log filtering results
-  console.log("Total doctors:", doctors.length);
-  console.log("Filtered doctors:", filteredDoctors.length);
-  console.log("Selected category:", selectedCategory);
-  console.log("Selected filters:", selectedFilters);
-
-  if (!isReady || loading) {
-    return (
-      <div className="w-full h-screen bg-[#e9f6f4] flex items-center justify-center">
-        <div className="text-[#034B44] text-xl">Loading experts...</div>
-      </div>
-    );
+  // Debug: Log filtering results (only in development)
+  if (import.meta.env.DEV) {
+    console.log("Total doctors:", doctors.length);
+    console.log("Filtered doctors:", filteredDoctors.length);
+    console.log("Selected category:", selectedCategory);
+    console.log("Selected filters:", selectedFilters);
   }
+
+  // Show page immediately with skeleton loaders instead of full-screen loading
+  const showSkeletons = loading && doctors.length === 0;
 
   return (
     <motion.div
@@ -233,26 +244,39 @@ export default function ExpertsPage() {
       <section className="relative px-6 mt-6">
         <h2 className="text-center text-2xl font-semibold mb-6">
           Our Specialists
-          {filteredDoctors.length !== doctors.length && (
+          {!showSkeletons && filteredDoctors.length !== doctors.length && (
             <span className="text-lg text-[#034B44]/60 ml-2">
               ({filteredDoctors.length} of {doctors.length})
             </span>
           )}
         </h2>
 
-        {filteredDoctors.length > 0 ? (
-          <div className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-6 snap-x snap-mandatory">
-            {filteredDoctors.map((doc, index) => (
-              <motion.div
-                key={doc.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="snap-start flex-shrink-0"
+        {showSkeletons ? (
+          // Show skeleton loaders while loading
+          <div className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-2xl shadow-lg p-6 animate-pulse"
               >
+                <div className="w-full h-[280px] bg-gray-200 rounded-xl mb-4"></div>
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            ))}
+          </div>
+        ) : filteredDoctors.length > 0 ? (
+          <div
+            ref={scrollContainerRef}
+            className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-6 snap-x snap-mandatory"
+            style={{ scrollBehavior: "smooth" }}
+          >
+            {filteredDoctors.map((doc) => (
+              <div key={doc.id} className="snap-start flex-shrink-0">
                 <DoctorCard doctor={doc} />
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
@@ -278,7 +302,7 @@ export default function ExpertsPage() {
         )}
 
         {/* subtle gradient overlays for scroll hint */}
-        {filteredDoctors.length > 0 && (
+        {(showSkeletons || filteredDoctors.length > 0) && (
           <>
             <div className="pointer-events-none absolute top-0 left-0 w-16 h-full bg-gradient-to-r from-[#e9f6f4] to-transparent z-10" />
             <div className="pointer-events-none absolute top-0 right-0 w-16 h-full bg-gradient-to-l from-[#e9f6f4] to-transparent z-10" />
