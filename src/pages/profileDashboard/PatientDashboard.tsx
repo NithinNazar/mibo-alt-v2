@@ -69,7 +69,10 @@ export default function PatientDashboard() {
   const [cancelError, setCancelError] = useState("");
 
   // Snackbar state
-  const [snackbar, setSnackbar] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
+  const [snackbar, setSnackbar] = useState<{
+    message: string;
+    visible: boolean;
+  }>({ message: "", visible: false });
 
   const showSnackbar = (message: string) => {
     setSnackbar({ message, visible: true });
@@ -154,7 +157,11 @@ export default function PatientDashboard() {
         "Cannot cancel completed appointment",
         "Appointment is already cancelled",
       ];
-      if (snackbarMessages.some((s) => msg.toLowerCase().includes(s.toLowerCase()))) {
+      if (
+        snackbarMessages.some((s) =>
+          msg.toLowerCase().includes(s.toLowerCase()),
+        )
+      ) {
         setShowCancelModal(false);
         setSelectedAppointment(null);
         setCancelReason("");
@@ -362,8 +369,8 @@ export default function PatientDashboard() {
                       </p>
                     </div>
                     <div className="text-right text-xs opacity-80">
-                      <p>Mibo Mental Health</p>
-                      <p>Your care, personalised</p>
+                      <p>Mibo</p>
+                      <p>The Mind Expert</p>
                     </div>
                   </div>
                 </div>

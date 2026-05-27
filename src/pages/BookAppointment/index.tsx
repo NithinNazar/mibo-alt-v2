@@ -18,7 +18,7 @@ export default function BookAppointment() {
 
   const [step, setStep] = useState<number>(1);
   const [bookingData, setBookingData] = useState<any>({
-    mode: "In-person",
+    mode: "", // No default mode - user must choose
     duration: "30 mins",
     price: 1500,
     date: "",

@@ -9,8 +9,8 @@ import yashaswini from "../../Landing/Yashaswini.webp";
 // Kochi experts
 import drMuhammed from "../../Landing/Dr.Muhammed.webp";
 import drAnu from "../../Landing/DrAnuSobha.webp";
-import drThomasMathai from "../../Landing/DrThomasMathai.webp";
-import drHridya from "../../Landing/Hridya.webp";
+import drAnet from "../../Landing/Anet Augustine-1.webp";
+import drRia from "../../Landing/Ria Mary-3.webp";
 
 interface Expert {
   image: string;
@@ -63,16 +63,18 @@ const MeetOurExperts: React.FC<MeetOurExpertsProps> = ({ city }) => {
         "Consultant Psychiatrist, 10+ Years Of Experience In Women Mental Health, De-addiction, Child and Adolescent Psychiatry",
     },
     {
-      image: drThomasMathai,
-      name: "Dr.Thomas Mathai",
-      specialization: "Consultant Psychiatrist, 7+ Years Of Experience",
+      image: drAnet,
+      name: "Anet Augustine",
+      specialization:
+        "Clinical Psychologist, 2+ Years Of Experience in Anxeity Dissorder, Psychosis",
     },
     {
-      image: drHridya,
-      name: "Hridya VM",
+      image: drRia,
+      name: "Ria Mary Jojo",
       specialization:
-        "Clinical Psychologist, 7+ Years Of Experience In Adult Population, Depression, OCD, Personality Disorder, Marital Issues, Attachment Styles",
+        "Clinical Psychologist of 3+ Year of Experience ,Licensed by Rehabilitation Council of India In-person & Online Consultations",
     },
+    ,
   ];
 
   // Use Bangalore experts for Mumbai as requested

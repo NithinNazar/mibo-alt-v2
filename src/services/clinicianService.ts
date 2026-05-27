@@ -121,7 +121,7 @@ class ClinicianService {
 
     try {
       // Use the configured apiClient which handles base URL and auth properly
-      // Force Accept-Encoding header to handle gzip properly
+      // Browser automatically handles Accept-Encoding, don't set it manually
       const response = await apiClient.get<APIResponse<Clinician[]>>(
         "/users/clinicians",
         {
@@ -129,11 +129,6 @@ class ClinicianService {
             isActive: true, // Only fetch active clinicians for public display
           },
           timeout: this.API_TIMEOUT,
-          headers: {
-            "Accept-Encoding": "gzip, deflate, br",
-            Accept: "application/json",
-          },
-          decompress: true, // Explicitly enable decompression
         },
       );
 

@@ -393,7 +393,10 @@ export default function Step1SessionDetails({
 
   /**
    * Group available slots by period (Morning/Afternoon/Evening)
-   * Uses REAL API data and includes booked slots (marked as unavailable)
+   * Uses REAL API data
+   * Filters out:
+   * 1. Booked slots (available: false)
+   * 2. Unbooked slots that are less than 30 minutes away
    */
   const slotsByPeriod = useMemo(() => {
     const grouped: Record<string, TimeSlot[]> = {
@@ -402,8 +405,51 @@ export default function Step1SessionDetails({
       Evening: [],
     };
 
+    // Get current time in IST for filtering
+    const now = new Date();
+    const istOffset = 5.5 * 60; // IST is UTC+5:30 in minutes
+    const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+    const istMinutesRaw = utcMinutes + istOffset;
+    const currentISTMinutes = istMinutesRaw % (24 * 60);
+
+    // Get current date in IST
+    const istDate = new Date(now.getTime() + istOffset * 60 * 1000);
+    const istYear = istDate.getUTCFullYear();
+    const istMonth = istDate.getUTCMonth();
+    const istDay = istDate.getUTCDate();
+
+    // Check if selected date is today
+    const selectedDateOnly = selectedDate
+      ? new Date(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+        )
+      : null;
+    const todayIST = new Date(istYear, istMonth, istDay);
+    const isToday =
+      selectedDateOnly && selectedDateOnly.getTime() === todayIST.getTime();
+
     availableSlots.forEach((slot) => {
-      // Include ALL slots (both available and booked)
+      // Filter 1: Remove booked slots completely
+      if (!slot.available) {
+        return; // Skip booked slots
+      }
+
+      // Filter 2: For today, remove unbooked slots 15 minutes or less away
+      if (isToday) {
+        const [slotHour, slotMinute] = slot.start_time.split(":").map(Number);
+        const slotTimeMinutes = slotHour * 60 + slotMinute;
+
+        // Calculate time difference in minutes
+        const minutesUntilSlot = slotTimeMinutes - currentISTMinutes;
+
+        // If slot is 15 minutes or less away (or in the past), skip it
+        if (minutesUntilSlot <= 15) {
+          return; // Skip slots 15 minutes or less away
+        }
+      }
+
       // Parse time to determine period
       const hour = parseInt(slot.start_time.split(":")[0]);
 
@@ -417,7 +463,7 @@ export default function Step1SessionDetails({
     });
 
     return grouped;
-  }, [availableSlots]);
+  }, [availableSlots, selectedDate]);
 
   /**
    * Get periods that have available slots
@@ -463,6 +509,7 @@ export default function Step1SessionDetails({
    */
   function handleContinue() {
     if (
+      !selectedMode ||
       !selectedCentre ||
       !selectedClinician ||
       !selectedDate ||
@@ -950,13 +997,14 @@ export default function Step1SessionDetails({
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {slots.map((slot) => {
                               const active = selectedTime === slot.start_time;
-                              const isBooked = !slot.available;
 
-                              return isBooked ? null : (
+                              return (
                                 <button
                                   key={slot.start_time}
-                                  onClick={() => setSelectedTime(slot.start_time)}
-                                  className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md"
+                                  onClick={() =>
+                                    setSelectedTime(slot.start_time)
+                                  }
+                                  className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md cursor-pointer"
                                   style={
                                     active
                                       ? {
@@ -1008,6 +1056,7 @@ export default function Step1SessionDetails({
               <button
                 onClick={handleContinue}
                 disabled={
+                  !selectedMode ||
                   !selectedCentre ||
                   !selectedClinician ||
                   !selectedDate ||
