@@ -278,6 +278,24 @@ export default function Step3ConfirmBooking({
       return;
     }
 
+    const reportPaymentFailure = (errorCode: string, errorDescription: string) => {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
+      const accessToken = localStorage.getItem("mibo_access_token");
+      fetch(`${apiBaseUrl}/payments/failure`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId,
+          razorpayOrderId: orderId,
+          errorCode,
+          errorDescription,
+        }),
+      }).catch((err) => console.error("Failed to report payment failure:", err));
+    };
+
     const options = {
       key: razorpayKeyId, // Use key from backend
       amount: amount, // Already in paise from backend
@@ -343,7 +361,7 @@ export default function Step3ConfirmBooking({
       },
       modal: {
         ondismiss: function () {
-          // User closed the payment modal
+          reportPaymentFailure("PAYMENT_CANCELLED", "Payment cancelled by user");
           setError("Payment cancelled. Please try again.");
           setPaymentStep("review");
         },
@@ -361,7 +379,10 @@ export default function Step3ConfirmBooking({
     const razorpay = new window.Razorpay(options);
 
     razorpay.on("payment.failed", function (response: any) {
-      // Payment failed
+      reportPaymentFailure(
+        response.error.code || "PAYMENT_FAILED",
+        response.error.description || "Payment failed",
+      );
       setError(
         response.error.description || "Payment failed. Please try again.",
       );
