@@ -1053,6 +1053,17 @@ export default function Step1SessionDetails({
           {/* Sticky Continue */}
           <div className="sticky bottom-0 bg-white border-t">
             <div className="p-4">
+              {/* Notification text */}
+              <div className="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-800">
+                    Please make sure you have selected Mode of Session, Date and
+                    Time before continuing
+                  </p>
+                </div>
+              </div>
+
               <button
                 onClick={handleContinue}
                 disabled={
