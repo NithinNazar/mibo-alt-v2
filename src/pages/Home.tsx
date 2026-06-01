@@ -11,11 +11,11 @@ import CareServiceComponent from "../components/Features";
 import SupportServices from "../components/Mibo_Supports";
 import Location from "../components/Location";
 import ContactSection from "../components/ContactSection";
-
 import Footer from "../components/Footer";
 import ScrollRevealWrapper from "../components/ScrollRevealWrapper";
 import lottie from "lottie-web";
 import { defineElement } from "lord-icon-element";
+import clinicianService from "../services/clinicianService";
 
 const Home = () => {
   defineElement(lottie.loadAnimation);
@@ -28,6 +28,29 @@ const Home = () => {
     return () => {
       document.documentElement.style.scrollBehavior = "auto";
     };
+  }, []);
+
+  // Prefetch experts data in the background
+  useEffect(() => {
+    // Wait 2 seconds after home page loads, then prefetch experts data
+    const prefetchTimer = setTimeout(() => {
+      console.log("🚀 Prefetching experts data in background...");
+
+      clinicianService
+        .getClinicians()
+        .then((clinicians) => {
+          console.log(
+            `✅ Prefetched ${clinicians.length} experts successfully`,
+          );
+          // Data is now cached by the browser/service
+        })
+        .catch((error) => {
+          console.log("⚠️ Prefetch failed (non-critical):", error.message);
+          // Fail silently - not critical for home page
+        });
+    }, 2000); // Wait 2 seconds to not interfere with home page loading
+
+    return () => clearTimeout(prefetchTimer);
   }, []);
 
   return (
