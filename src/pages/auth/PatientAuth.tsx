@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import authService from "../../services/authService";
+import ProfileCompletionModal from "../../components/ProfileCompletionModal";
 
 const PatientAuth = () => {
   const navigate = useNavigate();
@@ -21,8 +22,15 @@ const PatientAuth = () => {
   const [password, setPassword] = useState("");
 
   // New user details
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [age, setAge] = useState<number | "">("");
+  const [gender, setGender] = useState<string>("");
+
+  // Profile completion modal for legacy users
+  const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+  const [profileCompletionPhone, setProfileCompletionPhone] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,9 +96,23 @@ const PatientAuth = () => {
     }
 
     // Validate required fields for new users
-    if (isNewUser && !fullName.trim()) {
-      setError("Please enter your full name");
-      return;
+    if (isNewUser) {
+      if (!firstName.trim()) {
+        setError("Please enter your first name");
+        return;
+      }
+      if (!lastName.trim()) {
+        setError("Please enter your last name");
+        return;
+      }
+      if (!age || age < 1 || age > 150) {
+        setError("Please enter a valid age");
+        return;
+      }
+      if (!gender) {
+        setError("Please select your gender");
+        return;
+      }
     }
 
     setError("");
@@ -100,12 +122,23 @@ const PatientAuth = () => {
     try {
       // Add country code 91 for India
       const phoneWithCountryCode = `91${phone}`;
-      await authService.verifyOTP(
+      const response = await authService.verifyOTP(
         phoneWithCountryCode,
         otp,
-        fullName.trim() || undefined,
+        firstName.trim() || undefined,
+        lastName.trim() || undefined,
         email.trim() || undefined,
+        typeof age === "number" ? age : undefined,
+        gender || undefined,
       );
+
+      // Check if legacy user requires profile completion
+      if (response.data.requiresProfileCompletion) {
+        setProfileCompletionPhone(phoneWithCountryCode);
+        setShowProfileCompletion(true);
+        setLoading(false);
+        return;
+      }
 
       setSuccess("Login successful! Redirecting...");
 
@@ -196,8 +229,11 @@ const PatientAuth = () => {
   const handleChangeNumber = () => {
     setOtpSent(false);
     setOtp("");
-    setFullName("");
+    setFirstName("");
+    setLastName("");
     setEmail("");
+    setAge("");
+    setGender("");
     setError("");
     setSuccess("");
     setIsNewUser(false);
@@ -350,19 +386,38 @@ const PatientAuth = () => {
                     <p className="text-sm text-[#2a1470] font-medium text-center">
                       Welcome! Please provide your details
                     </p>
+
+                    {/* First Name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name <span className="text-red-500">*</span>
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder="Enter your full name"
+                        placeholder="Enter your first name"
                         className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         disabled={loading}
                       />
                     </div>
+
+                    {/* Last Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your last name"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    {/* Email */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Email (optional)
@@ -375,6 +430,86 @@ const PatientAuth = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
                       />
+                    </div>
+
+                    {/* Age */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Age <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative flex items-center">
+                        <input
+                          type="number"
+                          placeholder="Enter your age"
+                          min="1"
+                          max="150"
+                          className="w-full border rounded-lg px-4 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8]"
+                          value={age}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setAge(
+                              value === ""
+                                ? ""
+                                : Math.min(
+                                    150,
+                                    Math.max(1, parseInt(value) || 0),
+                                  ),
+                            );
+                          }}
+                          disabled={loading}
+                        />
+                        <div className="absolute right-2 flex flex-col">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setAge((prev) => {
+                                const current =
+                                  typeof prev === "number" ? prev : 0;
+                                return Math.min(150, current + 1);
+                              })
+                            }
+                            className="px-2 py-0.5 text-xs bg-[#2fbfa8] text-white rounded hover:bg-[#27a693] transition-colors"
+                            disabled={loading}
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setAge((prev) => {
+                                const current =
+                                  typeof prev === "number" ? prev : 0;
+                                return Math.max(1, current - 1);
+                              })
+                            }
+                            className="px-2 py-0.5 text-xs bg-[#2fbfa8] text-white rounded hover:bg-[#27a693] transition-colors mt-0.5"
+                            disabled={loading}
+                          >
+                            ▼
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gender */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Gender <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2fbfa8] bg-white"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        disabled={loading}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="NON_BINARY">Non-Binary</option>
+                        <option value="PREFER_NOT_TO_SAY">
+                          Rather not say
+                        </option>
+                      </select>
                     </div>
                   </motion.div>
                 )}
@@ -500,6 +635,23 @@ const PatientAuth = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Profile Completion Modal for Legacy Users */}
+      <ProfileCompletionModal
+        isOpen={showProfileCompletion}
+        phone={profileCompletionPhone}
+        onComplete={() => {
+          setShowProfileCompletion(false);
+          setSuccess("Profile completed! Redirecting...");
+          setTimeout(() => {
+            navigate("/profileDashboard");
+          }, 1000);
+        }}
+        onSkip={() => {
+          setShowProfileCompletion(false);
+          navigate("/profileDashboard");
+        }}
+      />
     </div>
   );
 };

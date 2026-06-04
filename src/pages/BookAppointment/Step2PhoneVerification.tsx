@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import authService from "../../services/authService";
+import ProfileCompletionModal from "../../components/ProfileCompletionModal";
 
 interface Step2PhoneVerificationProps {
   bookingData: any;
@@ -18,8 +19,11 @@ export default function Step2PhoneVerification({
   const [phone, setPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [age, setAge] = useState<number | "">("");
+  const [gender, setGender] = useState<string>("");
   const [otpDigits, setOtpDigits] = useState<string[]>([
     "",
     "",
@@ -31,6 +35,10 @@ export default function Step2PhoneVerification({
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+
+  // Profile completion modal for legacy users
+  const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+  const [profileCompletionPhone, setProfileCompletionPhone] = useState("");
 
   // Refs for OTP input boxes
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -91,9 +99,23 @@ export default function Step2PhoneVerification({
     }
 
     // Validate required fields for new users
-    if (isNewUser && !fullName.trim()) {
-      setError("Please enter your full name");
-      return;
+    if (isNewUser) {
+      if (!firstName.trim()) {
+        setError("Please enter your first name");
+        return;
+      }
+      if (!lastName.trim()) {
+        setError("Please enter your last name");
+        return;
+      }
+      if (!age || age < 1 || age > 150) {
+        setError("Please enter a valid age");
+        return;
+      }
+      if (!gender) {
+        setError("Please select your gender");
+        return;
+      }
     }
 
     setError("");
@@ -102,13 +124,24 @@ export default function Step2PhoneVerification({
     try {
       const formattedPhone = `91${phone}`;
 
-      // Verify OTP with name/email for new users
-      await authService.verifyOTP(
+      // Verify OTP with enhanced user data for new users
+      const response = await authService.verifyOTP(
         formattedPhone,
         otpToVerify,
-        isNewUser ? fullName.trim() : undefined,
+        isNewUser ? firstName.trim() : undefined,
+        isNewUser ? lastName.trim() : undefined,
         isNewUser && email.trim() ? email.trim() : undefined,
+        isNewUser ? Number(age) : undefined,
+        isNewUser ? gender : undefined,
       );
+
+      // Check if legacy user requires profile completion
+      if (response.data.requiresProfileCompletion) {
+        setProfileCompletionPhone(formattedPhone);
+        setShowProfileCompletion(true);
+        setIsLoading(false);
+        return;
+      }
 
       setIsVerified(true);
 
@@ -280,25 +313,44 @@ export default function Step2PhoneVerification({
                   </p>
                 </div>
 
-                {/* New User Details - Show name/email fields if isNewUser */}
+                {/* New User Details - Show enhanced registration form if isNewUser */}
                 {isNewUser && (
                   <div className="space-y-3 pt-2 border-t border-[#a7c4f2]/30">
                     <p className="text-sm text-[#034B44] font-medium text-center">
                       Welcome! Please provide your details
                     </p>
+
+                    {/* First Name */}
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Full Name <span className="text-red-500">*</span>
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder="Enter your full name"
+                        placeholder="Enter your first name"
                         className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0]"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         disabled={isLoading}
                       />
                     </div>
+
+                    {/* Last Name */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your last name"
+                        className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0]"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+
+                    {/* Email */}
                     <div>
                       <label className="block text-sm font-medium mb-1">
                         Email (optional)
@@ -311,6 +363,86 @@ export default function Step2PhoneVerification({
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
                       />
+                    </div>
+
+                    {/* Age */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Age <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative flex items-center">
+                        <input
+                          type="number"
+                          placeholder="Enter your age"
+                          min="1"
+                          max="150"
+                          className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 pr-16 outline-none focus:ring-2 focus:ring-[#81b2f0]"
+                          value={age}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setAge(
+                              value === ""
+                                ? ""
+                                : Math.min(
+                                    150,
+                                    Math.max(1, parseInt(value) || 0),
+                                  ),
+                            );
+                          }}
+                          disabled={isLoading}
+                        />
+                        <div className="absolute right-2 flex flex-col">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setAge((prev) => {
+                                const current =
+                                  typeof prev === "number" ? prev : 0;
+                                return Math.min(150, current + 1);
+                              })
+                            }
+                            className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors"
+                            disabled={isLoading}
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setAge((prev) => {
+                                const current =
+                                  typeof prev === "number" ? prev : 0;
+                                return Math.max(1, current - 1);
+                              })
+                            }
+                            className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors mt-0.5"
+                            disabled={isLoading}
+                          >
+                            ▼
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gender */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Gender <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        className="w-full border border-[#a7c4f2]/50 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-[#81b2f0] bg-white"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        disabled={isLoading}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="NON_BINARY">Non-Binary</option>
+                        <option value="PREFER_NOT_TO_SAY">
+                          Rather not say
+                        </option>
+                      </select>
                     </div>
                   </div>
                 )}
@@ -352,6 +484,44 @@ export default function Step2PhoneVerification({
           </p>
         )}
       </div>
+
+      {/* Profile Completion Modal for Legacy Users */}
+      <ProfileCompletionModal
+        isOpen={showProfileCompletion}
+        phone={profileCompletionPhone}
+        onComplete={() => {
+          setShowProfileCompletion(false);
+          setIsVerified(true);
+
+          // Store booking data and continue
+          const updated = {
+            ...bookingData,
+            phone: `+${profileCompletionPhone}`,
+            authenticated: true,
+          };
+          setBookingData(updated);
+
+          setTimeout(() => {
+            onContinue();
+          }, 1000);
+        }}
+        onSkip={() => {
+          setShowProfileCompletion(false);
+          setIsVerified(true);
+
+          // Store booking data and continue
+          const updated = {
+            ...bookingData,
+            phone: `+${profileCompletionPhone}`,
+            authenticated: true,
+          };
+          setBookingData(updated);
+
+          setTimeout(() => {
+            onContinue();
+          }, 500);
+        }}
+      />
     </div>
   );
 }

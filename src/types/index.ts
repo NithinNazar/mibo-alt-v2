@@ -23,6 +23,8 @@ export type UserType = "PATIENT" | "STAFF";
 export interface User {
   id: number;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
   phone: string;
   email: string | null;
   user_type: UserType;
@@ -188,7 +190,14 @@ export interface AvailabilityResponse {
 /**
  * Gender enumeration
  */
-export type Gender = "male" | "female" | "other";
+export type Gender =
+  | "MALE"
+  | "FEMALE"
+  | "NON_BINARY"
+  | "PREFER_NOT_TO_SAY"
+  | "male"
+  | "female"
+  | "other";
 
 /**
  * Patient object
@@ -197,8 +206,11 @@ export type Gender = "male" | "female" | "other";
 export interface Patient {
   id: number;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
   phone: string;
   email: string | null;
+  age?: number;
   date_of_birth: string | null; // Date in YYYY-MM-DD format
   gender: Gender | null;
   blood_group: string | null;

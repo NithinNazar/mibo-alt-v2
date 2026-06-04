@@ -19,10 +19,14 @@ import {
 interface UserProfile {
   id: number;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
   phone: string;
   email: string | null;
   userType: string;
   patientId: number;
+  age?: number;
+  gender?: string;
 }
 
 interface PaymentSummary {
@@ -45,8 +49,11 @@ export default function ProfileSettings() {
   // Edit mode states
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [editedName, setEditedName] = useState("");
+  const [isEditingAge, setIsEditingAge] = useState(false);
+  const [editedFirstName, setEditedFirstName] = useState("");
+  const [editedLastName, setEditedLastName] = useState("");
   const [editedEmail, setEditedEmail] = useState("");
+  const [editedAge, setEditedAge] = useState<number | "">("");
 
   useEffect(() => {
     loadUserData();
@@ -59,8 +66,10 @@ export default function ProfileSettings() {
       try {
         const userData = JSON.parse(userStr);
         setUser(userData);
-        setEditedName(userData.full_name || "");
+        setEditedFirstName(userData.first_name || "");
+        setEditedLastName(userData.last_name || "");
         setEditedEmail(userData.email || "");
+        setEditedAge(userData.age || "");
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
@@ -90,11 +99,16 @@ export default function ProfileSettings() {
   };
 
   const handleSaveName = () => {
-    if (!editedName.trim()) return;
+    if (!editedFirstName.trim() || !editedLastName.trim()) return;
 
     // Update localStorage
     if (user) {
-      const updatedUser = { ...user, full_name: editedName.trim() };
+      const updatedUser = {
+        ...user,
+        first_name: editedFirstName.trim(),
+        last_name: editedLastName.trim(),
+        full_name: `${editedFirstName.trim()} ${editedLastName.trim()}`,
+      };
       localStorage.setItem("mibo_user", JSON.stringify(updatedUser));
       setUser(updatedUser);
     }
@@ -113,6 +127,20 @@ export default function ProfileSettings() {
 
     setIsEditingEmail(false);
     // TODO: Call API to update email on backend
+  };
+
+  const handleSaveAge = () => {
+    if (!editedAge || editedAge < 1 || editedAge > 150) return;
+
+    // Update localStorage
+    if (user) {
+      const updatedUser = { ...user, age: editedAge };
+      localStorage.setItem("mibo_user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    }
+
+    setIsEditingAge(false);
+    // TODO: Call API to update age on backend
   };
 
   const handleLogout = () => {
@@ -169,23 +197,25 @@ export default function ProfileSettings() {
               </div>
 
               <div className="p-6 space-y-4">
-                {/* Full Name */}
+                {/* First Name */}
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center gap-3 flex-1">
                     <User className="text-gray-400" size={20} />
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Full Name</p>
+                      <p className="text-xs text-gray-500 mb-1">First Name</p>
                       {isEditingName ? (
                         <input
                           type="text"
-                          value={editedName}
-                          onChange={(e) => setEditedName(e.target.value)}
+                          value={editedFirstName}
+                          onChange={(e) => setEditedFirstName(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#034B44]"
                           autoFocus
                         />
                       ) : (
                         <p className="font-medium text-gray-800">
-                          {user.full_name}
+                          {user.first_name ||
+                            user.full_name.split(" ")[0] ||
+                            "N/A"}
                         </p>
                       )}
                     </div>
@@ -202,7 +232,8 @@ export default function ProfileSettings() {
                         <button
                           onClick={() => {
                             setIsEditingName(false);
-                            setEditedName(user.full_name);
+                            setEditedFirstName(user.first_name || "");
+                            setEditedLastName(user.last_name || "");
                           }}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
@@ -217,6 +248,139 @@ export default function ProfileSettings() {
                         <Edit2 size={18} />
                       </button>
                     )}
+                  </div>
+                </div>
+
+                {/* Last Name */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-3 flex-1">
+                    <User className="text-gray-400" size={20} />
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Last Name</p>
+                      {isEditingName ? (
+                        <input
+                          type="text"
+                          value={editedLastName}
+                          onChange={(e) => setEditedLastName(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#034B44]"
+                        />
+                      ) : (
+                        <p className="font-medium text-gray-800">
+                          {user.last_name ||
+                            user.full_name.split(" ").slice(1).join(" ") ||
+                            "N/A"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Age */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-3 flex-1">
+                    <Calendar className="text-gray-400" size={20} />
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Age</p>
+                      {isEditingAge ? (
+                        <div className="relative flex items-center">
+                          <input
+                            type="number"
+                            value={editedAge}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setEditedAge(
+                                value === ""
+                                  ? ""
+                                  : Math.min(
+                                      150,
+                                      Math.max(1, parseInt(value) || 0),
+                                    ),
+                              );
+                            }}
+                            min="1"
+                            max="150"
+                            className="w-full px-3 py-2 pr-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#034B44]"
+                          />
+                          <div className="absolute right-2 flex flex-col">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditedAge((prev) => {
+                                  const current =
+                                    typeof prev === "number" ? prev : 0;
+                                  return Math.min(150, current + 1);
+                                })
+                              }
+                              className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditedAge((prev) => {
+                                  const current =
+                                    typeof prev === "number" ? prev : 0;
+                                  return Math.max(1, current - 1);
+                                })
+                              }
+                              className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors mt-0.5"
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="font-medium text-gray-800">
+                          {user.age ? `${user.age} years` : "Not provided"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {isEditingAge ? (
+                      <>
+                        <button
+                          onClick={handleSaveAge}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        >
+                          <Save size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsEditingAge(false);
+                            setEditedAge(user.age || "");
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setIsEditingAge(true)}
+                        className="p-2 text-[#034B44] hover:bg-[#034B44]/5 rounded-lg transition-colors"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Gender */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <User className="text-gray-400" size={20} />
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Gender</p>
+                      <p className="font-medium text-gray-800">
+                        {user.gender
+                          ? user.gender
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())
+                          : "Not provided"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -342,7 +506,7 @@ export default function ProfileSettings() {
                       Last payment on{" "}
                       <span className="font-medium text-gray-800">
                         {new Date(
-                          paymentSummary.lastPaymentDate
+                          paymentSummary.lastPaymentDate,
                         ).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "long",

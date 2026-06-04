@@ -31,8 +31,46 @@ export default function Step3ConfirmBooking({
 
   // Pre-fill user data if already authenticated
   const currentUser = authService.getCurrentUser();
-  const [fullName, setFullName] = useState(currentUser?.full_name || "");
+  const [fullName, setFullName] = useState(currentUser?.fullName || "");
   const [email, setEmail] = useState(currentUser?.email || "");
+  const [userDataLoaded, setUserDataLoaded] = useState(false);
+
+  // Fetch user profile data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const accessToken = localStorage.getItem("mibo_access_token");
+        if (!accessToken) {
+          setUserDataLoaded(true);
+          return;
+        }
+
+        const apiBaseUrl =
+          import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
+
+        const response = await fetch(`${apiBaseUrl}/patient/profile`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const user = data.data.user;
+
+          // Auto-fill with user's actual data
+          setFullName(user.full_name || "");
+          setEmail(user.email || "");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setUserDataLoaded(true);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Registration fee state
   const [registrationFee, setRegistrationFee] = useState<number>(0);
@@ -278,8 +316,12 @@ export default function Step3ConfirmBooking({
       return;
     }
 
-    const reportPaymentFailure = (errorCode: string, errorDescription: string) => {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
+    const reportPaymentFailure = (
+      errorCode: string,
+      errorDescription: string,
+    ) => {
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
       const accessToken = localStorage.getItem("mibo_access_token");
       fetch(`${apiBaseUrl}/payments/failure`, {
         method: "POST",
@@ -293,7 +335,9 @@ export default function Step3ConfirmBooking({
           errorCode,
           errorDescription,
         }),
-      }).catch((err) => console.error("Failed to report payment failure:", err));
+      }).catch((err) =>
+        console.error("Failed to report payment failure:", err),
+      );
     };
 
     const options = {
@@ -361,7 +405,10 @@ export default function Step3ConfirmBooking({
       },
       modal: {
         ondismiss: function () {
-          reportPaymentFailure("PAYMENT_CANCELLED", "Payment cancelled by user");
+          reportPaymentFailure(
+            "PAYMENT_CANCELLED",
+            "Payment cancelled by user",
+          );
           setError("Payment cancelled. Please try again.");
           setPaymentStep("review");
         },

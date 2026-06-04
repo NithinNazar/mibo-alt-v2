@@ -50,6 +50,8 @@ interface LoginResponse {
     };
     accessToken: string;
     refreshToken: string;
+    isNewUser?: boolean;
+    requiresProfileCompletion?: boolean;
   };
 }
 
@@ -115,12 +117,15 @@ class AuthService {
    * - User data is stored in localStorage
    * - Patient is automatically authenticated for subsequent API calls
    *
-   * For new users, full_name is required. Email is optional.
+   * For new users, first_name, last_name, age, and gender are required. Email is optional.
    *
    * @param phone - Phone number with country code (must match the number OTP was sent to)
    * @param otp - 6-digit OTP code received via WhatsApp
-   * @param full_name - Full name (required for new users)
+   * @param first_name - First name (required for new users)
+   * @param last_name - Last name (required for new users)
    * @param email - Email address (optional)
+   * @param age - Age in years (required for new users)
+   * @param gender - Gender (MALE, FEMALE, NON_BINARY, PREFER_NOT_TO_SAY) (required for new users)
    * @returns Promise with user data and authentication tokens
    * @throws {AxiosError} If OTP is invalid, expired, or phone number doesn't match
    *
@@ -130,10 +135,13 @@ class AuthService {
    *   const response = await authService.verifyOTP(
    *     "919876543210",
    *     "123456",
-   *     "John Doe",
-   *     "john@example.com"
+   *     "John",
+   *     "Doe",
+   *     "john@example.com",
+   *     30,
+   *     "MALE"
    *   );
-   *   console.log(`Welcome ${response.data.user.full_name}!`);
+   *   console.log(`Welcome ${response.data.user.fullName}!`);
    *   // User is now authenticated, tokens are stored automatically
    * } catch (error) {
    *   console.error("Invalid OTP:", error.response?.data?.message);
@@ -143,16 +151,22 @@ class AuthService {
   async verifyOTP(
     phone: string,
     otp: string,
-    full_name?: string,
+    first_name?: string,
+    last_name?: string,
     email?: string,
+    age?: number,
+    gender?: string,
   ): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
       "/patient-auth/verify-otp",
       {
         phone,
         otp,
-        full_name,
+        first_name,
+        last_name,
         email,
+        age,
+        gender,
       },
     );
 
