@@ -35,6 +35,10 @@ export default function Step3ConfirmBooking({
   const [email, setEmail] = useState(currentUser?.email || "");
   const [userDataLoaded, setUserDataLoaded] = useState(false);
 
+  // 🔧 NEW: Add state for user profile data (age, gender) for display
+  const [userAge, setUserAge] = useState<number | null>(null);
+  const [userGender, setUserGender] = useState<string | null>(null);
+
   // Fetch user profile data on mount
   useEffect(() => {
     const fetchUserData = async () => {
@@ -57,10 +61,15 @@ export default function Step3ConfirmBooking({
         if (response.ok) {
           const data = await response.json();
           const user = data.data.user;
+          const profile = data.data.profile;
 
           // Auto-fill with user's actual data
           setFullName(user.full_name || "");
           setEmail(user.email || "");
+
+          // 🔧 NEW: Store user profile data (age, gender) for display
+          setUserAge(profile.age || null);
+          setUserGender(profile.gender || null);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -310,36 +319,76 @@ export default function Step3ConfirmBooking({
     appointmentId: number,
     razorpayKeyId: string,
   ) => {
-    // Check if Razorpay is loaded
-    if (!window.Razorpay) {
-      setError("Payment gateway not loaded. Please refresh and try again.");
-      return;
-    }
+    // 🔧 FIX: Load Razorpay SDK dynamically only when needed
+    const loadRazorpayScript = () => {
+      return new Promise((resolve) => {
+        // Check if Razorpay is already loaded
+        if (window.Razorpay) {
+          resolve(true);
+          return;
+        }
 
-    const reportPaymentFailure = (
-      errorCode: string,
-      errorDescription: string,
-    ) => {
-      const apiBaseUrl =
-        import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
-      const accessToken = localStorage.getItem("mibo_access_token");
-      fetch(`${apiBaseUrl}/payments/failure`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appointmentId,
-          razorpayOrderId: orderId,
-          errorCode,
-          errorDescription,
-        }),
-      }).catch((err) =>
-        console.error("Failed to report payment failure:", err),
-      );
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => {
+          resolve(true);
+        };
+        script.onerror = () => {
+          resolve(false);
+        };
+        document.body.appendChild(script);
+      });
     };
 
+    // Load Razorpay and then open modal
+    loadRazorpayScript().then((loaded) => {
+      if (!loaded) {
+        setError("Failed to load payment gateway. Please try again.");
+        setPaymentStep("review");
+        return;
+      }
+
+      // Razorpay is now loaded, proceed with payment
+      initializeRazorpayPayment(orderId, amount, appointmentId, razorpayKeyId);
+    });
+  };
+
+  /**
+   * Report payment failure to backend
+   */
+  const reportPaymentFailure = (
+    appointmentId: number,
+    orderId: string,
+    errorCode: string,
+    errorDescription: string,
+  ) => {
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
+    const accessToken = localStorage.getItem("mibo_access_token");
+    fetch(`${apiBaseUrl}/payments/failure`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        appointmentId,
+        razorpayOrderId: orderId,
+        errorCode,
+        errorDescription,
+      }),
+    }).catch((err) => console.error("Failed to report payment failure:", err));
+  };
+
+  /**
+   * Initialize Razorpay payment with loaded SDK
+   */
+  const initializeRazorpayPayment = (
+    orderId: string,
+    amount: number,
+    appointmentId: number,
+    razorpayKeyId: string,
+  ) => {
     const options = {
       key: razorpayKeyId, // Use key from backend
       amount: amount, // Already in paise from backend
@@ -406,6 +455,8 @@ export default function Step3ConfirmBooking({
       modal: {
         ondismiss: function () {
           reportPaymentFailure(
+            appointmentId,
+            orderId,
             "PAYMENT_CANCELLED",
             "Payment cancelled by user",
           );
@@ -427,6 +478,8 @@ export default function Step3ConfirmBooking({
 
     razorpay.on("payment.failed", function (response: any) {
       reportPaymentFailure(
+        appointmentId,
+        orderId,
         response.error.code || "PAYMENT_FAILED",
         response.error.description || "Payment failed",
       );
@@ -657,6 +710,38 @@ export default function Step3ConfirmBooking({
                 We'll send booking confirmation to this email
               </p>
             </div>
+
+            {/* 🔧 NEW: Display Age and Gender (Read-only) */}
+            {(userAge || userGender) && (
+              <div className="grid grid-cols-2 gap-4">
+                {userAge && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Age
+                    </label>
+                    <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                      {userAge} years
+                    </div>
+                  </div>
+                )}
+                {userGender && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender
+                    </label>
+                    <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                      {userGender === "MALE"
+                        ? "Male"
+                        : userGender === "FEMALE"
+                          ? "Female"
+                          : userGender === "NON_BINARY"
+                            ? "Non-Binary"
+                            : "Prefer not to say"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

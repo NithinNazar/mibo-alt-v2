@@ -95,7 +95,8 @@ const PatientAuth = () => {
       return;
     }
 
-    // Validate required fields for new users
+    // 🔧 FIX: Validate required fields for new users ONLY if they are new
+    // For new users, firstName, lastName, age, and gender are REQUIRED
     if (isNewUser) {
       if (!firstName.trim()) {
         setError("Please enter your first name");
@@ -106,13 +107,14 @@ const PatientAuth = () => {
         return;
       }
       if (!age || age < 1 || age > 150) {
-        setError("Please enter a valid age");
+        setError("Please enter a valid age (1-150)");
         return;
       }
       if (!gender) {
         setError("Please select your gender");
         return;
       }
+      // Email is optional for new users - no validation needed
     }
 
     setError("");

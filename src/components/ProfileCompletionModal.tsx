@@ -35,7 +35,7 @@ export default function ProfileCompletionModal({
       return;
     }
     if (!age || age < 1 || age > 150) {
-      setError("Please enter a valid age");
+      setError("Please enter a valid age (1-150)");
       return;
     }
     if (!gender) {
@@ -67,8 +67,13 @@ export default function ProfileCompletionModal({
         }),
       });
 
+      // 🔧 FIX: Better error handling - check response before proceeding
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to update profile");
+        throw new Error(
+          responseData.message || "Failed to update profile. Please try again.",
+        );
       }
 
       // Update local storage with new user data
@@ -81,8 +86,10 @@ export default function ProfileCompletionModal({
       userData.gender = gender;
       localStorage.setItem("mibo_user", JSON.stringify(userData));
 
+      // 🔧 FIX: Only call onComplete after successful update
       onComplete();
     } catch (err: any) {
+      console.error("Profile completion error:", err);
       setError(err.message || "Failed to complete profile. Please try again.");
     } finally {
       setLoading(false);
