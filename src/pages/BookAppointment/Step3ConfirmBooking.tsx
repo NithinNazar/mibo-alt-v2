@@ -11,6 +11,7 @@ import {
   AlertCircle,
   User,
   Mail,
+  Phone,
   FileText,
 } from "lucide-react";
 
@@ -31,13 +32,25 @@ export default function Step3ConfirmBooking({
 
   // Pre-fill user data if already authenticated
   const currentUser = authService.getCurrentUser();
-  const [fullName, setFullName] = useState(currentUser?.fullName || "");
+  const [fullName, setFullName] = useState(
+    currentUser?.fullName
+      ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
+      : "",
+  );
+  const [firstName, setFirstName] = useState(currentUser?.firstName || "");
+  const [lastName, setLastName] = useState(currentUser?.lastName || "");
   const [email, setEmail] = useState(currentUser?.email || "");
+  const [phone, setPhone] = useState(bookingData?.phone || "");
   const [userDataLoaded, setUserDataLoaded] = useState(false);
 
   // 🔧 NEW: Add state for user profile data (age, gender) for display
-  const [userAge, setUserAge] = useState<number | null>(null);
-  const [userGender, setUserGender] = useState<string | null>(null);
+  // Initialize from localStorage if available
+  const [userAge, setUserAge] = useState<number | null>(
+    currentUser?.age || null,
+  );
+  const [userGender, setUserGender] = useState<string | null>(
+    currentUser?.gender || null,
+  );
 
   // Fetch user profile data on mount
   useEffect(() => {
@@ -65,7 +78,10 @@ export default function Step3ConfirmBooking({
 
           // Auto-fill with user's actual data
           setFullName(user.full_name || "");
+          setFirstName(user.first_name || "");
+          setLastName(user.last_name || "");
           setEmail(user.email || "");
+          setPhone(user.phone || bookingData?.phone || "");
 
           // 🔧 NEW: Store user profile data (age, gender) for display
           setUserAge(profile.age || null);
@@ -185,52 +201,18 @@ export default function Step3ConfirmBooking({
   };
 
   const handleConfirmPayment = async () => {
-    // Validate name and email
-    if (!fullName.trim()) {
-      setError("Please enter your full name");
-      return;
-    }
-
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
+    // No validation needed - all fields are auto-fetched and read-only
     setError("");
     setPaymentStep("processing");
 
     try {
-      // Step 0: Verify OTP with name and email to get auth token
+      // Step 0: Get auth token
       // Get access token from localStorage (set by authService during OTP verification on Step2)
       const accessToken = localStorage.getItem("mibo_access_token");
       if (!accessToken) {
         throw new Error(
           "Authentication failed. Please go back and verify OTP again.",
         );
-      }
-
-      // Update user profile with name and email
-      try {
-        const apiBaseUrl =
-          import.meta.env.VITE_API_BASE_URL || "https://api.mibo.care/api";
-        await fetch(`${apiBaseUrl}/patient-auth/update-profile`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fullName: fullName,
-            email: email || undefined,
-          }),
-        });
-        console.log("✅ User profile updated with name and email");
-      } catch (profileErr) {
-        console.warn(
-          "Profile update failed, continuing with booking:",
-          profileErr,
-        );
-        // Don't fail the booking if profile update fails
       }
 
       // Log booking data for debugging
@@ -465,9 +447,9 @@ export default function Step3ConfirmBooking({
         },
       },
       prefill: {
-        name: fullName,
+        name: `${firstName} ${lastName}`.trim(),
         email: email || undefined,
-        contact: bookingData.phone,
+        contact: phone || bookingData.phone,
       },
       theme: {
         color: "#034B44",
@@ -673,75 +655,82 @@ export default function Step3ConfirmBooking({
           </div>
 
           <div className="space-y-4">
-            {/* Full Name Input */}
+            {/* First Name - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+                First Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
-                  required
-                />
+                <div className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                  {firstName || "Not provided"}
+                </div>
               </div>
             </div>
 
-            {/* Email Input */}
+            {/* Last Name - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-gray-400">(Optional)</span>
+                Last Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                  {lastName || "Not provided"}
+                </div>
+              </div>
+            </div>
+
+            {/* Email - Read Only */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
-                />
+                <div className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                  {email || "Not provided"}
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                We'll send booking confirmation to this email
-              </p>
             </div>
 
-            {/* 🔧 NEW: Display Age and Gender (Read-only) */}
-            {(userAge || userGender) && (
-              <div className="grid grid-cols-2 gap-4">
-                {userAge && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Age
-                    </label>
-                    <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
-                      {userAge} years
-                    </div>
-                  </div>
-                )}
-                {userGender && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Gender
-                    </label>
-                    <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
-                      {userGender === "MALE"
-                        ? "Male"
-                        : userGender === "FEMALE"
-                          ? "Female"
-                          : userGender === "NON_BINARY"
-                            ? "Non-Binary"
-                            : "Prefer not to say"}
-                    </div>
-                  </div>
-                )}
+            {/* Phone - Read Only */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                {phone || "Not provided"}
               </div>
-            )}
+            </div>
+
+            {/* Age and Gender in Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age
+                </label>
+                <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                  {userAge ? `${userAge} years` : "Not provided"}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gender
+                </label>
+                <div className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-700">
+                  {userGender
+                    ? userGender === "MALE"
+                      ? "Male"
+                      : userGender === "FEMALE"
+                        ? "Female"
+                        : userGender === "NON_BINARY"
+                          ? "Non-Binary"
+                          : "Prefer not to say"
+                    : "Not provided"}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -910,7 +899,7 @@ export default function Step3ConfirmBooking({
         )}
         <button
           onClick={handleConfirmPayment}
-          disabled={!fullName.trim() || loadingFeeStatus}
+          disabled={!firstName.trim() || loadingFeeStatus}
           className="w-full py-4 bg-[#034B44] text-white font-bold rounded-full hover:bg-[#046e63] transition-all shadow-lg flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <CreditCard className="w-5 h-5" />

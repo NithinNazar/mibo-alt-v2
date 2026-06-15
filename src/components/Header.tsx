@@ -2,10 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Phone, MessageCircle, Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import miboIcon from "../assets/logo1.png?w=200&format=webp&quality=85";
-const homeVideo =
-  "https://ishviontech.com/wp-content/uploads/2026/02/home_video.mp4";
-import PremiumSlider from "../components/Slider";
-import MentalHealthCard from "./mentalhealth";
 import authService from "../services/authService";
 
 const Header = () => {
@@ -444,36 +440,6 @@ const DesktopVideo = () => {
   );
 };
 
-const App = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkDevice = () => setIsMobile(window.innerWidth < 768);
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
-  }, []);
-
-  return (
-    <div className="relative w-full min-h-screen overflow-hidden">
-      <Header />
-      <div className="w-full overflow-y-auto">
-        {isMobile ? (
-          <div className="flex flex-col justify-start items-center">
-            <PremiumSlider />
-            <div className="flex justify-center">
-              <MentalHealthCard />
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col">
-            <DesktopVideo />
-            <MentalHealthCard />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default App;
+// Export only the Header (navigation bar) component
+// The old App component with video hero is no longer needed
+export default Header;

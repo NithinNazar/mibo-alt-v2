@@ -60,11 +60,15 @@ interface LoginResponse {
  */
 export interface AuthUser {
   id: number;
-  full_name: string;
+  fullName: string;
+  firstName: string | null;
+  lastName: string | null;
   phone: string;
   email: string | null;
   userType: "PATIENT";
   patientId: number;
+  age: number | null;
+  gender: string | null;
 }
 
 /**
@@ -180,8 +184,16 @@ class AuthService {
     localStorage.setItem(
       "mibo_user",
       JSON.stringify({
-        ...user,
+        id: user.id,
+        fullName: user.fullName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        email: user.email,
+        userType: user.userType,
         patientId: patient.id,
+        age: patient.age,
+        gender: patient.gender,
       }),
     );
 
@@ -387,8 +399,16 @@ class AuthService {
     localStorage.setItem(
       "mibo_user",
       JSON.stringify({
-        ...user,
+        id: user.id,
+        fullName: user.fullName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        email: user.email,
+        userType: user.userType,
         patientId: patient.id,
+        age: patient.age,
+        gender: patient.gender,
       }),
     );
 

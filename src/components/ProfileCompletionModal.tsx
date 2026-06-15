@@ -14,15 +14,46 @@ export default function ProfileCompletionModal({
   isOpen,
   phone,
   onComplete,
-  onSkip,
+  onSkip, // Keep parameter but don't use it - for backward compatibility
 }: ProfileCompletionModalProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [age, setAge] = useState<number | "">("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [age, setAge] = useState<number | null>(null);
   const [gender, setGender] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Calculate age from date of birth
+  const calculateAge = (dob: string): number | null => {
+    if (!dob) return null;
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    if (isNaN(birthDate.getTime())) return null;
+
+    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Adjust if birthday hasn't occurred this year
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      calculatedAge--;
+    }
+
+    return calculatedAge;
+  };
+
+  // Handle date of birth change
+  const handleDateOfBirthChange = (value: string) => {
+    setDateOfBirth(value);
+    const calculatedAge = calculateAge(value);
+    setAge(calculatedAge);
+  };
 
   const handleComplete = async () => {
     // Validate required fields
@@ -34,8 +65,14 @@ export default function ProfileCompletionModal({
       setError("Please enter your last name");
       return;
     }
+    if (!dateOfBirth) {
+      setError("Please select your date of birth");
+      return;
+    }
     if (!age || age < 1 || age > 150) {
-      setError("Please enter a valid age (1-150)");
+      setError(
+        "Please enter a valid date of birth (age must be between 1-150)",
+      );
       return;
     }
     if (!gender) {
@@ -62,7 +99,8 @@ export default function ProfileCompletionModal({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim() || undefined,
-          age: Number(age),
+          dateOfBirth: dateOfBirth, // Send date of birth
+          age: age, // Send calculated age
           gender: gender,
         }),
       });
@@ -78,11 +116,11 @@ export default function ProfileCompletionModal({
 
       // Update local storage with new user data
       const userData = JSON.parse(localStorage.getItem("mibo_user") || "{}");
-      userData.first_name = firstName.trim();
-      userData.last_name = lastName.trim();
-      userData.full_name = `${firstName.trim()} ${lastName.trim()}`;
+      userData.firstName = firstName.trim();
+      userData.lastName = lastName.trim();
+      userData.fullName = `${firstName.trim()} ${lastName.trim()}`;
       userData.email = email.trim() || userData.email;
-      userData.age = Number(age);
+      userData.age = age;
       userData.gender = gender;
       localStorage.setItem("mibo_user", JSON.stringify(userData));
 
@@ -126,14 +164,7 @@ export default function ProfileCompletionModal({
                   </p>
                 </div>
               </div>
-              {onSkip && (
-                <button
-                  onClick={onSkip}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              )}
+              {/* Removed X button - profile completion is mandatory */}
             </div>
 
             {/* Info Message */}
@@ -191,58 +222,24 @@ export default function ProfileCompletionModal({
                 />
               </div>
 
-              {/* Age */}
+              {/* Date of Birth */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Age <span className="text-red-500">*</span>
+                  Date of Birth <span className="text-red-500">*</span>
                 </label>
-                <div className="relative flex items-center">
-                  <input
-                    type="number"
-                    placeholder="Enter your age"
-                    min="1"
-                    max="150"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-[#034B44]"
-                    value={age}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setAge(
-                        value === ""
-                          ? ""
-                          : Math.min(150, Math.max(1, parseInt(value) || 0)),
-                      );
-                    }}
-                    disabled={loading}
-                  />
-                  <div className="absolute right-2 flex flex-col">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAge((prev) => {
-                          const current = typeof prev === "number" ? prev : 0;
-                          return Math.min(150, current + 1);
-                        })
-                      }
-                      className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors"
-                      disabled={loading}
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAge((prev) => {
-                          const current = typeof prev === "number" ? prev : 0;
-                          return Math.max(1, current - 1);
-                        })
-                      }
-                      className="px-2 py-0.5 text-xs bg-[#034B44] text-white rounded hover:bg-[#046e63] transition-colors mt-0.5"
-                      disabled={loading}
-                    >
-                      ▼
-                    </button>
-                  </div>
-                </div>
+                <input
+                  type="date"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#034B44]"
+                  value={dateOfBirth}
+                  onChange={(e) => handleDateOfBirthChange(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]} // Can't select future dates
+                  disabled={loading}
+                />
+                {age !== null && age >= 0 && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Age: <span className="font-semibold">{age} years</span>
+                  </p>
+                )}
               </div>
 
               {/* Gender */}
@@ -273,11 +270,11 @@ export default function ProfileCompletionModal({
             )}
 
             {/* Action Buttons */}
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6">
               <button
                 onClick={handleComplete}
                 disabled={loading}
-                className="flex-1 bg-[#034B44] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#046e63] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-[#034B44] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#046e63] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -288,15 +285,6 @@ export default function ProfileCompletionModal({
                   "Complete Profile"
                 )}
               </button>
-              {onSkip && (
-                <button
-                  onClick={onSkip}
-                  disabled={loading}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all disabled:opacity-50"
-                >
-                  Skip for Now
-                </button>
-              )}
             </div>
 
             <p className="text-xs text-gray-500 text-center mt-4">
