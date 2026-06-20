@@ -219,7 +219,6 @@ export default function Step1SessionDetails({
           });
         }
       } catch (error) {
-        console.error("Error fetching clinician data:", error);
         // Set fallback data to prevent UI from breaking
         setSelectedClinician({
           id: doctor.id,
@@ -306,10 +305,6 @@ export default function Step1SessionDetails({
         const startDateStr = toISODateKey(today);
         const endDateStr = toISODateKey(endDate);
 
-        console.log(
-          `Fetching dates with slots for clinician ${selectedClinician.id}, centre ${selectedCentre.id}, from ${startDateStr} to ${endDateStr}`,
-        );
-
         const response = await fetch(
           `${API_BASE_URL}/booking/dates-with-slots?clinicianId=${selectedClinician.id}&centreId=${selectedCentre.id}&startDate=${startDateStr}&endDate=${endDateStr}`,
         );
@@ -319,17 +314,14 @@ export default function Step1SessionDetails({
         }
 
         const data = await response.json();
-        console.log("Dates with slots response:", data);
         setDatesWithSlots(data.data || []);
 
         // Auto-select first available date if no date is selected
         if (!selectedDate && data.data && data.data.length > 0) {
           const firstDate = new Date(data.data[0].date + "T00:00:00");
           setSelectedDate(firstDate);
-          console.log("Auto-selected first available date:", firstDate);
         }
       } catch (error) {
-        console.error("Error fetching dates with slots:", error);
         setDatesWithSlots([]);
       } finally {
         setDatesLoading(false);

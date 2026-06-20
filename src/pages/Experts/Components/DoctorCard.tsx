@@ -81,6 +81,15 @@ export default function DoctorCard({ doctor }: Props) {
         )}
       </div>
 
+      {/* Consultation Fee */}
+      <div className="mb-3">
+        <div className="text-center">
+          <p className="text-base font-semibold text-[#034B44]">
+            {doctor.price}
+          </p>
+        </div>
+      </div>
+
       {/* Button */}
       <button
         onClick={handleBook}

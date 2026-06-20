@@ -60,11 +60,13 @@ export default function ExpertsPage() {
             c.profilePictureUrl ||
             c.profile_picture_url ||
             "/default-avatar.png",
-          location: (c.primaryCentreName ||
-            c.primary_centre_name ||
-            c.centreName ||
-            c.centre_name ||
-            "Bangalore") as "Bangalore" | "Kochi" | "Mumbai",
+          location: normalizeLocation(
+            c.primaryCentreName ||
+              c.primary_centre_name ||
+              c.centreName ||
+              c.centre_name ||
+              "Bangalore",
+          ) as "Bangalore" | "Kochi" | "Mumbai",
           language: c.languages || ["English"],
           price: `₹${c.consultationFee || c.consultation_fee || 0}/session`,
           sessionTypes: getSessionTypes(
@@ -77,16 +79,6 @@ export default function ExpertsPage() {
 
       setDoctors(transformedDoctors);
     } catch (error: any) {
-      console.error("Failed to fetch clinicians from database:", error);
-      console.error("Error details:", {
-        message: error.message,
-        code: error.code,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        url: error.config?.url,
-        timeout: error.config?.timeout,
-      });
       // Show empty state - no fallback
       setDoctors([]);
     } finally {
@@ -104,6 +96,20 @@ export default function ExpertsPage() {
     } else {
       return "In-person & Online sessions";
     }
+  };
+
+  // Normalize location names to match filter options
+  const normalizeLocation = (location: string): string => {
+    const loc = location.trim().toLowerCase();
+    if (loc.includes("bangalore") || loc.includes("bengaluru")) {
+      return "Bangalore";
+    } else if (loc.includes("kochi") || loc.includes("cochin")) {
+      return "Kochi";
+    } else if (loc.includes("mumbai") || loc.includes("bombay")) {
+      return "Mumbai";
+    }
+    // Default fallback - capitalize first letter
+    return location.charAt(0).toUpperCase() + location.slice(1).toLowerCase();
   };
 
   /**
@@ -183,23 +189,32 @@ export default function ExpertsPage() {
       );
     }
 
-    // Filter by Price
+    // Filter by Price (using price ranges)
     if (selectedFilters.Price.length > 0) {
-      filtered = filtered.filter((doc) =>
-        selectedFilters.Price.includes(doc.price),
-      );
+      filtered = filtered.filter((doc) => {
+        // Extract numeric price from string like "₹2000/session"
+        const priceMatch = doc.price.match(/₹(\d+)/);
+        if (!priceMatch) return false;
+
+        const price = parseInt(priceMatch[1]);
+
+        return selectedFilters.Price.some((range) => {
+          if (range === "₹1000-₹1500") {
+            return price >= 1000 && price <= 1500;
+          } else if (range === "₹1500-₹2000") {
+            return price > 1500 && price <= 2000;
+          } else if (range === "₹2000-₹2500") {
+            return price > 2000 && price <= 2500;
+          } else if (range === "₹2500+") {
+            return price > 2500;
+          }
+          return false;
+        });
+      });
     }
 
     return filtered;
   }, [selectedCategory, selectedFilters, doctors]);
-
-  // Debug: Log filtering results (only in development)
-  if (import.meta.env.DEV) {
-    console.log("Total doctors:", doctors.length);
-    console.log("Filtered doctors:", filteredDoctors.length);
-    console.log("Selected category:", selectedCategory);
-    console.log("Selected filters:", selectedFilters);
-  }
 
   // Show skeleton only on initial load, not on filter changes
   const showSkeletons = loading && doctors.length === 0;

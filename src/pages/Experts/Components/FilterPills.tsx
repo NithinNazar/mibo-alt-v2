@@ -100,7 +100,7 @@ export default function FilterPills({
       "Telugu",
       "Marathi",
     ],
-    Price: ["₹1600/session"],
+    Price: ["₹1000-₹1500", "₹1500-₹2000", "₹2000-₹2500", "₹2500+"],
   };
 
   const toggleDropdown = (key: string) => {
