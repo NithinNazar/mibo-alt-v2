@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   UserRound,
@@ -22,6 +23,7 @@ import {
   Tag,
   Globe,
   Quote,
+  X,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import ExpertsHeader from "./Components/ExpertsHeader";
@@ -100,7 +102,9 @@ function FilterDropdown({
 }
 
 export default function ExpertsPage() {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(
     "All Experts",
@@ -313,7 +317,7 @@ export default function ExpertsPage() {
         url: error.config?.url,
         timeout: error.config?.timeout,
       });
-      // API failed - show dummy data instead of an empty state
+      // if API failed - show dummy data instead of an empty state
       setDoctors(dummyDoctors);
     } finally {
       setLoading(false);
@@ -332,9 +336,8 @@ export default function ExpertsPage() {
     }
   };
 
-  /**
-   * Filter doctors based on category and selected filters
-   */
+  //  Filter doctors based on category and selected filters
+   
   const filteredDoctors = useMemo(() => {
     let filtered = [...doctors];
 
@@ -716,13 +719,14 @@ export default function ExpertsPage() {
                 </div>
 
                 <div className="flex gap-3 mt-4 pt-[18px] border-t border-[#eef4f1]">
-                  <button className="flex-1 justify-center text-xs px-3 py-3 rounded-[9px] border border-[#e6ede9] bg-white font-bold text-[#16241f] hover:border-[#138158] hover:text-[#0e6b4f] transition-colors">
+                  <button
+                    onClick={() => setSelectedProfile(doc)}
+                    className="flex-1 justify-center text-xs px-3 py-3 rounded-[9px] border border-[#e6ede9] bg-white font-bold text-[#16241f] hover:border-[#138158] hover:text-[#0e6b4f] transition-colors"
+                  >
                     VIEW PROFILE
                   </button>
                   <button
-                    onClick={() =>
-                      (window.location.href = `/book-appointment/${doc.id}`)
-                    }
+                    onClick={() => navigate(`/book-appointment/${doc.id}`)}
                     className="flex-1 justify-center text-xs px-3 py-3 rounded-[9px] bg-[#0e6b4f] text-white font-bold hover:bg-[#138158] transition-colors"
                   >
                     BOOK APPOINTMENT
@@ -886,6 +890,130 @@ export default function ExpertsPage() {
 
       {/* --- FOOTER --- */}
       <ExpertsFooter />
+
+      {/* --- VIEW PROFILE MODAL --- */}
+      {selectedProfile &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4"
+            onMouseDown={() => setSelectedProfile(null)}
+          >
+            <div
+              className="bg-white rounded-2xl max-w-[560px] w-full max-h-[85vh] overflow-y-auto p-7 relative shadow-2xl"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setSelectedProfile(null)}
+                aria-label="Close"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-[#637268] hover:bg-[#f4faf7] hover:text-[#16241f] transition-colors"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+
+              <div className="flex items-start gap-4 mb-5">
+                <img
+                  src={selectedProfile.image}
+                  alt={selectedProfile.name}
+                  className="w-20 h-20 rounded-[14px] object-cover flex-shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/default-avatar.png";
+                  }}
+                />
+                <div>
+                  <h3 className="m-0 mb-1 text-[19px] font-bold text-[#16241f] flex items-center gap-1.5">
+                    {selectedProfile.name}
+                    <BadgeCheck className="w-4 h-4 text-[#0e6b4f]" />
+                  </h3>
+                  <div className="text-[#0e6b4f] text-[13.5px] font-bold mb-1">
+                    {selectedProfile.designation}
+                  </div>
+                  <div className="flex items-center gap-1 text-[12.5px] text-[#637268] font-medium">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {selectedProfile.location}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="bg-[#f4faf7] rounded-xl p-3.5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-1">
+                    <Briefcase className="w-3.5 h-3.5" />
+                    Experience
+                  </div>
+                  <div className="text-[14px] font-bold text-[#16241f]">
+                    {selectedProfile.experience}
+                  </div>
+                </div>
+                <div className="bg-[#f4faf7] rounded-xl p-3.5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-1">
+                    <IndianRupee className="w-3.5 h-3.5" />
+                    Fee
+                  </div>
+                  <div className="text-[14px] font-bold text-[#16241f]">
+                    {selectedProfile.price.replace("/session", "")} / 50 mins
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-1.5">
+                  Qualification
+                </div>
+                <div className="text-[13.5px] text-[#37433d] font-medium">
+                  {selectedProfile.qualification}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-1.5">
+                  <Languages className="w-3.5 h-3.5" />
+                  Languages
+                </div>
+                <div className="text-[13.5px] text-[#37433d] font-medium">
+                  {selectedProfile.language.join(", ")}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-2">
+                  <ClipboardList className="w-3.5 h-3.5" />
+                  Areas of Expertise
+                </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  {selectedProfile.expertise.map((ex, i) => (
+                    <span
+                      key={i}
+                      className="bg-[#f4faf7] text-[#0e6b4f] text-[12px] font-semibold px-2.5 py-1 rounded-[7px] border border-[#e1f4ec]"
+                    >
+                      {ex}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <div className="text-[11px] font-bold text-[#94a39b] uppercase tracking-wide mb-1.5">
+                  Session Types
+                </div>
+                <div className="text-[13.5px] text-[#37433d] font-medium">
+                  {selectedProfile.sessionTypes}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const id = selectedProfile.id;
+                  setSelectedProfile(null);
+                  navigate(`/book-appointment/${id}`);
+                }}
+                className="w-full justify-center text-xs px-3 py-3.5 rounded-[9px] bg-[#0e6b4f] text-white font-bold hover:bg-[#138158] transition-colors"
+              >
+                BOOK APPOINTMENT
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
