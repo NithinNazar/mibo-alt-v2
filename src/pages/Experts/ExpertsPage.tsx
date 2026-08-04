@@ -322,7 +322,7 @@ export default function ExpertsPage() {
         // Handle specialization 
         const specialization = Array.isArray(c.specialization)
           ? c.specialization.join(", ")
-          : c.specialization || "";
+          : c.specialization || ""; 
 
         // Handle qualification 
         const qualification = Array.isArray(c.qualification)
