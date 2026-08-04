@@ -6,7 +6,7 @@ import HeroSection from "./components/HeroSection";
 import StorySection from "./components/StorySection";
 import ApproachSection from "./components/ApproachSection";
 import DirectorsNote from "./components/DirectorsNote";
-import TeamSection from "./components/TeamSection";
+// import TeamSection from "./components/TeamSection";
 
 const AboutPage: React.FC = () => {
   return (
@@ -19,7 +19,7 @@ const AboutPage: React.FC = () => {
       <StorySection />
       <ApproachSection />
       <DirectorsNote />
-      <TeamSection />
+      {/* <TeamSection /> */}
 
       {/* Footer */}
       <ExpertsFooter />
