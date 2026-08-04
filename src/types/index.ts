@@ -64,6 +64,7 @@ export interface Clinician {
   languages: string[];
   isActive: boolean;
   profilePictureUrl?: string;
+  profileVideoUrl?: string; // video introduction URL
   consultationModes?: string[];
   defaultDurationMinutes?: number;
 }

@@ -139,9 +139,7 @@ class ClinicianService {
       // Apply filters and return
       return this.filterClinicians(this.cache.data, params);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.warn("Clinician API unavailable, falling back:", error);
-      }
+      console.error("Failed to fetch clinicians:", error);
 
       // If we have stale cache data, return it as fallback
       if (this.cache.data !== null) {

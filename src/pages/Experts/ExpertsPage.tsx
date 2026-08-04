@@ -347,7 +347,8 @@ export default function ExpertsPage() {
             (c.profilePictureUrl || c.profile_picture_url
               ? [c.profilePictureUrl || c.profile_picture_url]
               : undefined),
-          videoUrl: c.videoUrl || c.video_url || undefined,
+          videoUrl:
+            c.profileVideoUrl || c.profile_video_url || c.videoUrl || c.video_url || undefined,
           location: (c.primaryCentreName ||
             c.primary_centre_name ||
             c.centreName ||
