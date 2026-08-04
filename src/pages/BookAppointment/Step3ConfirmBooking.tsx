@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
+import BookingSummarySidebar from "../../components/BookingSummarySidebar";
+import type { Doctor } from "../Experts/data/doctors";
+import phoneVerifyBg from "../Experts/assets/phone-verify-bg.jpg";
 import {
   ArrowLeft,
   Loader2,
@@ -11,17 +14,140 @@ import {
   AlertCircle,
   User,
   Mail,
-  FileText,
+  Phone,
+  Calendar,
+  Lock,
+  SquarePen,
+  X,
 } from "lucide-react";
 
+type ToastType = "success" | "error";
+
+/** Fixed top-center toast used for transient success/error feedback across
+ * the payment flow. Slides + fades in, auto-dismisses, and can be closed
+ * manually via the X button. */
+function Toast({
+  toast,
+  visible,
+  onDismiss,
+}: {
+  toast: { type: ToastType; message: string } | null;
+  visible: boolean;
+  onDismiss: () => void;
+}) {
+  if (!toast) return null;
+
+  const isSuccess = toast.type === "success";
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[100] w-[92vw] max-w-md transition-all duration-300 ease-out ${
+        visible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 -translate-y-3 pointer-events-none"
+      }`}
+    >
+      <div
+        className={`flex items-start gap-3 pl-4 pr-3 py-3.5 rounded-2xl border shadow-[0_10px_34px_rgba(10,46,35,0.18)] backdrop-blur-sm ${
+          isSuccess
+            ? "bg-[#eafff5]/95 border-green-200"
+            : "bg-[#fff1f1]/95 border-red-200"
+        }`}
+      >
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+            isSuccess ? "bg-green-100" : "bg-red-100"
+          }`}
+        >
+          {isSuccess ? (
+            <CheckCircle className="w-[18px] h-[18px] text-green-600" />
+          ) : (
+            <AlertCircle className="w-[18px] h-[18px] text-red-600" />
+          )}
+        </div>
+        <p
+          className={`flex-1 text-[13.5px] font-medium leading-snug pt-1 ${
+            isSuccess ? "text-green-800" : "text-red-800"
+          }`}
+        >
+          {toast.message}
+        </p>
+        <button
+          onClick={onDismiss}
+          aria-label="Dismiss notification"
+          className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-black/5 transition-colors"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 interface Step3ConfirmBookingProps {
+  doctor?: Doctor | null;
   bookingData: any;
   onBack: () => void;
 }
 
 type PaymentStep = "review" | "processing" | "success" | "failed";
 
+/** Small labeled field used in the "Your Details" grid — icon + value in a
+ * soft mint-tinted box, matching the rest of the booking flow's inputs. */
+function DetailField({
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  readOnly = false,
+  suffix,
+  required = false,
+}: {
+  icon: any;
+  label: string;
+  value: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  placeholder?: string;
+  readOnly?: boolean;
+  suffix?: string;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-[13px] font-semibold text-[#0a2e23] mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div
+        className={`flex items-center gap-2.5 border border-[#dfe8e4] rounded-xl px-3.5 py-2.5 transition-all ${
+          readOnly
+            ? "bg-[#f4f9f7]"
+            : "bg-white focus-within:ring-2 focus-within:ring-[#0e6b4f]/30 focus-within:border-[#0e6b4f]"
+        }`}
+      >
+        <Icon className="w-4 h-4 text-[#0e6b4f] shrink-0" />
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          readOnly={readOnly}
+          placeholder={placeholder}
+          className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-[#0a2e23] placeholder:text-[#a8b5af]"
+        />
+        {suffix && (
+          <span className="text-xs text-[#6b7a74] shrink-0">{suffix}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Step3ConfirmBooking({
+  doctor = null,
   bookingData,
   onBack,
 }: Step3ConfirmBookingProps) {
@@ -29,10 +155,58 @@ export default function Step3ConfirmBooking({
   const [paymentStep, setPaymentStep] = useState<PaymentStep>("review");
   const [error, setError] = useState("");
 
+  // Top-center toast notifications (success / error)
+  const [toast, setToast] = useState<{
+    type: ToastType;
+    message: string;
+  } | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastHideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissToast = () => {
+    setToastVisible(false);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (toastHideRef.current) clearTimeout(toastHideRef.current);
+    toastHideRef.current = setTimeout(() => setToast(null), 300);
+  };
+
+  const showToast = (type: ToastType, message: string, duration = 4000) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (toastHideRef.current) clearTimeout(toastHideRef.current);
+    setToast({ type, message });
+    // Let the element mount first, then trigger the entrance transition
+    requestAnimationFrame(() => requestAnimationFrame(() => setToastVisible(true)));
+    toastTimerRef.current = setTimeout(dismissToast, duration);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (toastHideRef.current) clearTimeout(toastHideRef.current);
+    };
+  }, []);
+
   // Pre-fill user data if already authenticated
   const currentUser = authService.getCurrentUser();
-  const [fullName, setFullName] = useState(currentUser?.fullName || "");
+  const splitName = (name?: string) => {
+    const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+    return {
+      first: parts.slice(0, -1).join(" ") || parts[0] || "",
+      last: parts.length > 1 ? parts[parts.length - 1] : "",
+    };
+  };
+  const initialName = splitName(currentUser?.fullName);
+  const [firstName, setFirstName] = useState(initialName.first);
+  const [lastName, setLastName] = useState(initialName.last);
   const [email, setEmail] = useState(currentUser?.email || "");
+  const [age, setAge] = useState(
+    bookingData.age || currentUser?.age || "",
+  );
+  const [gender, setGender] = useState(
+    bookingData.gender || currentUser?.gender || "",
+  );
+  const fullName = `${firstName} ${lastName}`.trim();
   const [userDataLoaded, setUserDataLoaded] = useState(false);
 
   // Fetch user profile data on mount
@@ -59,8 +233,12 @@ export default function Step3ConfirmBooking({
           const user = data.data.user;
 
           // Auto-fill with user's actual data
-          setFullName(user.full_name || "");
+          const split = splitName(user.full_name);
+          setFirstName(split.first);
+          setLastName(split.last);
           setEmail(user.email || "");
+          if (user.age) setAge(user.age);
+          if (user.gender) setGender(user.gender);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -178,12 +356,12 @@ export default function Step3ConfirmBooking({
   const handleConfirmPayment = async () => {
     // Validate name and email
     if (!fullName.trim()) {
-      setError("Please enter your full name");
+      showToast("error", "Please enter your full name");
       return;
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address");
+      showToast("error", "Please enter a valid email address");
       return;
     }
 
@@ -296,7 +474,10 @@ export default function Step3ConfirmBooking({
       );
     } catch (err: any) {
       console.error("Booking error:", err);
-      setError(err.message || "Failed to process booking. Please try again.");
+      const message =
+        err.message || "Failed to process booking. Please try again.";
+      setError(message);
+      showToast("error", message);
       setPaymentStep("review");
     }
   };
@@ -377,6 +558,7 @@ export default function Step3ConfirmBooking({
           }
 
           setPaymentStep("success");
+          showToast("success", "Payment successful! Confirming your booking…");
 
           // Save booking info for dashboard
           const bookingInfo = {
@@ -399,7 +581,9 @@ export default function Step3ConfirmBooking({
             });
           }, 3000);
         } catch (err: any) {
-          setError(err.message || "Payment verification failed");
+          const message = err.message || "Payment verification failed";
+          setError(message);
+          showToast("error", message);
           setPaymentStep("failed");
         }
       },
@@ -409,7 +593,9 @@ export default function Step3ConfirmBooking({
             "PAYMENT_CANCELLED",
             "Payment cancelled by user",
           );
-          setError("Payment cancelled. Please try again.");
+          const message = "Payment cancelled. Please try again.";
+          setError(message);
+          showToast("error", message);
           setPaymentStep("review");
         },
       },
@@ -419,7 +605,7 @@ export default function Step3ConfirmBooking({
         contact: bookingData.phone,
       },
       theme: {
-        color: "#034B44",
+        color: "#0e6b4f",
       },
     };
 
@@ -430,9 +616,10 @@ export default function Step3ConfirmBooking({
         response.error.code || "PAYMENT_FAILED",
         response.error.description || "Payment failed",
       );
-      setError(
-        response.error.description || "Payment failed. Please try again.",
-      );
+      const message =
+        response.error.description || "Payment failed. Please try again.";
+      setError(message);
+      showToast("error", message);
       setPaymentStep("failed");
     });
 
@@ -442,7 +629,8 @@ export default function Step3ConfirmBooking({
   // Render different views based on payment step
   if (paymentStep === "failed") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#e9f6f4] text-[#034B44] p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#eef6f2] text-[#0a2e23] p-6">
+        <Toast toast={toast} visible={toastVisible} onDismiss={dismissToast} />
         <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
           <div className="mb-6">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -460,7 +648,7 @@ export default function Step3ConfirmBooking({
                 setPaymentStep("review");
                 setError("");
               }}
-              className="w-full py-3 bg-[#034B44] text-white font-semibold rounded-full hover:bg-[#046e63] transition-all"
+              className="w-full py-3 bg-[#0e6b4f] text-white font-semibold rounded-full hover:bg-[#0b5940] transition-all"
             >
               Try Again
             </button>
@@ -478,10 +666,11 @@ export default function Step3ConfirmBooking({
 
   if (paymentStep === "processing") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#e9f6f4] text-[#034B44] p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#eef6f2] text-[#0a2e23] p-6">
+        <Toast toast={toast} visible={toastVisible} onDismiss={dismissToast} />
         <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
           <div className="mb-6">
-            <Loader2 className="w-16 h-16 animate-spin text-[#034B44] mx-auto" />
+            <Loader2 className="w-16 h-16 animate-spin text-[#0e6b4f] mx-auto" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Processing Payment</h2>
           <p className="text-gray-600 mb-4">
@@ -498,7 +687,8 @@ export default function Step3ConfirmBooking({
 
   if (paymentStep === "success") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#e9f6f4] text-[#034B44] p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#eef6f2] text-[#0a2e23] p-6">
+        <Toast toast={toast} visible={toastVisible} onDismiss={dismissToast} />
         <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center animate-fade-in">
           <div className="mb-6">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -515,7 +705,7 @@ export default function Step3ConfirmBooking({
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Appointment ID</span>
-              <span className="font-mono font-semibold text-[#034B44]">
+              <span className="font-mono font-semibold text-[#0a2e23]">
                 #{bookingData.appointmentId}
               </span>
             </div>
@@ -578,13 +768,13 @@ export default function Step3ConfirmBooking({
           </p>
 
           <div className="flex gap-2 justify-center">
-            <div className="w-2 h-2 bg-[#034B44] rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-[#0e6b4f] rounded-full animate-bounce"></div>
             <div
-              className="w-2 h-2 bg-[#034B44] rounded-full animate-bounce"
+              className="w-2 h-2 bg-[#0e6b4f] rounded-full animate-bounce"
               style={{ animationDelay: "0.1s" }}
             ></div>
             <div
-              className="w-2 h-2 bg-[#034B44] rounded-full animate-bounce"
+              className="w-2 h-2 bg-[#0e6b4f] rounded-full animate-bounce"
               style={{ animationDelay: "0.2s" }}
             ></div>
           </div>
@@ -595,191 +785,248 @@ export default function Step3ConfirmBooking({
 
   // Default: Review and Payment step
   return (
-    <div className="min-h-screen flex flex-col bg-[#e9f6f4] text-[#034B44]">
-      {/* Header */}
-      <div className="flex items-center p-4 border-b border-[#a7c4f2]/40 bg-white sticky top-0 z-20">
-        <button onClick={onBack} className="mr-3">
-          <ArrowLeft className="text-[#034B44]" />
-        </button>
-        <h2 className="text-lg font-semibold">Review & Pay</h2>
-      </div>
+    <div
+      className="min-h-screen flex flex-col bg-[#eef6f2] bg-cover bg-center bg-no-repeat md:bg-fixed text-[#0a2e23]"
+      style={{ backgroundImage: `url(${phoneVerifyBg})` }}
+    >
+      <Toast toast={toast} visible={toastVisible} onDismiss={dismissToast} />
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-28">
+        <div className="mx-auto w-full max-w-[1440px] py-2.5 sm:py-3">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(260px,300px)_1fr] lg:gap-6">
+            {/* ================= LEFT: shared booking summary sidebar ================= */}
+            <BookingSummarySidebar doctor={doctor} currentStep={3} onBack={onBack} />
 
-      <div className="flex-1 p-6 space-y-6">
+            {/* ================= RIGHT: Review & Pay content (unchanged logic) ================= */}
+            <div className="w-full max-w-[900px] space-y-3.5 sm:space-y-4">
+        {/* Header */}
+        {/* <div className="flex items-center gap-2.5 pt-1 pb-1">
+          <button
+            onClick={onBack}
+            aria-label="Go back"
+            className="flex items-center justify-center w-10 h-10 shrink-0 rounded-2xl bg-white shadow-[0_4px_14px_rgba(10,46,35,0.10)] text-[#0e6b4f] hover:opacity-80 transition-opacity"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-[17px] sm:text-lg font-bold text-[#0a2e23]">
+              Review & Pay
+            </h2>
+            <p className="text-[12px] text-[#6b7a74]">
+              Please review your details and confirm your booking
+            </p>
+          </div>
+        </div> */}
+
         {/* User Details Form */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-[#034B44]/10 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-[#034B44]" />
+        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+          <div className="flex items-center gap-2.5 mb-3.5">
+            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-[#0e6b4f]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Your Details</h3>
-              <p className="text-xs text-gray-500">
-                Required for booking confirmation
+              <h3 className="font-bold text-base text-[#0a2e23]">
+                Your Details
+              </h3>
+              <p className="text-xs text-[#6b7a74]">
+                Review your booking information
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Full Name Input */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <DetailField
+              icon={User}
+              label="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name"
+              required
+            />
+            <DetailField
+              icon={User}
+              label="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name"
+              required
+            />
+            <DetailField
+              icon={Mail}
+              label="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="your.email@example.com"
+            />
+            <DetailField
+              icon={Calendar}
+              label="Age"
+              value={age}
+              onChange={(e) =>
+                setAge(e.target.value.replace(/\D/g, "").slice(0, 3))
+              }
+              placeholder="Enter your age"
+              suffix={age ? "years" : undefined}
+            />
+            <DetailField
+              icon={Phone}
+              label="Phone Number"
+              value={bookingData.phone || ""}
+              readOnly
+              required
+            />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+              <label className="block text-[13px] font-semibold text-[#0a2e23] mb-1.5">
+                Gender
               </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
-                  required
-                />
+              <div className="flex items-center gap-2.5 border border-[#dfe8e4] rounded-xl px-3.5 py-2.5 bg-white focus-within:ring-2 focus-within:ring-[#0e6b4f]/30 focus-within:border-[#0e6b4f] transition-all">
+                <User className="w-4 h-4 text-[#0e6b4f] shrink-0" />
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-[#0a2e23] appearance-none"
+                >
+                  <option value="">Select gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="NON_BINARY">Non-Binary</option>
+                  <option value="PREFER_NOT_TO_SAY">Rather not say</option>
+                </select>
               </div>
-            </div>
-
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-gray-400">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                We'll send booking confirmation to this email
-              </p>
             </div>
           </div>
+
+          <p className="text-xs text-[#6b7a74] mt-2.5">
+            We'll send booking confirmation to this email
+          </p>
         </div>
 
         {/* Patient Notes Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-[#034B44]/10 rounded-full flex items-center justify-center">
-              <FileText className="w-6 h-6 text-[#034B44]" />
+        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+              <SquarePen className="w-5 h-5 text-[#0e6b4f]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Additional Notes</h3>
-              <p className="text-xs text-gray-500">
-                Optional - Share any special needs or conditions
+              <h3 className="font-bold text-base text-[#0a2e23]">
+                Additional Notes
+              </h3>
+              <p className="text-xs text-[#6b7a74]">
+                Optional: Share any special needs or conditions
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Your Notes <span className="text-gray-400">(Optional)</span>
             </label>
             <textarea
               value={patientNotes}
               onChange={(e) => setPatientNotes(e.target.value)}
               placeholder="E.g., First time consultation, anxiety about specific topics, preferred communication style, etc."
-              rows={4}
-              maxLength={500}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#034B44] focus:outline-none transition-colors resize-none"
+              rows={3}
+              maxLength={300}
+              className="w-full px-4 py-2.5 border border-[#dfe8e4] rounded-xl focus:ring-2 focus:ring-[#0e6b4f]/30 focus:border-[#0e6b4f] focus:outline-none transition-all resize-none"
             />
-            <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-gray-500">
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-xs text-[#6b7a74] italic">
                 Help your clinician prepare for your session
               </p>
-              <p className="text-xs text-gray-400">{patientNotes.length}/500</p>
+              <p className="text-xs text-gray-400">{patientNotes.length}/300</p>
             </div>
           </div>
         </div>
 
         {/* Payment Summary Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-[#034B44]/20">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-[#034B44]/10 rounded-full flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-[#034B44]" />
+        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-[#0e6b4f]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Payment Summary</h3>
-              <p className="text-xs text-gray-500">Review before confirming</p>
+              <h3 className="font-bold text-base text-[#0a2e23]">
+                Payment Summary
+              </h3>
+              <p className="text-xs text-[#6b7a74]">
+                Review your payment details
+              </p>
             </div>
           </div>
 
           {loadingFeeStatus ? (
-            <div className="text-center py-4">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#034B44]"></div>
-              <p className="text-xs text-gray-600 mt-2">Calculating fees...</p>
+            <div className="text-center py-3">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#0e6b4f]"></div>
+              <p className="text-xs text-gray-600 mt-1.5">Calculating fees...</p>
             </div>
           ) : (
-            <>
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">
-                    Consultation Fee
-                  </span>
-                  <span className="font-semibold">₹{consultationFee}</span>
-                </div>
-
-                {!hasPaidRegistrationFee && registrationFee > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <div className="flex flex-col">
-                      <span className="text-sm text-gray-600">
-                        One-time Registration Fee
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        (First time booking)
-                      </span>
-                    </div>
-                    <span className="font-semibold">₹{registrationFee}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Platform Fee</span>
-                  <span className="font-semibold text-green-600">FREE</span>
-                </div>
-
-                <div className="flex items-center justify-between py-3 bg-[#034B44]/5 rounded-lg px-3">
-                  <span className="font-bold text-[#034B44]">Total Amount</span>
-                  <span className="font-bold text-2xl text-[#034B44]">
-                    ₹{totalAmount}
-                  </span>
-                </div>
+            <div className="space-y-2 mb-3">
+              <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                <span className="text-sm text-gray-600">
+                  Consultation Fee
+                </span>
+                <span className="font-semibold">₹{consultationFee}</span>
               </div>
 
               {!hasPaidRegistrationFee && registrationFee > 0 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-800">
-                      This is your first booking with Mibo. A one-time
-                      registration fee of ₹{registrationFee} will be added to
-                      your consultation fee.
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">
+                    One time registration fee (For new booking)
+                  </span>
+                  <span className="font-semibold">₹{registrationFee}</span>
                 </div>
               )}
-            </>
+
+              <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                <span className="text-sm text-gray-600">Platform Fee</span>
+                <span className="font-semibold text-green-600">FREE</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2.5 bg-[#eaf6f1] rounded-lg px-3">
+                <span className="font-bold text-[#0a2e23]">Total Amount</span>
+                <span className="font-bold text-2xl text-[#0e6b4f]">
+                  ₹{totalAmount}
+                </span>
+              </div>
+            </div>
           )}
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <div className="flex items-start gap-2">
-              <Shield className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-800">
-                Your payment is secured with 256-bit SSL encryption
-              </p>
+          {/* Notices */}
+          <div className="space-y-1.5 mt-3">
+            {!hasPaidRegistrationFee && registrationFee > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-800">
+                    This is your first booking with MIBO. A one-time
+                    registration fee of ₹{registrationFee} will be added to
+                    your consultation fee.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-blue-800">
+                  Your payment is secured with 256-bit SSL encryption.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Appointment Summary */}
-        <div className="bg-white rounded-xl p-5 shadow-md border border-[#a7c4f2]/40">
-          <h3 className="font-semibold mb-3 text-[#034B44]">
-            Appointment Summary
-          </h3>
-          <div className="space-y-2">
+        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-[#0e6b4f]" />
+            </div>
+            <h3 className="font-bold text-base text-[#0a2e23]">
+              Appointment Summary
+            </h3>
+          </div>
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Doctor</span>
               <span className="font-medium text-right">
@@ -813,27 +1060,30 @@ export default function Step3ConfirmBooking({
             </div>
           </div>
         </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Footer - Confirm Payment Button */}
-      <div className="p-4 border-t border-[#a7c4f2]/30 bg-white sticky bottom-0">
-        {error && (
-          <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-red-800">{error}</p>
-          </div>
-        )}
-        <button
-          onClick={handleConfirmPayment}
-          disabled={!fullName.trim() || loadingFeeStatus}
-          className="w-full py-4 bg-[#034B44] text-white font-bold rounded-full hover:bg-[#046e63] transition-all shadow-lg flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <CreditCard className="w-5 h-5" />
-          {loadingFeeStatus ? "Loading..." : `Confirm & Pay ₹${totalAmount}`}
-        </button>
-        <p className="text-xs text-center text-gray-500 mt-3">
-          By confirming, you agree to our terms and conditions
-        </p>
+      <div className="fixed bottom-0 left-0 right-0 border-t border-[#dfe8e4] bg-white z-20">
+        <div className="max-w-[680px] lg:max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+          <button
+            onClick={handleConfirmPayment}
+            disabled={!fullName.trim() || loadingFeeStatus}
+            className="w-full py-3 sm:py-3.5 bg-[#0e6b4f] text-white font-bold rounded-full hover:bg-[#0b5940] transition-all shadow-md flex items-center justify-center gap-2 text-[15px] sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+            {loadingFeeStatus ? "Loading..." : `Confirm & Pay ₹${totalAmount}`}
+          </button>
+          <p className="text-xs text-center text-[#6b7a74] mt-2">
+            By confirming, you agree to our{" "}
+            <span className="text-[#0e6b4f] font-semibold">
+              terms and conditions
+            </span>
+            .
+          </p>
+        </div>
       </div>
     </div>
   );

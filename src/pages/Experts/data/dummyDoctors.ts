@@ -1,16 +1,20 @@
-
 import type { Doctor } from "./doctors";
 
 export const dummyDoctors: Doctor[] = [
   {
     id: 1,
     name: "Arjun Menon",
+    bio: "Arjun is a dedicated Clinical Psychologist specializing in CBT-based approaches to anxiety and stress management. He creates a warm, non-judgmental space where clients can build practical coping skills and strengthen their self-esteem.",
+    rating: 4.9,
+    reviewsCount: 128,
     qualification: "M.Phil Clinical Psychology",
     designation: "Clinical Psychologist",
     experience: "4+ years",
     expertise: ["Anxiety", "CBT", "Stress", "Self Esteem"],
     image:
       "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop",
+    videoUrl: "https://youtu.be/EngW7tLk6R8?si=YFwLlGLzDp2Lychq",
+    nextAvailableSlot: "2024-06-15T10:00:00",
     location: "Bangalore",
     language: ["English", "Hindi", "Kannada"],
     price: "₹1500/session",
@@ -19,12 +23,14 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 2,
     name: "Dr. Neha Iyer",
+    bio: "Dr. Neha brings a compassionate, trauma-informed lens to her work, blending CBT with mindfulness techniques. She helps clients navigate depression and past trauma at a pace that feels safe and sustainable for them.",
     qualification: "M.Phil Clinical Psychology",
     designation: "Clinical Psychologist",
     experience: "6+ years",
     expertise: ["Depression", "Trauma", "CBT", "Mindfulness"],
     image:
       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
+    videoUrl: "https://youtu.be/EngW7tLk6R8?si=YFwLlGLzDp2Lychq",
     location: "Mumbai",
     language: ["English", "Hindi", "Marathi"],
     price: "₹1800/session",
@@ -33,6 +39,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 3,
     name: "Dr. Priya Nair",
+    bio: "Dr. Priya specializes in OCD and phobia treatment using CBT and exposure therapy. Her structured, evidence-based approach helps clients gradually confront their fears and regain a sense of control over their lives.",
     qualification: "Ph.D Clinical Psychology",
     designation: "Clinical Psychologist",
     experience: "9+ years",
@@ -47,6 +54,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 4,
     name: "Dr. Varun Shetty",
+    bio: "Dr. Varun works closely with clients experiencing anxiety and panic disorder, using CBT to help them understand and reframe unhelpful thought patterns. His calm, steady presence puts clients at ease from the first session.",
     qualification: "M.Phil Clinical Psychology",
     designation: "Clinical Psychologist",
     experience: "5+ years",
@@ -63,6 +71,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 5,
     name: "Dr. Sandeep Kumar",
+    bio: "Dr. Sandeep is an experienced Psychiatrist focused on stress, anger management, and medication management. He takes a holistic view of mental health, combining clinical expertise with genuine empathy for each patient's journey.",
     qualification: "MBBS, MD Psychiatry",
     designation: "Psychiatrist",
     experience: "7+ years",
@@ -77,6 +86,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 6,
     name: "Dr. Anjali Rao",
+    bio: "Dr. Anjali has over a decade of experience treating bipolar disorder and schizophrenia. She's known for her thorough, patient approach to medication management and her commitment to long-term patient wellbeing.",
     qualification: "MBBS, DPM",
     designation: "Psychiatrist",
     experience: "11+ years",
@@ -91,6 +101,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 7,
     name: "Dr. Farhan Ali",
+    bio: "Dr. Farhan specializes in ADHD and depression, offering thoughtful medication management alongside supportive check-ins. He believes in collaborative care where patients feel heard and involved in their treatment decisions.",
     qualification: "MBBS, MD Psychiatry",
     designation: "Psychiatrist",
     experience: "8+ years",
@@ -105,6 +116,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 8,
     name: "Dr. Lakshmi Pillai",
+    bio: "Dr. Lakshmi has a decade of experience helping patients manage anxiety disorders and insomnia. Her attentive, detail-oriented approach to medication management is paired with genuine care for her patients' day-to-day wellbeing.",
     qualification: "MBBS, MD Psychiatry",
     designation: "Psychiatrist",
     experience: "10+ years",
@@ -121,6 +133,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 9,
     name: "Rohit Verma",
+    bio: "Rohit is a warm and approachable Counsellor specializing in relationship and couples therapy. He uses CBT techniques to help clients strengthen communication and work through anxiety within their relationships.",
     qualification: "M.A. Counselling Psychology",
     designation: "Counsellor",
     experience: "3+ years",
@@ -135,6 +148,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 10,
     name: "Meera Pillai",
+    bio: "Meera works with adolescents and young adults, helping them build self-esteem and healthy coping strategies for stress. Her gentle, encouraging style makes therapy feel accessible and judgment-free.",
     qualification: "M.Sc. Counselling",
     designation: "Counsellor",
     experience: "2+ years",
@@ -149,6 +163,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 11,
     name: "Sanya Kapoor",
+    bio: "Sanya specializes in grief and family therapy, offering a compassionate space for clients to process loss and navigate difficult family dynamics. She also supports clients dealing with everyday stress and life transitions.",
     qualification: "M.A. Counselling Psychology",
     designation: "Counsellor",
     experience: "4+ years",
@@ -163,6 +178,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 12,
     name: "Vikram Desai",
+    bio: "Vikram helps clients navigate career-related stress and self-esteem challenges through practical, goal-oriented counselling. His pragmatic approach is well suited to clients looking for clear, actionable guidance.",
     qualification: "M.Sc. Counselling Psychology",
     designation: "Counsellor",
     experience: "6+ years",
@@ -179,6 +195,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 13,
     name: "Karan Mehta",
+    bio: "Karan specializes in addiction and family therapy, drawing on grief and stress-management techniques to support clients through some of life's hardest moments. His steady, non-judgmental presence fosters real trust.",
     qualification: "M.A. Psychology",
     designation: "Therapist",
     experience: "5+ years",
@@ -193,6 +210,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 14,
     name: "Ritika Joshi",
+    bio: "Ritika focuses on couples therapy and communication, helping partners rebuild understanding and connection. She also works with clients on anxiety, bringing a warm and collaborative approach to every session.",
     qualification: "M.A. Clinical Psychology",
     designation: "Therapist",
     experience: "3+ years",
@@ -207,6 +225,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 15,
     name: "Aditya Krishnan",
+    bio: "Aditya specializes in trauma and PTSD, using mindfulness-based techniques to help clients process difficult experiences at their own pace. His grounded, patient approach creates a genuine sense of safety.",
     qualification: "M.A. Counselling Psychology",
     designation: "Therapist",
     experience: "7+ years",
@@ -221,6 +240,7 @@ export const dummyDoctors: Doctor[] = [
   {
     id: 16,
     name: "Pooja Nambiar",
+    bio: "Pooja works with clients on body image, self-esteem, and eating disorders, offering a supportive and non-judgmental space for healing. Her empathetic approach helps clients rebuild a healthier relationship with themselves.",
     qualification: "M.Sc. Applied Psychology",
     designation: "Therapist",
     experience: "4+ years",

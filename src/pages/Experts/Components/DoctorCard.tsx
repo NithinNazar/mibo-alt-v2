@@ -1,6 +1,8 @@
 import type { Doctor } from "../data/doctors";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+// import DoctorMediaCarousel from "./DoctorMediaCarousel";
+import ExpertiseMarquee from "./ExpertiseMarquee";
+import "./doctorCard.css";
 
 interface Props {
   doctor: Doctor;
@@ -8,12 +10,13 @@ interface Props {
 
 export default function DoctorCard({ doctor }: Props) {
   const navigate = useNavigate();
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
   const handleBook = () => {
     navigate(`/book-appointment/${doctor.id}`);
   };
+
+  const images =
+    doctor.images && doctor.images.length > 0 ? doctor.images : [doctor.image];
 
   return (
     <div
@@ -21,39 +24,15 @@ export default function DoctorCard({ doctor }: Props) {
              p-6 w-full h-auto flex flex-col
              hover:shadow-xl transition-shadow duration-200"
     >
-      {/* Image container */}
-      <div className="relative w-full aspect-square mb-4 rounded-xl overflow-hidden bg-[#e9f6f4]">
-        {/* Always render img tag, show placeholder until loaded */}
-        <img
-          src={doctor.image}
-          alt={doctor.name}
-          className={`w-full h-full object-cover object-top transition-opacity duration-300 ${
-            imageLoaded && !imageError ? "opacity-100" : "opacity-0"
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => {
-            setImageError(true);
-            setImageLoaded(true);
-          }}
-          loading="eager"
-        />
-        {/* Show initials placeholder while loading or on error */}
-        {(!imageLoaded || imageError) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#d0f7e9]/80">
-            <span className="text-4xl md:text-5xl font-bold text-[#034B44]">
-              {doctor.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </span>
-          </div>
-        )}
-      </div>
+      {/* Profile media: image/video carousel */}
+      {/* <DoctorMediaCarousel
+        images={images}
+        videoUrl={doctor.videoUrl}
+        doctorName={doctor.name}
+      />
 
       {/* Text content */}
-      <h3 className="text-xl font-semibold text-[#034B44] line-clamp-2 mb-1">
+      <h3 className="text-xl font-semibold tracking-tight text-[#034B44] line-clamp-2 mb-1">
         {doctor.name}
       </h3>
       <p className="text-sm text-[#034B44]/80 line-clamp-1 mb-1">
@@ -64,22 +43,8 @@ export default function DoctorCard({ doctor }: Props) {
       </p>
       <p className="text-xs text-[#a7c4f2] mb-3">{doctor.experience}</p>
 
-      {/* Expertise tags */}
-      <div className="flex flex-wrap gap-2 mb-4 min-h-[60px]">
-        {doctor.expertise.slice(0, 4).map((ex, i) => (
-          <span
-            key={i}
-            className="bg-[#a7c4f2]/40 text-[#034B44] text-xs px-3 py-1 rounded-full whitespace-nowrap"
-          >
-            {ex}
-          </span>
-        ))}
-        {doctor.expertise.length > 4 && (
-          <span className="bg-[#a7c4f2]/40 text-[#034B44] text-xs px-3 py-1 rounded-full">
-            +{doctor.expertise.length - 4} more
-          </span>
-        )}
-      </div>
+      {/* Expertise tags — continuous auto-scroll, pauses on hover */}
+      <ExpertiseMarquee expertise={doctor.expertise} />
 
       {/* Button */}
       <button

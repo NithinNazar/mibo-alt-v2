@@ -8,11 +8,16 @@
 export interface Doctor {
   id: number | string; // Support both string and number IDs from database
   name: string;
+  bio?: string; // clinician description/about text, shown in the View Profile modal
+  rating?: number; // optional average rating (e.g. 4.9), shown as a badge when available
+  reviewsCount?: number; // optional number of reviews backing the rating
   qualification: string;
   designation: string;
   experience: string;
   expertise: string[];
-  image: string;
+  image: string; // primary/legacy image, kept for backward compatibility
+  images?: string[]; // optional gallery of profile images (falls back to [image])
+  videoUrl?: string; // optional YouTube URL (watch, youtu.be, or embed link)
   location: "Bangalore" | "Kochi" | "Mumbai";
   language: string[];
   price: string;

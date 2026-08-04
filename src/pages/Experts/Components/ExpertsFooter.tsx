@@ -2,10 +2,10 @@ import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"; //  Moder
 
 const ExpertsFooter = () => {
   return (
-    <footer className="bg-[#E3F7F1] text-[#1C3D3A] py-12 px-6 sm:px-12 lg:px-20">
-      <div className="max-w-7xl mx-auto border-t border-[#C1DFDA] pt-10">
+    <footer className="bg-[#E3F7F1] text-[#1C3D3A] py-10 sm:py-12 px-5 sm:px-12 lg:px-20">
+      <div className="max-w-7xl mx-auto border-t border-[#C1DFDA] pt-8 sm:pt-10">
         {/* --- 🌐 Social Icons Row --- */}
-        <div className="flex justify-center items-center gap-8 mb-10 text-gray-400">
+        <div className="flex justify-center items-center gap-6 sm:gap-8 mb-8 sm:mb-10 text-gray-400">
           <a
             href="https://twitter.com/"
             target="_blank"
@@ -40,9 +40,9 @@ const ExpertsFooter = () => {
           </a>
         </div>
         {/* --- Footer Grid --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
           {/* --- Left Column --- */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 sm:gap-6">
             {/* About Mibo */}
             <div>
               <h3 className="text-sm font-semibold text-[#2A5752] uppercase tracking-wide mb-4">
@@ -133,7 +133,7 @@ const ExpertsFooter = () => {
           </div>
 
           {/* --- Right Column --- */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 sm:gap-6">
             {/* Conditions */}
             <div>
               <h3 className="text-sm font-semibold text-[#2A5752] uppercase tracking-wide mb-4">
@@ -215,7 +215,7 @@ const ExpertsFooter = () => {
         </div>
 
         {/* --- Bottom Line --- */}
-        <div className="mt-10 pt-6 text-sm text-center text-[#2A5752]/80">
+        <div className="mt-8 sm:mt-10 pt-6 text-sm text-center text-[#2A5752]/80">
           © {new Date().getFullYear()}{" "}
           <span className="font-semibold">Mibo Care</span>. All rights reserved.
         </div>
