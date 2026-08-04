@@ -320,7 +320,7 @@ export default function ExpertsPage() {
       // Transform backend data to match Doctor interface
       const transformedDoctors: Doctor[] = clinicians.map((c: any) => {
         // Handle specialization 
-        const specialization = Array.isArray(c.specialization)
+        const specialization = Array.isArray(c.specialization) 
           ? c.specialization.join(", ")
           : c.specialization || ""; 
 

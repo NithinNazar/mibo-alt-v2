@@ -34,7 +34,7 @@ export default function BookAppointment() {
     const fetchDoctor = async () => {
       // If no doctorId is provided, fall back to the first dummy doctor
       if (!doctorId) {
-        const dummy = dummyDoctors[0];
+        const dummy = dummyDoctors[0]; 
         if (dummy) {
           console.warn("No doctor ID provided — using dummy doctor data.");
           setDoctor(dummy);

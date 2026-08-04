@@ -252,4 +252,4 @@ export const dummyDoctors: Doctor[] = [
     price: "₹1750/session",
     sessionTypes: "In-person & Online sessions",
   },
-];
+]; 
