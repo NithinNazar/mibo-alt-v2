@@ -1,0 +1,86 @@
+/* Continuous right-to-left auto-scroll for expertise chips */
+@keyframes expertise-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-expertise-marquee {
+  animation: expertise-marquee 26s linear infinite;
+}
+
+/* Soft pulse ring behind the video play button */
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  70%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.animate-ping-slow {
+  animation: ping-slow 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Swiper overrides scoped to the doctor media carousel */
+.doctor-media-swiper .swiper-pagination {
+  bottom: 10px !important;
+}
+
+.doctor-media-swiper .swiper-pagination-bullet {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  opacity: 0.55;
+  transition: all 0.25s ease;
+}
+
+.doctor-media-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  width: 18px;
+  border-radius: 9999px;
+  background: #ffffff;
+}
+
+.doctor-media-swiper .swiper-button-next,
+.doctor-media-swiper .swiper-button-prev {
+  color: #034b44;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(3, 75, 68, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.group\/media:hover .doctor-media-swiper .swiper-button-next,
+.group\/media:hover .doctor-media-swiper .swiper-button-prev {
+  opacity: 1;
+}
+
+.doctor-media-swiper .swiper-button-next:hover,
+.doctor-media-swiper .swiper-button-prev:hover {
+  background: #ffffff;
+}
+
+.doctor-media-swiper .swiper-button-next::after,
+.doctor-media-swiper .swiper-button-prev::after {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-expertise-marquee,
+  .animate-ping-slow {
+    animation: none;
+  }
+}

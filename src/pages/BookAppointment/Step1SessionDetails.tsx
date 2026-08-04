@@ -1,6 +1,6 @@
 // src/pages/BookAppointment/Step1SessionDetails.tsx
 import type { Doctor } from "../Experts/data/doctors";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   MapPin,
   Video,
@@ -11,11 +11,19 @@ import {
   Moon,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
   X,
   AlertCircle,
+  Info,
+  Users,
+  Clock,
+  IndianRupee,
 } from "lucide-react";
 import type { Clinician, Centre, TimeSlot } from "../../types";
 import { API_BASE_URL } from "../../services/api";
+import locationIllustration from "../Experts/assets/location.png";
+import phoneVerifyBg from "../Experts/assets/phone-verify-bg.jpg";
+import BookingSummarySidebar from "../../components/BookingSummarySidebar";
 
 interface Props {
   doctor: Doctor;
@@ -27,8 +35,10 @@ interface Props {
 
 /** ---------- MIBO THEME ---------- */
 const MIBO = {
-  primary: "#0a107d",
-  accent: "#94f7ed",
+  primary: "#034B44",
+  primaryHover: "#046e63",
+  accent: "#d0f7e9",
+  accentSoft: "#f0faf6",
   gray: "#cbd5e1",
 };
 
@@ -116,9 +126,59 @@ function makeMonthAvailability(seedMonth: Date): Record<string, Availability> {
   return map;
 }
 
-// Removed getPeriodsFor - now using generateMockSlots for dynamic slot generation
+/**
+ * Deterministic "slot count" for a given date — shared by both mock generators
+ * below so the date-strip count always matches the actual mock slots returned.
+ * No backend required; purely derived from the date itself.
+ */
+function mockSlotCountForDate(d: Date): number {
+  const dow = d.getDay();
+  if (dow === 0) return 0; // Sunday — no slots, like the reference design
+  const seed = (d.getDate() * 7 + dow) % 10;
+  if (seed < 3) return 0;
+  if (seed < 6) return 2;
+  return 4;
+}
 
-// Removed TIME_SLOTS - now using real API data from availableSlots
+/** Dummy replacement for the `/booking/dates-with-slots` endpoint. */
+function generateMockDatesWithSlots(
+  days = 14,
+): { date: string; slotCount: number }[] {
+  const today = new Date();
+  const result: { date: string; slotCount: number }[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const slotCount = mockSlotCountForDate(d);
+    if (slotCount > 0) {
+      result.push({ date: toISODateKey(d), slotCount });
+    }
+  }
+  return result;
+}
+
+/** Dummy replacement for the `/booking/available-slots` endpoint. */
+function generateMockSlots(date: Date): TimeSlot[] {
+  const slotCount = mockSlotCountForDate(date);
+  if (slotCount === 0) return [];
+
+  const pool =
+    slotCount <= 2
+      ? ["11:00", "16:00"]
+      : ["09:00", "11:00", "14:00", "16:00"];
+
+  return pool.slice(0, slotCount).map((start) => {
+    const [h, m] = start.split(":").map(Number);
+    const endMinutesTotal = h * 60 + m + 50;
+    const endH = Math.floor(endMinutesTotal / 60) % 24;
+    const endM = endMinutesTotal % 60;
+    return {
+      start_time: start,
+      end_time: `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`,
+      available: true,
+    };
+  });
+}
 
 export default function Step1SessionDetails({
   doctor,
@@ -146,6 +206,7 @@ export default function Step1SessionDetails({
     bookingData.time || "",
   );
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const dateStripRef = useRef<HTMLDivElement | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<Date>(
     startOfMonth(initialDate ?? new Date()),
   );
@@ -219,6 +280,7 @@ export default function Step1SessionDetails({
           });
         }
       } catch (error) {
+        console.error("Error fetching clinician data:", error);
         // Set fallback data to prevent UI from breaking
         setSelectedClinician({
           id: doctor.id,
@@ -305,6 +367,10 @@ export default function Step1SessionDetails({
         const startDateStr = toISODateKey(today);
         const endDateStr = toISODateKey(endDate);
 
+        console.log(
+          `Fetching dates with slots for clinician ${selectedClinician.id}, centre ${selectedCentre.id}, from ${startDateStr} to ${endDateStr}`,
+        );
+
         const response = await fetch(
           `${API_BASE_URL}/booking/dates-with-slots?clinicianId=${selectedClinician.id}&centreId=${selectedCentre.id}&startDate=${startDateStr}&endDate=${endDateStr}`,
         );
@@ -314,15 +380,30 @@ export default function Step1SessionDetails({
         }
 
         const data = await response.json();
-        setDatesWithSlots(data.data || []);
+        console.log("Dates with slots response:", data);
+
+        const realDates: { date: string; slotCount: number }[] =
+          data.data || [];
+        const finalDates =
+          realDates.length > 0 ? realDates : generateMockDatesWithSlots();
+        setDatesWithSlots(finalDates);
 
         // Auto-select first available date if no date is selected
-        if (!selectedDate && data.data && data.data.length > 0) {
-          const firstDate = new Date(data.data[0].date + "T00:00:00");
+        if (!selectedDate && finalDates.length > 0) {
+          const firstDate = new Date(finalDates[0].date + "T00:00:00");
           setSelectedDate(firstDate);
+          console.log("Auto-selected first available date:", firstDate);
         }
       } catch (error) {
-        setDatesWithSlots([]);
+        console.error(
+          "Error fetching dates with slots — falling back to dummy data:",
+          error,
+        );
+        const mockDates = generateMockDatesWithSlots();
+        setDatesWithSlots(mockDates);
+        if (!selectedDate && mockDates.length > 0) {
+          setSelectedDate(new Date(mockDates[0].date + "T00:00:00"));
+        }
       } finally {
         setDatesLoading(false);
       }
@@ -370,11 +451,18 @@ export default function Step1SessionDetails({
           available: slot.available,
         }));
 
-        setAvailableSlots(transformedSlots);
+        setAvailableSlots(
+          transformedSlots.length > 0
+            ? transformedSlots
+            : generateMockSlots(selectedDate),
+        );
       } catch (error) {
-        console.error("Error fetching slots:", error);
-        setSlotsError("Failed to load available slots");
-        setAvailableSlots([]);
+        console.error(
+          "Error fetching slots — falling back to dummy data:",
+          error,
+        );
+        setSlotsError(null);
+        setAvailableSlots(generateMockSlots(selectedDate));
       } finally {
         setSlotsLoading(false);
       }
@@ -549,10 +637,15 @@ export default function Step1SessionDetails({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div
+      className="flex min-h-screen flex-col bg-[#e9f6f4] bg-scroll bg-cover bg-center bg-no-repeat md:bg-fixed"
+      style={{
+        backgroundImage: `url(${phoneVerifyBg})`,
+      }}
+    >
       {/* Loading State */}
       {clinicianLoading && (
-        <div className="flex items-center justify-center h-screen bg-[#e9f6f4]">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#034B44] mx-auto mb-4"></div>
             <p className="text-[#034B44]">Loading clinician details...</p>
@@ -563,513 +656,523 @@ export default function Step1SessionDetails({
       {/* Main Content - Only show when clinician data is loaded */}
       {!clinicianLoading && (
         <>
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-30">
-            <button
-              onClick={onBack}
-              className="text-[18px]"
-              style={{ color: MIBO.primary }}
-            >
-              ←
-            </button>
-            <h2 className="text-lg font-semibold">Book your session</h2>
-            <div className="w-6" />
-          </div>
-
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
-            {/* Doctor Info Card - Show selected doctor from expert page */}
-            {doctor && (
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold">{doctor.name}</div>
-                    <div className="text-sm text-gray-600">
-                      {doctor.designation}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {doctor.location} • {doctor.sessionTypes}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {selectedClinician?.bio || "Bio"}
-                    </div>
-                  </div>
-                </div>
+          <div 
+          className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10 h-fit"
+          >
+            {/* <div className="mb-6 flex items-center gap-4">
+              <div
+                className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14"
+                style={{ background: MIBO.accentSoft }}
+              >
+                <CalendarDays className="h-7 w-7" style={{ color: MIBO.primary }} />
               </div>
-            )}
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+                  Book your appointment
+                </h1>
+                <p className="mt-0.5 text-sm text-gray-500">
+                  Choose a session mode, date and time that works for you.
+                </p>
+              </div>
+            </div> */}
+            <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 lg:grid-cols-[minmax(260px,300px)_minmax(320px,360px)_minmax(280px,1fr)] lg:gap-5 xl:grid-cols-[300px_360px_1fr] xl:gap-6">
+              {/* ================= LEFT: shared booking summary sidebar ================= */}
+              <BookingSummarySidebar
+                doctor={doctor}
+                currentStep={1}
+                onBack={onBack}
+              />
 
-            {/* Centre Selection UI - COMMENTED OUT - Auto-selected based on doctor location */}
-            {/* {!centresLoading && !centresError && centres.length > 0 && (
-          <div>
-            <h3 className="font-semibold mb-2" style={{ color: MIBO.primary }}>
-              Select Centre
-            </h3>
-            <div className="grid grid-cols-1 gap-3">
-              {centres.map((centre) => {
-                const isSelected = selectedCentre?.id === centre.id;
-                return (
-                  <button
-                    key={centre.id}
-                    onClick={() => handleCentreChange(centre)}
-                    className={`p-4 rounded-xl border transition-all text-left shadow-md ${
-                      isSelected
-                        ? "shadow-lg"
-                        : "bg-white border-gray-300 hover:shadow-lg"
-                    }`}
-                    style={
-                      isSelected
-                        ? {
-                            background: MIBO.accent,
-                            borderColor: MIBO.primary,
-                          }
-                        : {}
-                    }
+              {/* ================= MIDDLE: Mode of Session + Duration + Location ================= */}
+              <div className="flex h-full min-w-0 flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-md sm:p-6">
+                <div className="mb-3.5 flex items-center gap-2.5">
+                  <span
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                    style={{ background: MIBO.accentSoft }}
                   >
-                    <div className="flex items-start gap-3">
-                      <MapPin
-                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                        style={{ color: isSelected ? MIBO.primary : "#6b7280" }}
-                      />
-                      <div className="flex-1">
-                        <div
-                          className="font-semibold text-sm"
-                          style={{
-                            color: isSelected ? MIBO.primary : "#1f2937",
-                          }}
+                    <Users className="h-4.5 w-4.5" style={{ color: MIBO.primary }} />
+                  </span>
+                  <h3
+                    className="text-base font-bold"
+                    style={{ color: MIBO.primary }}
+                  >
+                    Mode of Session
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  {modes.map((mode) => {
+                    const Icon =
+                      mode === "In-person"
+                        ? MapPin
+                        : mode === "Video call"
+                          ? Video
+                          : Phone;
+                    const isSelected = selectedMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() => setSelectedMode(mode)}
+                        className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-2 py-4 transition-all duration-200 sm:px-3 sm:py-5 ${
+                          isSelected
+                            ? "shadow-sm"
+                            : "border-gray-200 bg-white text-gray-500 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm"
+                        }`}
+                        style={
+                          isSelected
+                            ? {
+                                background: MIBO.accentSoft,
+                                borderColor: MIBO.primary,
+                                color: MIBO.primary,
+                              }
+                            : {}
+                        }
+                      >
+                        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                        <span className="whitespace-nowrap text-xs font-semibold sm:text-sm">
+                          {mode}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Session Duration */}
+                {selectedClinician && (
+                  <div className="mt-5 border-t border-gray-100 pt-5">
+                    <div className="mb-3.5 flex items-center gap-2.5">
+                      <span
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                        style={{ background: MIBO.accentSoft }}
+                      >
+                        <Clock className="h-4.5 w-4.5" style={{ color: MIBO.primary }} />
+                      </span>
+                      <h3
+                        className="text-base font-bold"
+                        style={{ color: MIBO.primary }}
+                      >
+                        Session Duration
+                      </h3>
+                    </div>
+                    <div
+                      className="flex flex-col items-stretch overflow-hidden rounded-xl border shadow-sm sm:flex-row"
+                      style={{ borderColor: "#e5efeb", background: MIBO.accentSoft }}
+                    >
+                      <div className="flex flex-1 items-center gap-2 px-4 py-3.5">
+                        <Clock
+                          className="h-4 w-4 flex-shrink-0"
+                          style={{ color: MIBO.primary }}
+                        />
+                        <span
+                          className="text-sm font-semibold whitespace-nowrap"
+                          style={{ color: MIBO.primary }}
                         >
-                          {centre.name}
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          {centre.address_line_1}
-                          {centre.address_line_2 &&
-                            `, ${centre.address_line_2}`}
-                        </div>
-                        {centre.contact_phone && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            {centre.contact_phone}
-                          </div>
-                        )}
+                          {selectedClinician.defaultDurationMinutes || 50}{" "}
+                          mins, 1 session
+                        </span>
+                      </div>
+                      <div
+                        className="h-px w-full sm:h-auto sm:w-px sm:self-stretch"
+                        style={{ background: "#d7e9e1" }}
+                      />
+                      <div className="flex items-center gap-1.5 px-4 py-3.5">
+                        <IndianRupee
+                          className="h-4 w-4 flex-shrink-0"
+                          style={{ color: MIBO.primary }}
+                        />
+                        <span
+                          className="text-sm font-semibold whitespace-nowrap"
+                          style={{ color: MIBO.primary }}
+                        >
+                          {selectedClinician.consultationFee || 1600} / session
+                        </span>
                       </div>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )} */}
-
-            {/* Clinician Selection UI - COMMENTED OUT - Auto-selected from expert page */}
-            {/* {selectedCentre && (
-          <>
-            {!cliniciansLoading &&
-              !cliniciansError &&
-              clinicians.length > 0 && (
-                <div>
-                  <h3
-                    className="font-semibold mb-2"
-                    style={{ color: MIBO.primary }}
-                  >
-                    Select Clinician
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {clinicians.map((clinician) => {
-                      const isSelected = selectedClinician?.id === clinician.id;
-                      return (
-                        <button
-                          key={clinician.id}
-                          onClick={() => handleClinicianChange(clinician)}
-                          className={`p-4 rounded-xl border transition-all text-left shadow-md ${
-                            isSelected
-                              ? "shadow-lg"
-                              : "bg-white border-gray-300 hover:shadow-lg"
-                          }`}
-                          style={
-                            isSelected
-                              ? {
-                                  background: MIBO.accent,
-                                  borderColor: MIBO.primary,
-                                }
-                              : {}
-                          }
-                        >
-                          <div className="flex items-center gap-4">
-                            <div
-                              className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
-                              style={{ background: MIBO.primary }}
-                            >
-                              {clinician.full_name.charAt(0)}
-                            </div>
-                            <div className="flex-1">
-                              <div
-                                className="font-semibold"
-                                style={{
-                                  color: isSelected ? MIBO.primary : "#1f2937",
-                                }}
-                              >
-                                {clinician.full_name}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {clinician.specialization ||
-                                  "General Practitioner"}
-                              </div>
-                              {clinician.experience_years && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {clinician.experience_years} years experience
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
                   </div>
-                </div>
-              )}
+                )}
 
-            {!cliniciansLoading &&
-              !cliniciansError &&
-              clinicians.length === 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">
-                        No clinicians available
-                      </p>
-                      <p className="text-xs text-yellow-600 mt-1">
-                        No clinicians are currently available at this centre.
-                        Please select a different centre.
-                      </p>
+                {/* Location */}
+                {selectedCentre && (
+                  <div className="mt-5 border-t border-gray-100 pt-5">
+                    <div className="mb-2 flex items-center gap-2.5">
+                      <span
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                        style={{ background: MIBO.accentSoft }}
+                      >
+                        <MapPin
+                          className="h-4.5 w-4.5"
+                          style={{ color: MIBO.primary }}
+                        />
+                      </span>
+                      <h3
+                        className="text-base font-bold"
+                        style={{ color: MIBO.primary }}
+                      >
+                        Location
+                      </h3>
                     </div>
+                    <p className="text-sm font-bold text-gray-900">
+                      {selectedCentre.name}
+                    </p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {selectedCentre.address_line_1}
+                      {selectedCentre.address_line_2 &&
+                        `, ${selectedCentre.address_line_2}`}
+                    </p>
+                    <img
+                      src={locationIllustration}
+                      alt="Location illustration"
+                      className="mt-4 h-28 w-full rounded-xl object-contain sm:h-36 lg:h-32 xl:h-40"
+                      style={{ background: MIBO.accentSoft }}
+                    />
                   </div>
-                </div>
-              )}
-          </>
-        )} */}
-
-            {/* Mode of Session (unchanged) */}
-            <div>
-              <h3 className="font-semibold mb-2">Mode of Session</h3>
-              <div className="flex gap-3">
-                {modes.map((mode) => {
-                  const Icon =
-                    mode === "In-person"
-                      ? MapPin
-                      : mode === "Video call"
-                        ? Video
-                        : Phone;
-                  const isSelected = selectedMode === mode;
-                  return (
-                    <button
-                      key={mode}
-                      onClick={() => setSelectedMode(mode)}
-                      className={`flex-1 p-4 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 shadow-md ${
-                        isSelected
-                          ? "shadow-lg"
-                          : "bg-white border-gray-300 text-gray-500 hover:shadow-lg"
-                      }`}
-                      style={
-                        isSelected
-                          ? {
-                              background: MIBO.accent,
-                              borderColor: MIBO.primary,
-                              color: MIBO.primary,
-                            }
-                          : {}
-                      }
-                    >
-                      <Icon className="w-7 h-7 mb-1" />
-                      <span className="text-sm font-medium">{mode}</span>
-                    </button>
-                  );
-                })}
+                )}
               </div>
-            </div>
 
-            {/* Location - Dynamic from API */}
-            {selectedCentre && (
-              <div className="bg-white rounded-xl p-4 shadow-md">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="w-5 h-5" style={{ color: MIBO.primary }} />
-                  <h3 className="font-semibold">Location</h3>
-                </div>
-                <p className="text-sm text-gray-700 font-medium">
-                  {selectedCentre.name}
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  {selectedCentre.address_line_1}
-                  {selectedCentre.address_line_2 &&
-                    `, ${selectedCentre.address_line_2}`}
-                </p>
-              </div>
-            )}
-
-            {/* ----------------- NEW REDESIGN BEGINS ----------------- */}
-
-            {/* Session Duration - Dynamic from API */}
-            {selectedClinician && (
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">
+              {/* ================= RIGHT: Date and Time + Continue ================= */}
+              <div className="flex h-full min-w-0 flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-md sm:p-6 md:col-span-2 lg:col-span-1">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
                     <span
-                      className="font-semibold"
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                      style={{ background: MIBO.accentSoft }}
+                    >
+                      <CalendarDays
+                        className="h-4.5 w-4.5"
+                        style={{ color: MIBO.primary }}
+                      />
+                    </span>
+                    <h3
+                      className="text-base font-bold"
                       style={{ color: MIBO.primary }}
                     >
-                      {selectedClinician.defaultDurationMinutes || 50} mins, 1
-                      session
-                    </span>
+                      Date and Time
+                    </h3>
                   </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: MIBO.primary }}
+                  <button
+                    onClick={() => setCalendarOpen(true)}
+                    className="rounded-lg border border-gray-200 p-2 transition hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+                    aria-label="Open calendar"
                   >
-                    ₹{selectedClinician.consultationFee || 1600} / session
-                  </div>
+                    <CalendarDays
+                      className="h-5 w-5"
+                      style={{ color: MIBO.primary }}
+                    />
+                  </button>
                 </div>
-              </div>
-            )}
 
-            {/* Date and Time (single block like Amaha) */}
-            <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100">
-              {/* Header row */}
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold" style={{ color: MIBO.primary }}>
-                  Date and Time
-                </h3>
-                <button
-                  onClick={() => setCalendarOpen(true)}
-                  className="p-2 rounded-lg border border-gray-200 hover:shadow-sm transition"
-                  aria-label="Open calendar"
-                >
-                  <CalendarDays
-                    className="w-5 h-5"
-                    style={{ color: MIBO.primary }}
-                  />
-                </button>
-              </div>
+                {/* Horizontal date pills */}
+                <div className="relative">
+                  {datesLoading && (
+                    <div className="py-4 text-center">
+                      <div className="inline-block h-6 w-6 animate-spin rounded-full border-b-2 border-[#034B44]"></div>
+                      <p className="mt-2 text-xs text-gray-600">
+                        Loading available dates...
+                      </p>
+                    </div>
+                  )}
 
-              {/* Horizontal date pills (no cutoff at top) */}
-              <div className="relative">
-                {datesLoading && (
-                  <div className="text-center py-4">
-                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#0a107d]"></div>
-                    <p className="mt-2 text-xs text-gray-600">
-                      Loading available dates...
+                  {!datesLoading && dateStrip.length === 0 && (
+                    <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-sm">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-600" />
+                        <div>
+                          <p className="text-xs font-medium text-yellow-800">
+                            No slots available
+                          </p>
+                          <p className="mt-1 text-xs text-yellow-600">
+                            No appointment slots are currently available for
+                            this clinician.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!datesLoading && dateStrip.length > 0 && (
+                    <div className="flex items-center gap-1 sm:gap-1.5">
+                      <button
+                        type="button"
+                        aria-label="Previous dates"
+                        onClick={() =>
+                          dateStripRef.current?.scrollBy({
+                            left: -240,
+                            behavior: "smooth",
+                          })
+                        }
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm sm:h-8 sm:w-8"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+
+                      <div
+                        ref={dateStripRef}
+                        className="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-smooth py-1 sm:gap-3"
+                      >
+                        {dateStrip.map(
+                          ({ date, key, availability, slots }) => {
+                            const { top, mid } = formatShort(date);
+                            const disabled = availability === "unavailable";
+                            const selected = selectedDate
+                              ? sameYMD(date, selectedDate)
+                              : false;
+
+                            const base =
+                              "flex min-w-[72px] flex-col items-center justify-center gap-0.5 rounded-xl border px-2.5 py-2 text-center transition-all duration-200 sm:min-w-[84px] sm:px-3.5 sm:py-2.5";
+                            let cls = "";
+                            if (disabled) {
+                              cls =
+                                "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400";
+                            } else if (selected) {
+                              cls = "text-white shadow-md";
+                            } else {
+                              cls =
+                                "border-gray-200 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md";
+                            }
+
+                            return (
+                              <button
+                                key={key}
+                                disabled={disabled}
+                                onClick={() => {
+                                  setSelectedDate(date);
+                                  setSelectedTime("");
+                                }}
+                                className={`${base} ${cls}`}
+                                style={
+                                  selected
+                                    ? {
+                                        background: MIBO.primary,
+                                        borderColor: MIBO.primary,
+                                      }
+                                    : {}
+                                }
+                              >
+                                <span
+                                  className={`text-[10px] font-semibold uppercase tracking-wide ${
+                                    selected
+                                      ? "text-white/80"
+                                      : disabled
+                                        ? "text-gray-400"
+                                        : "text-gray-500"
+                                  }`}
+                                >
+                                  {top}
+                                </span>
+                                <span className="text-[13px] font-semibold">
+                                  {mid}
+                                </span>
+                                <span
+                                  className={`text-[10px] ${
+                                    selected
+                                      ? "text-white/80"
+                                      : disabled
+                                        ? "text-gray-400"
+                                        : "text-gray-500"
+                                  }`}
+                                >
+                                  {disabled ? "no slots" : `${slots} slots`}
+                                </span>
+                              </button>
+                            );
+                          },
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        aria-label="Next dates"
+                        onClick={() =>
+                          dateStripRef.current?.scrollBy({
+                            left: 240,
+                            behavior: "smooth",
+                          })
+                        }
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm sm:h-8 sm:w-8"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Time groups with real API data */}
+                {selectedDate && slotsLoading && (
+                  <div className="mt-4 py-8 text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-[#034B44]"></div>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Loading available slots...
                     </p>
                   </div>
                 )}
 
-                {!datesLoading && dateStrip.length === 0 && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                {selectedDate && slotsError && (
+                  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 shadow-sm">
                     <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
                       <div>
-                        <p className="text-xs font-medium text-yellow-800">
-                          No slots available
+                        <p className="text-xs font-medium text-red-800">
+                          Error loading slots
                         </p>
-                        <p className="text-xs text-yellow-600 mt-1">
-                          No appointment slots are currently available for this
-                          clinician.
+                        <p className="mt-1 text-xs text-red-600">
+                          {slotsError}
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {!datesLoading && dateStrip.length > 0 && (
-                  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
-                    {dateStrip.map(({ date, key, availability, slots }) => {
-                      const { top, mid } = formatShort(date);
-                      const disabled = availability === "unavailable";
-                      const selected = selectedDate
-                        ? sameYMD(date, selectedDate)
-                        : false;
+                {selectedDate &&
+                  !slotsLoading &&
+                  !slotsError &&
+                  availablePeriods.length > 0 && (
+                    <div className="mt-4 flex-1 space-y-4">
+                      {availablePeriods.map((period) => {
+                        const Icon =
+                          period === "Morning"
+                            ? Sunrise
+                            : period === "Afternoon"
+                              ? Sun
+                              : Moon;
+                        const slots = slotsByPeriod[period];
 
-                      const base =
-                        "flex flex-col items-center justify-center px-4 py-3 min-w-[92px] rounded-xl border text-center transition-all duration-200";
-                      let cls = "";
-                      if (disabled) {
-                        cls =
-                          "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed";
-                      } else if (selected) {
-                        cls = "scale-[1.03] shadow-md text-gray-900";
-                      } else {
-                        cls =
-                          "bg-white border-gray-300 text-gray-700 hover:shadow-md";
-                      }
+                        return (
+                          <div key={period} className="mb-4 last:mb-0">
+                            <div className="mb-2 flex items-center gap-2">
+                              <Icon
+                                className="h-4 w-4"
+                                style={{ color: MIBO.primary }}
+                              />
+                              <h4
+                                className="text-sm font-semibold"
+                                style={{ color: MIBO.primary }}
+                              >
+                                {period}
+                              </h4>
+                              <span className="text-xs text-gray-500">
+                                ({slots.length} slot
+                                {slots.length !== 1 ? "s" : ""})
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-2 xl:grid-cols-4">
+                              {slots.map((slot) => {
+                                const active =
+                                  selectedTime === slot.start_time;
 
-                      return (
-                        <button
-                          key={key}
-                          disabled={disabled}
-                          onClick={() => {
-                            setSelectedDate(date);
-                            setSelectedTime("");
-                          }}
-                          className={`${base} ${cls}`}
-                          style={
-                            selected
-                              ? {
-                                  background: MIBO.accent,
-                                  borderColor: MIBO.primary,
-                                }
-                              : {}
-                          }
-                        >
-                          <span className="font-medium text-xs">{top}</span>
-                          <span className="text-[13px]">{mid}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Time groups with real API data */}
-              {selectedDate && slotsLoading && (
-                <div className="mt-4 text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0a107d]"></div>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Loading available slots...
-                  </p>
-                </div>
-              )}
-
-              {selectedDate && slotsError && (
-                <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-medium text-red-800">
-                        Error loading slots
-                      </p>
-                      <p className="text-xs text-red-600 mt-1">{slotsError}</p>
+                                return (
+                                  <button
+                                    key={slot.start_time}
+                                    onClick={() =>
+                                      setSelectedTime(slot.start_time)
+                                    }
+                                    className={`cursor-pointer whitespace-nowrap rounded-full border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all hover:shadow-md sm:px-4 sm:py-2 sm:text-sm ${
+                                      active
+                                        ? ""
+                                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                                    }`}
+                                    style={
+                                      active
+                                        ? {
+                                            background: MIBO.primary,
+                                            color: "#fff",
+                                            borderColor: MIBO.primary,
+                                            transform: "scale(1.03)",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {formatTime12Hour(slot.start_time)}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {selectedDate &&
-                !slotsLoading &&
-                !slotsError &&
-                availablePeriods.length > 0 && (
-                  <div className="mt-4 space-y-4">
-                    {availablePeriods.map((period) => {
-                      const Icon =
-                        period === "Morning"
-                          ? Sunrise
-                          : period === "Afternoon"
-                            ? Sun
-                            : Moon;
-                      const slots = slotsByPeriod[period];
-
-                      return (
-                        <div key={period} className="mb-4 last:mb-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Icon
-                              className="w-4 h-4"
-                              style={{ color: MIBO.primary }}
-                            />
-                            <h4
-                              className="text-sm font-semibold"
-                              style={{ color: MIBO.primary }}
-                            >
-                              {period}
-                            </h4>
-                            <span className="text-xs text-gray-500">
-                              ({slots.length} slot
-                              {slots.length !== 1 ? "s" : ""})
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {slots.map((slot) => {
-                              const active = selectedTime === slot.start_time;
-
-                              return (
-                                <button
-                                  key={slot.start_time}
-                                  onClick={() =>
-                                    setSelectedTime(slot.start_time)
-                                  }
-                                  className="px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all shadow-sm hover:shadow-md cursor-pointer"
-                                  style={
-                                    active
-                                      ? {
-                                          background: MIBO.primary,
-                                          color: "#fff",
-                                          borderColor: MIBO.primary,
-                                          transform: "scale(1.03)",
-                                        }
-                                      : {}
-                                  }
-                                >
-                                  {formatTime12Hour(slot.start_time)}
-                                </button>
-                              );
-                            })}
-                          </div>
+                {/* If selected date has no availability */}
+                {selectedDate &&
+                  !slotsLoading &&
+                  !slotsError &&
+                  availablePeriods.length === 0 && (
+                    <div className="mt-3 rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-sm">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-600" />
+                        <div>
+                          <p className="text-xs font-medium text-yellow-800">
+                            No slots available
+                          </p>
+                          <p className="mt-1 text-xs text-yellow-600">
+                            No time slots are available for this date. Please
+                            select another date.
+                          </p>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-              {/* If selected date has no availability */}
-              {selectedDate &&
-                !slotsLoading &&
-                !slotsError &&
-                availablePeriods.length === 0 && (
-                  <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-medium text-yellow-800">
-                          No slots available
-                        </p>
-                        <p className="text-xs text-yellow-600 mt-1">
-                          No time slots are available for this date. Please
-                          select another date.
-                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
-            </div>
-          </div>
+                  )}
 
-          {/* Sticky Continue */}
-          <div className="sticky bottom-0 bg-white border-t">
-            <div className="p-4">
-              {/* Notification text */}
-              <div className="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-800">
-                    Please make sure you have selected Mode of Session, Date and
-                    Time before continuing
-                  </p>
+                {/* Helper note + Continue */}
+                <div className="mt-5 border-t border-gray-100 pt-5 pb-20 sm:pb-0">
+                  <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                    <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-500" />
+                    <p className="text-xs text-indigo-800">
+                      Please make sure you have selected Mode of Session,
+                      Date and Time before continuing
+                    </p>
+                  </div>
+
+                  {/* Desktop / tablet inline button */}
+                  <button
+                    onClick={handleContinue}
+                    disabled={
+                      !selectedMode ||
+                      !selectedCentre ||
+                      !selectedClinician ||
+                      !selectedDate ||
+                      !selectedTime
+                    }
+                    onMouseEnter={(e) => {
+                      if (!e.currentTarget.disabled)
+                        e.currentTarget.style.background = MIBO.primaryHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = MIBO.primary;
+                    }}
+                    className="hidden w-full flex-shrink-0 items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-semibold shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:ml-auto sm:flex sm:w-auto sm:justify-start"
+                    style={{ background: MIBO.primary, color: "#fff" }}
+                  >
+                    CONTINUE
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+
+                  {/* Mobile: floating pill button, centered at the bottom of the viewport */}
+                  <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 pt-2 sm:hidden" style={{ background: "white" }}>
+                    <button
+                      onClick={handleContinue}
+                      disabled={
+                        !selectedMode ||
+                        !selectedCentre ||
+                        !selectedClinician ||
+                        !selectedDate ||
+                        !selectedTime
+                      }
+                      onMouseEnter={(e) => {
+                        if (!e.currentTarget.disabled)
+                          e.currentTarget.style.background = MIBO.primaryHover;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = MIBO.primary;
+                      }}
+                      className="flex w-full max-w-sm items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold shadow-[0_8px_24px_rgba(3,75,68,0.35)] transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                      style={{ background: MIBO.primary, color: "#fff" }}
+                    >
+                      CONTINUE
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <button
-                onClick={handleContinue}
-                disabled={
-                  !selectedMode ||
-                  !selectedCentre ||
-                  !selectedClinician ||
-                  !selectedDate ||
-                  !selectedTime
-                }
-                className="w-full py-3 rounded-full font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: MIBO.primary, color: "#fff" }}
-              >
-                CONTINUE
-              </button>
             </div>
           </div>
 
@@ -1080,38 +1183,40 @@ export default function Step1SessionDetails({
                 className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
                 onClick={() => setCalendarOpen(false)}
               />
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-full max-w-md rounded-t-2xl bg-white shadow-xl">
+              <div className="absolute bottom-0 left-1/2 flex max-h-[92vh] w-full max-w-md -translate-x-1/2 flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:bottom-auto sm:top-1/2 sm:max-h-[85vh] sm:-translate-y-1/2 sm:rounded-2xl">
                 {/* Modal header */}
-                <div className="px-5 pt-4 pb-3 border-b border-gray-100">
+                <div className="flex-shrink-0 border-b border-gray-100 px-5 pb-3 pt-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-base font-semibold">Choose a date</div>
+                    <div className="text-base font-semibold">
+                      Choose a date
+                    </div>
                     <button
                       onClick={() => setCalendarOpen(false)}
-                      className="p-2 rounded-lg hover:bg-gray-50"
+                      className="rounded-lg p-2 hover:bg-gray-50"
                     >
-                      <X className="w-5 h-5 text-gray-600" />
+                      <X className="h-5 w-5 text-gray-600" />
                     </button>
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <button
-                      className="p-2 rounded-lg hover:bg-gray-50"
+                      className="rounded-lg p-2 hover:bg-gray-50"
                       onClick={() => {
                         setCalendarMonth(addMonths(calendarMonth, -1));
                       }}
                     >
-                      <ChevronLeft className="w-5 h-5 text-gray-700" />
+                      <ChevronLeft className="h-5 w-5 text-gray-700" />
                     </button>
                     <div className="font-medium">
                       {monthNames[calendarMonth.getMonth()]}{" "}
                       {calendarMonth.getFullYear()}
                     </div>
                     <button
-                      className="p-2 rounded-lg hover:bg-gray-50"
+                      className="rounded-lg p-2 hover:bg-gray-50"
                       onClick={() => {
                         setCalendarMonth(addMonths(calendarMonth, 1));
                       }}
                     >
-                      <ChevronRight className="w-5 h-5 text-gray-700" />
+                      <ChevronRight className="h-5 w-5 text-gray-700" />
                     </button>
                   </div>
 
@@ -1119,14 +1224,14 @@ export default function Step1SessionDetails({
                   <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="inline-block w-2.5 h-2.5 rounded-full"
+                        className="inline-block h-2.5 w-2.5 rounded-full"
                         style={{ background: MIBO.primary }}
                       />
                       Slots available
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="inline-block w-2.5 h-2.5 rounded-full"
+                        className="inline-block h-2.5 w-2.5 rounded-full"
                         style={{ background: MIBO.gray }}
                       />
                       No slots
@@ -1134,9 +1239,9 @@ export default function Step1SessionDetails({
                   </div>
                 </div>
 
-                {/* Calendar grid */}
-                <div className="px-4 py-3">
-                  <div className="grid grid-cols-7 text-center text-xs text-gray-500 mb-2">
+                {/* Scrollable body: calendar grid, so tall months never get cut off on short screens */}
+                <div className="flex-1 overflow-y-auto px-4 py-3">
+                  <div className="mb-2 grid grid-cols-7 text-center text-xs text-gray-500">
                     {dayNames.map((d) => (
                       <div key={d} className="py-1">
                         {d[0]}
@@ -1151,10 +1256,10 @@ export default function Step1SessionDetails({
                     onPick={handleChooseCalendarDay}
                     datesWithSlots={datesWithSlots}
                   />
-                </div>
 
-                {/* Bottom space (safe area) */}
-                <div className="h-4" />
+                  {/* Bottom space (safe area) */}
+                  <div className="h-4" />
+                </div>
               </div>
             </div>
           )}
@@ -1200,7 +1305,7 @@ function CalendarMonthGrid({
   }
 
   return (
-    <div className="grid grid-cols-7 gap-2">
+    <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
       {days.map(({ date, status, hasSlots }, idx) => {
         if (isNaN(date.getTime())) {
           return <div key={`pad-${idx}`} />;
@@ -1223,7 +1328,7 @@ function CalendarMonthGrid({
           ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed"
           : "bg-white border-gray-200 hover:shadow"
       }
-      ${isSelected ? "ring-2 ring-offset-2 ring-[#0a107d]" : ""}
+      ${isSelected ? "ring-2 ring-offset-2 ring-[#034B44]" : ""}
     `}
           >
             <div className="text-[13px] font-medium">{date.getDate()}</div>
@@ -1242,209 +1347,3 @@ function CalendarMonthGrid({
     </div>
   );
 }
-
-// // src/pages/BookAppointment/Step1SessionDetails.tsx
-// import type { Doctor } from "../Experts/data/doctors";
-// import { useState } from "react";
-// import {
-//   MapPin,
-//   Video,
-//   Phone,
-//   Clock,
-//   CalendarDays,
-//   Clock4,
-// } from "lucide-react";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-
-// interface Props {
-//   doctor: Doctor;
-//   bookingData: any;
-//   setBookingData: (data: any) => void;
-//   onContinue: () => void;
-//   onBack: () => void;
-// }
-
-// export default function Step1SessionDetails({
-//   doctor,
-//   bookingData,
-//   setBookingData,
-//   onContinue,
-//   onBack,
-// }: Props) {
-//   const [selectedMode, setSelectedMode] = useState<string>(bookingData.mode);
-//   const [selectedDuration, setSelectedDuration] = useState<string>(
-//     bookingData.duration
-//   );
-//   const [selectedDate, setSelectedDate] = useState<Date | null>(
-//     bookingData.date ? new Date(bookingData.date) : null
-//   );
-//   const [selectedTime, setSelectedTime] = useState<string>(bookingData.time);
-
-//   const modes = ["In-person", "Video call", "Phone call"];
-//   const durations = [
-//     { label: "30 mins", price: 1500 },
-//     { label: "60 mins", price: 2500 },
-//   ];
-//   const times = ["10:00 AM", "1:00 PM", "5:00 PM"];
-
-//   const handleContinue = () => {
-//     setBookingData({
-//       ...bookingData,
-//       mode: selectedMode,
-//       duration: selectedDuration,
-//       date: selectedDate ? selectedDate.toDateString() : "",
-//       time: selectedTime,
-//       price: durations.find((d) => d.label === selectedDuration)?.price ?? 1500,
-//       doctorId: doctor.id,
-//     });
-//     onContinue();
-//   };
-
-//   return (
-//     <div className="flex flex-col min-h-screen">
-//       {/* Header */}
-//       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-20">
-//         <button onClick={onBack} className="text-[#034B44] text-lg">
-//           ←
-//         </button>
-//         <h2 className="text-lg font-semibold">Book your session</h2>
-//         <div className="w-6" />
-//       </div>
-
-//       {/* Body */}
-//       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
-//         {/* Doctor quick info */}
-//         <div className="bg-white rounded-xl p-4 shadow-sm">
-//           <div className="flex items-center gap-4">
-//             <img
-//               src={doctor.image}
-//               alt={doctor.name}
-//               className="w-16 h-16 rounded-lg object-cover"
-//             />
-//             <div>
-//               <div className="font-semibold">{doctor.name}</div>
-//               <div className="text-sm text-gray-600">{doctor.designation}</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Mode of Session */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Mode of Session</h3>
-//           <div className="flex gap-3">
-//             {modes.map((mode) => {
-//               const Icon =
-//                 mode === "In-person"
-//                   ? MapPin
-//                   : mode === "Video call"
-//                   ? Video
-//                   : Phone;
-//               const isSelected = selectedMode === mode;
-//               return (
-//                 <button
-//                   key={mode}
-//                   onClick={() => setSelectedMode(mode)}
-//                   className={`flex-1 p-4 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 shadow-md ${
-//                     isSelected
-//                       ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg"
-//                       : "bg-white border-gray-300 text-gray-500 hover:shadow-lg"
-//                   }`}
-//                 >
-//                   <Icon className="w-7 h-7 mb-1" />
-//                   <span className="text-sm font-medium">{mode}</span>
-//                 </button>
-//               );
-//             })}
-//           </div>
-//         </div>
-
-//         {/* Location */}
-//         <div className="bg-white rounded-xl p-4 shadow-md">
-//           <div className="flex items-center gap-2 mb-2">
-//             <MapPin className="w-5 h-5 text-[#034B44]" />
-//             <h3 className="font-semibold">Location</h3>
-//           </div>
-//           <p className="text-sm text-gray-700">
-//             Mibo Mental Health Centre — {doctor.name.split(" ")[1] ?? "City"}
-//           </p>
-//         </div>
-
-//         {/* NEW: Date Picker (Moved Up) */}
-//         <div className="bg-white rounded-xl p-5 shadow-md">
-//           <div className="flex items-center gap-2 mb-3">
-//             <CalendarDays className="w-5 h-5 text-[#034B44]" />
-//             <h3 className="font-semibold">Select Date</h3>
-//           </div>
-//           <DatePicker
-//             selected={selectedDate}
-//             onChange={(date) => setSelectedDate(date)}
-//             minDate={new Date()}
-//             placeholderText="click to select a date"
-//             className="w-full border border-gray-300 rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1425b8]"
-//             calendarClassName="rounded-xl shadow-lg border border-gray-200"
-//             dateFormat="EEE, MMM d, yyyy"
-//           />
-//         </div>
-
-//         {/* Time */}
-//         <div className="bg-white rounded-xl p-5 shadow-md overflow-visible">
-//           <div className="flex items-center gap-2 mb-3">
-//             <Clock4 className="w-5 h-5 text-[#034B44]" />
-//             <h3 className="font-semibold">Select Time</h3>
-//           </div>
-//           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-//             {times.map((t) => (
-//               <button
-//                 key={t}
-//                 onClick={() => setSelectedTime(t)}
-//                 className={`px-4 py-2 rounded-lg border whitespace-nowrap transition-all shadow-md hover:shadow-lg ${
-//                   selectedTime === t
-//                     ? "bg-[#d2fafa] border-[#d2fafa] text-[#034B44] shadow-lg scale-[1.02]"
-//                     : "bg-white border-gray-300 text-gray-500"
-//                 }`}
-//               >
-//                 {t}
-//               </button>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* Duration */}
-//         <div className="bg-white rounded-xl p-4 shadow-md">
-//           <div className="flex items-center gap-2 mb-2">
-//             <Clock className="w-5 h-5 text-[#034B44]" />
-//             <h3 className="font-semibold">Session Duration</h3>
-//           </div>
-//           <div className="flex gap-3">
-//             {durations.map((dur) => (
-//               <button
-//                 key={dur.label}
-//                 onClick={() => setSelectedDuration(dur.label)}
-//                 className={`flex-1 p-4 rounded-xl border transition-all flex flex-col items-center justify-center gap-1 shadow-md hover:shadow-lg ${
-//                   selectedDuration === dur.label
-//                     ? "bg-[#d2fafa] border-[#034B44] text-[#034B44] shadow-lg scale-[1.02]"
-//                     : "bg-white border-gray-300 text-gray-500"
-//                 }`}
-//               >
-//                 <span className="text-sm font-medium">{dur.label}</span>
-//                 <span className="text-xs">₹{dur.price}</span>
-//               </button>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Continue Button */}
-//       <div className="p-4 sticky bottom-0 bg-white border-t">
-//         <button
-//           onClick={handleContinue}
-//           disabled={!selectedDate || !selectedTime}
-//           className="w-full py-3 bg-[#0e0a73] text-white font-semibold rounded-full disabled:opacity-10"
-//         >
-//           Continue
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }

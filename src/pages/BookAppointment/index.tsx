@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import clinicianService from "../../services/clinicianService";
 import authService from "../../services/authService";
 import type { Doctor } from "../Experts/data/doctors";
+import { dummyDoctors } from "../Experts/data/dummyDoctors";
 import Step1SessionDetails from "./Step1SessionDetails";
 import Step2PhoneVerification from "./Step2PhoneVerification";
 import Step3ConfirmBooking from "./Step3ConfirmBooking";
@@ -17,6 +18,7 @@ export default function BookAppointment() {
   const [error, setError] = useState<string | null>(null);
 
   const [step, setStep] = useState<number>(1);
+
   const [bookingData, setBookingData] = useState<any>({
     mode: "", // No default mode - user must choose
     duration: "30 mins",
@@ -27,9 +29,18 @@ export default function BookAppointment() {
     authenticated: false,
   });
 
+  // Fetch doctor data on mount and when doctorId changes
   useEffect(() => {
     const fetchDoctor = async () => {
+      // If no doctorId is provided, fall back to the first dummy doctor
       if (!doctorId) {
+        const dummy = dummyDoctors[0];
+        if (dummy) {
+          console.warn("No doctor ID provided — using dummy doctor data.");
+          setDoctor(dummy);
+          setLoading(false);
+          return;
+        }
         setError("No doctor ID provided");
         setLoading(false);
         return;
@@ -48,6 +59,18 @@ export default function BookAppointment() {
         );
 
         if (!clinician) {
+          // No matching real clinician (or none at all) — fall back to dummy data
+          const dummy =
+            dummyDoctors.find((d) => String(d.id) === String(doctorId)) ||
+            dummyDoctors[0];
+          if (dummy) {
+            console.warn(
+              "Clinician not found via API — using dummy doctor data instead.",
+            );
+            setDoctor(dummy);
+            setLoading(false);
+            return;
+          }
           setError("Doctor not found");
           setLoading(false);
           return;
@@ -82,8 +105,19 @@ export default function BookAppointment() {
         setDoctor(transformedDoctor);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to fetch doctor:", err);
-        setError("Failed to load doctor information");
+        // API unreachable (e.g. no backend running) — fall back to dummy data
+        console.warn(
+          "Failed to fetch doctor from API — using dummy doctor data instead:",
+          err,
+        );
+        const dummy =
+          dummyDoctors.find((d) => String(d.id) === String(doctorId)) ||
+          dummyDoctors[0];
+        if (dummy) {
+          setDoctor(dummy);
+        } else {
+          setError("Failed to load doctor information");
+        }
         setLoading(false);
       }
     };
@@ -138,7 +172,7 @@ export default function BookAppointment() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#e9f6f4] text-[#034B44]">
+      <div className="flex items-center justify-center py-24 bg-[#eef6f2] text-[#0a2e23]">
         Loading doctor information...
       </div>
     );
@@ -146,11 +180,11 @@ export default function BookAppointment() {
 
   if (error || !doctor) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#e9f6f4] text-red-600">
+      <div className="flex flex-col items-center justify-center py-24 bg-[#eef6f2] text-red-600">
         <p className="text-xl mb-4">{error || "Doctor not found."}</p>
         <button
           onClick={() => navigate("/experts")}
-          className="px-6 py-2 bg-[#034B44] text-white rounded-full hover:bg-[#046e63] transition"
+          className="px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#0b5940] transition"
         >
           Back to Experts
         </button>
@@ -181,7 +215,7 @@ export default function BookAppointment() {
   };
 
   return (
-    <div className="min-h-screen bg-[#e9f6f4] text-[#034B44] flex flex-col">
+    <>
       {step === 1 && (
         <Step1SessionDetails
           doctor={doctor}
@@ -193,6 +227,7 @@ export default function BookAppointment() {
       )}
       {step === 2 && (
         <Step2PhoneVerification
+          doctor={doctor}
           bookingData={bookingData}
           setBookingData={setBookingData}
           onContinue={nextStep}
@@ -201,13 +236,13 @@ export default function BookAppointment() {
       )}
       {step === 3 && (
         <Step3ConfirmBooking
-          // doctor={doctor}
+          doctor={doctor}
           bookingData={bookingData}
           // onContinue={nextStep}
           onBack={prevStep}
         />
       )}
       {step === 4 && <Step4PaymentSuccess />}
-    </div>
+    </>
   );
 }

@@ -44,7 +44,7 @@ const ExpertsHeader = () => {
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
-      <div className="max-w-[1480px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 flex-wrap gap-y-2">
+      <div className="max-w-[1480px] mx-auto h-16 md:h-20 flex items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div
           className={`flex items-center flex-shrink-0 transition-all duration-400 delay-100 ease-out ${
@@ -60,36 +60,28 @@ const ExpertsHeader = () => {
           </Link>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu — kept to a single row (WhatsApp + hamburger only) so header height stays fixed and never wraps */}
         <div
-          className={`flex items-center gap-2 lg:hidden ml-auto transition-all duration-300 delay-150 ease-out ${
+          className={`flex items-center gap-2 lg:hidden ml-auto flex-shrink-0 transition-all duration-300 delay-150 ease-out ${
             isVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"
           }`}
         >
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
-          >
-            <Phone size={20} />
-          </button>
-          <button
             onClick={() =>
               (window.location.href = "https://wa.me/919083335000")
             }
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
+            aria-label="Chat on WhatsApp"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
           >
-            <MessageCircle size={20} />
+            <MessageCircle size={18} />
           </button>
-          <Link to="/patientAuth">
-            <button className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300">
-              SIGN IN
-            </button>
-          </Link>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="text-[#18356C] hover:text-[#34b9a5] text-3xl transition-colors duration-300"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            className="w-10 h-10 flex items-center justify-center text-[#18356C] hover:text-[#34b9a5] transition-colors duration-300"
           >
-            {menuOpen ? <X size={32} /> : <Menu size={32} />}
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
 
@@ -115,8 +107,8 @@ const ExpertsHeader = () => {
               )}
 
               {item.dropdown && (
-                <div className="absolute top-full left-0 pt-2 -mt-2 w-40 z-50">
-                  <div className="bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute top-full left-0 pt-2 -mt-2 w-40 z-50 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300">
+                  <div className="bg-white shadow-lg rounded-md">
                     {item.dropdown.map((drop) => (
                       <Link
                         key={drop.label}
@@ -171,7 +163,22 @@ const ExpertsHeader = () => {
 
       {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="lg:hidden px-4 py-6 bg-[#C2D3E4] border-t border-white/20">
+        <div className="lg:hidden px-4 py-6 bg-[#C2D3E4] border-t border-white/20 max-h-[calc(100vh-72px)] overflow-y-auto">
+          {/* Quick actions row (moved here from the top bar to keep the header a fixed single-row height) */}
+          <div className="flex items-center gap-3 mb-5">
+            <button
+              onClick={() => (window.location.href = "tel:9083335000")}
+              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-full border border-white/40 bg-white/40 text-[#18276c] font-semibold text-sm hover:border-[#34b9a5] hover:text-[#34b9a5] transition-all duration-300"
+            >
+              <Phone size={16} />
+              Call
+            </button>
+            <Link to="/patientAuth" className="flex-1" onClick={() => setMenuOpen(false)}>
+              <button className="w-full h-11 bg-[#1c0d54] text-white rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300">
+                SIGN IN
+              </button>
+            </Link>
+          </div>
           <nav className="flex flex-col gap-4 text-[#18276c] font-medium">
             {navItems.map((item) => (
               <div key={item.label}>
