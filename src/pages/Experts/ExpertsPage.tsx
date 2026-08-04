@@ -116,7 +116,9 @@ export default function ExpertsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copiedDoctorId, setCopiedDoctorId] = useState<string | number | null>(null);
+  const [copiedDoctorId, setCopiedDoctorId] = useState<string | number | null>(
+    null,
+  );
   // --- Share doctor link to clipboard ---
   const handleShareDoctor = async (doctorId: string | number) => {
     const shareUrl = `${window.location.origin}/book-appointment/${doctorId}`;
@@ -143,9 +145,7 @@ export default function ExpertsPage() {
       console.error("Failed to copy share link:", err);
     }
   };
-  const [selectedCategory, setSelectedCategory] = useState(
-    "All Experts",
-  );
+  const [selectedCategory, setSelectedCategory] = useState("All Experts");
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({
@@ -164,7 +164,7 @@ export default function ExpertsPage() {
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
-    width: 256, 
+    width: 256,
   });
   const filterBarRef = useRef<HTMLDivElement | null>(null);
   const stickyBarRef = useRef<HTMLDivElement | null>(null);
@@ -183,8 +183,10 @@ export default function ExpertsPage() {
     "Experience: High to Low",
     "Name: A-Z",
   ];
-  const parsePrice = (price: string) => parseInt(price.replace(/[^0-9]/g, ""), 10) || 0;
-  const parseExperience = (exp: string) => parseInt(exp.replace(/[^0-9]/g, ""), 10) || 0;
+  const parsePrice = (price: string) =>
+    parseInt(price.replace(/[^0-9]/g, ""), 10) || 0;
+  const parseExperience = (exp: string) =>
+    parseInt(exp.replace(/[^0-9]/g, ""), 10) || 0;
 
   const FILTER_OPTIONS: Record<string, string[]> = {
     Location: ["Bangalore", "Kochi", "Mumbai"],
@@ -208,7 +210,15 @@ export default function ExpertsPage() {
       "Child Anxiety",
       "Adolescent Issues",
     ],
-    Language: ["English", "Hindi", "Kannada", "Malayalam", "Tamil", "Telugu", "Marathi"],
+    Language: [
+      "English",
+      "Hindi",
+      "Kannada",
+      "Malayalam",
+      "Tamil",
+      "Telugu",
+      "Marathi",
+    ],
     Price: ["₹1600/session"],
   };
 
@@ -248,7 +258,7 @@ export default function ExpertsPage() {
       }
       if (left < 10) left = 10;
       setDropdownPosition({
-        top: rect.bottom + 8, 
+        top: rect.bottom + 8,
         left,
         width: dropdownWidth,
       });
@@ -261,10 +271,7 @@ export default function ExpertsPage() {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest(".filter-dropdown-portal")) return;
-      if (
-        filterBarRef.current &&
-        !filterBarRef.current.contains(target)
-      ) {
+      if (filterBarRef.current && !filterBarRef.current.contains(target)) {
         setOpenFilter(null);
       }
     };
@@ -308,6 +315,19 @@ export default function ExpertsPage() {
     // Scroll instantly to top
     window.scrollTo({ top: 0, behavior: "instant" });
     fetchClinicians();
+
+    // Check if there's a filter from the header navigation
+    const savedFilter = sessionStorage.getItem("expertsFilter");
+    if (savedFilter) {
+      // Apply the filter by setting the category
+      setSelectedCategory(
+        savedFilter === "Clinical Psychologist"
+          ? "Clinical Psychologists"
+          : "Psychiatrists",
+      );
+      // Clear the sessionStorage after applying
+      sessionStorage.removeItem("expertsFilter");
+    }
   }, []);
 
   const fetchClinicians = async () => {
@@ -319,18 +339,18 @@ export default function ExpertsPage() {
 
       // Transform backend data to match Doctor interface
       const transformedDoctors: Doctor[] = clinicians.map((c: any) => {
-        // Handle specialization 
+        // Handle specialization
         const specialization = Array.isArray(c.specialization)
           ? c.specialization.join(", ")
           : c.specialization || "";
 
-        // Handle qualification 
+        // Handle qualification
         const qualification = Array.isArray(c.qualification)
           ? c.qualification.join(", ")
           : c.qualification || "";
 
         const transformed = {
-          id: c.id, 
+          id: c.id,
           name: c.name || c.fullName || c.full_name || "",
           bio: c.bio || "",
           qualification,
@@ -368,7 +388,7 @@ export default function ExpertsPage() {
       );
     } catch (error: any) {
       if (import.meta.env.DEV) {
-        // 
+        //
         console.warn(
           "Clinicians API unavailable — using local dummy data instead:",
           {
@@ -401,7 +421,7 @@ export default function ExpertsPage() {
   };
 
   //  Filter doctors based on category and selected filters
-   
+
   const filteredDoctors = useMemo(() => {
     let filtered = [...doctors];
 
@@ -443,7 +463,7 @@ export default function ExpertsPage() {
       });
     }
 
-    // Filter by Location 
+    // Filter by Location
     if (selectedFilters.Location.length > 0) {
       filtered = filtered.filter((doc) =>
         selectedFilters.Location.some(
@@ -452,7 +472,7 @@ export default function ExpertsPage() {
       );
     }
 
-    // Filter by Expertise 
+    // Filter by Expertise
     if (selectedFilters.Expertise.length > 0) {
       filtered = filtered.filter((doc) =>
         selectedFilters.Expertise.some((expertise) =>
@@ -463,7 +483,7 @@ export default function ExpertsPage() {
       );
     }
 
-    // Filter by Language 
+    // Filter by Language
     if (selectedFilters.Language.length > 0) {
       filtered = filtered.filter((doc) =>
         selectedFilters.Language.some((lang) =>
@@ -489,7 +509,9 @@ export default function ExpertsPage() {
           case "Price: High to Low":
             return parsePrice(b.price) - parsePrice(a.price);
           case "Experience: High to Low":
-            return parseExperience(b.experience) - parseExperience(a.experience);
+            return (
+              parseExperience(b.experience) - parseExperience(a.experience)
+            );
           case "Name: A-Z":
             return a.name.localeCompare(b.name);
           default:
@@ -501,7 +523,6 @@ export default function ExpertsPage() {
     return filtered;
   }, [selectedCategory, selectedFilters, doctors, sortBy]);
 
-
   // Show skeleton only on initial load, not on filter changes
   const showSkeletons = loading && doctors.length === 0;
 
@@ -512,7 +533,6 @@ export default function ExpertsPage() {
 
       {/* --- HERO --- */}
       <section className="relative overflow-hidden text-center pt-[92px] sm:pt-[110px] md:pt-[120px] pb-8 sm:pb-10 px-4 sm:px-6 bg-gradient-to-b from-[#f8fcfa] to-white">
-
         <h1 className="text-[26px] sm:text-3xl md:text-[42px] font-extrabold text-[#0a2e23] mb-2 tracking-tight font-['Plus_Jakarta_Sans',sans-serif] leading-tight">
           Meet Our Experts
         </h1>
@@ -520,7 +540,6 @@ export default function ExpertsPage() {
         <p className="text-[#637268] text-[14px] sm:text-[15.5px] font-medium px-2">
           Compassionate professionals ready to support your wellbeing.
         </p>
-
       </section>
 
       {/* --- STICKY SEARCH BAR (Category Tabs + Filter Bar as one unit) ---
@@ -539,10 +558,11 @@ export default function ExpertsPage() {
               <button
                 key={label}
                 onClick={() => setSelectedCategory(label)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 min-h-[40px] rounded-full text-[12.5px] sm:text-[13.5px] font-semibold border transition-all whitespace-nowrap shrink-0 snap-start ${selectedCategory === label
-                  ? "bg-[#0e6b4f] text-white border-[#0e6b4f] shadow-[0_3px_10px_rgba(14,107,79,.22)]"
-                  : "bg-white text-[#3a463f] border-[#e6ede9] hover:border-[#138158] hover:text-[#0e6b4f]"
-                  }`}
+                className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 min-h-[40px] rounded-full text-[12.5px] sm:text-[13.5px] font-semibold border transition-all whitespace-nowrap shrink-0 snap-start ${
+                  selectedCategory === label
+                    ? "bg-[#0e6b4f] text-white border-[#0e6b4f] shadow-[0_3px_10px_rgba(14,107,79,.22)]"
+                    : "bg-white text-[#3a463f] border-[#e6ede9] hover:border-[#138158] hover:text-[#0e6b4f]"
+                }`}
               >
                 <Icon className="w-[14px] h-[14px] sm:w-[15px] sm:h-[15px] shrink-0" />
                 {label}
@@ -578,10 +598,11 @@ export default function ExpertsPage() {
                         ref={(el) => void (buttonRefs.current[label] = el)}
                         onClick={() => filterKey && openFilterDropdown(label)}
                         disabled={!filterKey}
-                        className={`flex items-center gap-1.5 text-[12.5px] sm:text-[13.5px] font-semibold whitespace-nowrap transition-colors py-2 -my-2 min-h-[36px] ${activeCount > 0
-                          ? "text-[#0e6b4f]"
-                          : "text-[#3a463f] hover:text-[#0e6b4f]"
-                          } ${filterKey ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
+                        className={`flex items-center gap-1.5 text-[12.5px] sm:text-[13.5px] font-semibold whitespace-nowrap transition-colors py-2 -my-2 min-h-[36px] ${
+                          activeCount > 0
+                            ? "text-[#0e6b4f]"
+                            : "text-[#3a463f] hover:text-[#0e6b4f]"
+                        } ${filterKey ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                       >
                         <Icon className="w-4 h-4 text-[#0e6b4f]" />
                         {label}
@@ -599,7 +620,9 @@ export default function ExpertsPage() {
                         <FilterDropdown
                           options={options}
                           selected={selectedFilters[filterKey] || []}
-                          onChange={(value) => toggleFilterOption(filterKey, value)}
+                          onChange={(value) =>
+                            toggleFilterOption(filterKey, value)
+                          }
                           position={dropdownPosition}
                           onRequestClose={() => setOpenFilter(null)}
                         />
@@ -631,7 +654,9 @@ export default function ExpertsPage() {
                   ref={(el) => void (buttonRefs.current["Sort By"] = el)}
                   onClick={() => openFilterDropdown("Sort By")}
                   className={`flex items-center gap-1.5 text-[12.5px] sm:text-[13.5px] font-semibold whitespace-nowrap transition-colors cursor-pointer py-2 -my-2 min-h-[36px] ${
-                    sortBy ? "text-[#0e6b4f]" : "text-[#3a463f] hover:text-[#0e6b4f]"
+                    sortBy
+                      ? "text-[#0e6b4f]"
+                      : "text-[#3a463f] hover:text-[#0e6b4f]"
                   }`}
                 >
                   <ArrowUpDown className="w-3.5 h-3.5" />
@@ -646,7 +671,13 @@ export default function ExpertsPage() {
                       className="filter-dropdown-portal fixed w-56 max-w-[calc(100vw-20px)] bg-white rounded-xl border border-[#e6ede9] shadow-xl p-2 z-[999] text-left"
                       style={{
                         top: dropdownPosition.top,
-                        left: Math.max(10, Math.min(dropdownPosition.left, window.innerWidth - 234)),
+                        left: Math.max(
+                          10,
+                          Math.min(
+                            dropdownPosition.left,
+                            window.innerWidth - 234,
+                          ),
+                        ),
                       }}
                       onMouseDown={(e) => e.stopPropagation()}
                     >
@@ -691,7 +722,9 @@ export default function ExpertsPage() {
           ))
         ) : filteredDoctors.length > 0 ? (
           filteredDoctors.map((doc) => {
-            const ratingSeed = (typeof doc.id === "number" ? doc.id : doc.id.toString().length) % 10;
+            const ratingSeed =
+              (typeof doc.id === "number" ? doc.id : doc.id.toString().length) %
+              10;
             const rating = (4.5 + ratingSeed / 20).toFixed(1); // 4.5 - 4.9
             const reviewCount = 40 + ratingSeed * 17;
             const isOnline = doc.sessionTypes.includes("Online");
@@ -738,7 +771,9 @@ export default function ExpertsPage() {
                       </div>
                     </div>
                     <div className="text-[12.5px] leading-[1.3] text-[#3a463f] mb-3 font-semibold truncate">
-                      <span className="font-bold text-[#16241f]">Languages:</span>{" "}
+                      <span className="font-bold text-[#16241f]">
+                        Languages:
+                      </span>{" "}
                       <span className="font-medium text-[#637268]">
                         {doc.language.join(", ")}
                       </span>
@@ -772,7 +807,9 @@ export default function ExpertsPage() {
                     <div className="flex basis-full sm:basis-auto sm:w-full items-start gap-1.5 text-[12.5px] mt-2 min-w-0 rounded-lg px-2.5 py-1.5 border border-[#bfe9d8] bg-[#e9f9f2]">
                       <CalendarClock className="w-3.5 h-3.5 text-[#0e6b4f] mt-0.5 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="font-bold text-[#16241f]">Next Available</div>
+                        <div className="font-bold text-[#16241f]">
+                          Next Available
+                        </div>
                         {/* need to replace with actual availability data this is  dummy data */}
                         <div className="text-[#0e6b4f] font-semibold whitespace-normal break-words leading-snug">
                           {new Date(doc.nextAvailableSlot).toLocaleString()}
@@ -878,7 +915,13 @@ export default function ExpertsPage() {
           </div>
         </div>
         <button
-          onClick={() => window.open("https://wa.me/919083335000", "_blank", "noopener,noreferrer")}
+          onClick={() =>
+            window.open(
+              "https://wa.me/919083335000",
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }
           className="w-full sm:w-auto flex items-center justify-center gap-2.5 rounded-full pl-2 pr-5 sm:pr-6 py-2.5 sm:py-2 min-h-[44px] text-[12px] sm:text-[12.5px] font-bold text-[#0e6b4f] bg-white shadow-[0_2px_8px_rgba(12,59,46,0.08)] hover:shadow-[0_4px_14px_rgba(12,59,46,0.14)] transition-shadow whitespace-nowrap"
         >
           <span className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center text-white flex-shrink-0 transition-all duration-300">
@@ -924,10 +967,18 @@ export default function ExpertsPage() {
             <img src={iso} alt="ISO" className="h-full w-auto object-contain" />
           </div>
           <div className="flex items-center justify-center h-14">
-            <img src={hipaa} alt="HIPAA" className="h-full w-auto object-contain" />
+            <img
+              src={hipaa}
+              alt="HIPAA"
+              className="h-full w-auto object-contain"
+            />
           </div>
           <div className="flex items-center justify-center h-14">
-            <img src={gdpr} alt="GDPR" className="h-full w-auto object-contain" />
+            <img
+              src={gdpr}
+              alt="GDPR"
+              className="h-full w-auto object-contain"
+            />
           </div>
         </div>
       </section>
@@ -938,7 +989,9 @@ export default function ExpertsPage() {
           <div className="w-12 h-12 rounded-full bg-[#e1f4ec] flex items-center justify-center text-[#0e6b4f]">
             <Users className="w-[21px] h-[21px]" />
           </div>
-          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">200+</h3>
+          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">
+            200+
+          </h3>
           <p className="m-0 text-[13px] text-[#637268] max-w-[170px] font-medium leading-snug">
             in-house psychologists &amp; psychiatrists
           </p>
@@ -947,7 +1000,9 @@ export default function ExpertsPage() {
           <div className="w-12 h-12 rounded-full bg-[#e1f4ec] flex items-center justify-center text-[#0e6b4f]">
             <ClipboardList className="w-[21px] h-[21px]" />
           </div>
-          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">1 lac+</h3>
+          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">
+            1 lac+
+          </h3>
           <p className="m-0 text-[13px] text-[#637268] max-w-[170px] font-medium leading-snug">
             therapy and psychiatry sessions conducted in 2024
           </p>
@@ -956,7 +1011,9 @@ export default function ExpertsPage() {
           <div className="w-12 h-12 rounded-full bg-[#eaf0fd] flex items-center justify-center text-[#3b5fe0]">
             <Languages className="w-[21px] h-[21px]" />
           </div>
-          <h3 className="m-0 text-[28px] text-[#3b5fe0] font-extrabold tracking-tight">18</h3>
+          <h3 className="m-0 text-[28px] text-[#3b5fe0] font-extrabold tracking-tight">
+            18
+          </h3>
           <p className="m-0 text-[13px] text-[#637268] max-w-[170px] font-medium leading-snug">
             languages
           </p>
@@ -965,7 +1022,9 @@ export default function ExpertsPage() {
           <div className="w-12 h-12 rounded-full bg-[#e1f4ec] flex items-center justify-center text-[#0e6b4f]">
             <MapPin className="w-[21px] h-[21px]" />
           </div>
-          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">8</h3>
+          <h3 className="m-0 text-[28px] text-[#0e6b4f] font-extrabold tracking-tight">
+            8
+          </h3>
           <p className="m-0 text-[13px] text-[#637268] max-w-[170px] font-medium leading-snug">
             centers in Bengaluru, Mumbai, and Delhi NCR
           </p>
@@ -974,8 +1033,7 @@ export default function ExpertsPage() {
 
       {/* --- CONTACT BANNER --- */}
       <div className="bg-gradient-to-br from-[#0a2e23] to-[#281a5e] text-white text-center py-6 sm:py-7 px-4 text-[13.5px] sm:text-[14.5px] font-medium leading-relaxed">
-        If you didn't find what you were looking for, please reach out to us
-        at{" "}
+        If you didn't find what you were looking for, please reach out to us at{" "}
         <a
           href="mailto:support@mibohealth.com"
           className="text-[#8fe0c2] font-bold underline underline-offset-2"
