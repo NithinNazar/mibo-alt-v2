@@ -22,6 +22,7 @@ export interface Doctor {
   language: string[];
   price: string;
   sessionTypes: string;
+  nextAvailableSlot?: string; // optional ISO date string; shown as "Next Available" when present
 }
 
 /**
@@ -29,4 +30,4 @@ export interface Doctor {
  * Clinicians are now managed through the admin panel and fetched from database
  * This export is kept for backward compatibility only
  */
-export const doctors: Doctor[] = []; 
+export const doctors: Doctor[] = [];

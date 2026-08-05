@@ -1,5 +1,14 @@
 import type { Doctor } from "./doctors";
 
+// Helper to generate a "next available" slot relative to today, so dummy
+// data never renders a stale/past date (or "Invalid Date") in the UI.
+function daysFromNow(days: number, hour: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+}
+
 export const dummyDoctors: Doctor[] = [
   {
     id: 1,
@@ -12,9 +21,9 @@ export const dummyDoctors: Doctor[] = [
     experience: "4+ years",
     expertise: ["Anxiety", "CBT", "Stress", "Self Esteem"],
     image:
-      "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop",
+      "https://d1hnn6ajbf5qc3.cloudfront.net/clinicians/1780354075561-download__1_.png",
     videoUrl: "https://youtu.be/EngW7tLk6R8?si=YFwLlGLzDp2Lychq",
-    nextAvailableSlot: "2024-06-15T10:00:00",
+    nextAvailableSlot: daysFromNow(1, 10),
     location: "Bangalore",
     language: ["English", "Hindi", "Kannada"],
     price: "₹1500/session",
@@ -29,8 +38,9 @@ export const dummyDoctors: Doctor[] = [
     experience: "6+ years",
     expertise: ["Depression", "Trauma", "CBT", "Mindfulness"],
     image:
-      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
+      "https://d1hnn6ajbf5qc3.cloudfront.net/clinicians/1780354075561-download__1_.png",
     videoUrl: "https://youtu.be/EngW7tLk6R8?si=YFwLlGLzDp2Lychq",
+    nextAvailableSlot: daysFromNow(2, 9),
     location: "Mumbai",
     language: ["English", "Hindi", "Marathi"],
     price: "₹1800/session",
@@ -46,6 +56,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["OCD", "Phobias", "CBT", "Exposure Therapy"],
     image:
       "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(3, 14),
     location: "Kochi",
     language: ["English", "Malayalam", "Hindi"],
     price: "₹2200/session",
@@ -61,6 +72,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Anxiety", "Panic Disorder", "CBT"],
     image:
       "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(0, 16),
     location: "Bangalore",
     language: ["English", "Kannada", "Tulu"],
     price: "₹1600/session",
@@ -78,6 +90,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Stress", "Anger Management", "Self Esteem", "Medication Management"],
     image:
       "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(2, 11),
     location: "Bangalore",
     language: ["English", "Hindi", "Telugu"],
     price: "₹2000/session",
@@ -93,6 +106,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Bipolar Disorder", "Schizophrenia", "Medication Management"],
     image:
       "https://images.unsplash.com/photo-1612531386530-97286d97c2d2?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(5, 10),
     location: "Bangalore",
     language: ["English", "Hindi", "Kannada"],
     price: "₹2500/session",
@@ -108,6 +122,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["ADHD", "Depression", "Medication Management"],
     image:
       "https://images.unsplash.com/photo-1622902046580-2b47f47f5471?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(1, 15),
     location: "Mumbai",
     language: ["English", "Hindi", "Urdu"],
     price: "₹2300/session",
@@ -123,6 +138,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Anxiety Disorders", "Insomnia", "Medication Management"],
     image:
       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(4, 13),
     location: "Kochi",
     language: ["English", "Malayalam"],
     price: "₹2400/session",
@@ -140,6 +156,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Relationship", "Anxiety", "Couples Therapy", "CBT"],
     image:
       "https://images.unsplash.com/photo-1564564321837-a57b7070ac4f?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(1, 9),
     location: "Kochi",
     language: ["English", "Hindi"],
     price: "₹1500/session",
@@ -155,6 +172,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Adolescent Therapy", "Self Esteem", "Stress"],
     image:
       "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(3, 12),
     location: "Kochi",
     language: ["English", "Malayalam"],
     price: "₹1200/session",
@@ -170,6 +188,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Grief", "Family Therapy", "Stress"],
     image:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(2, 17),
     location: "Mumbai",
     language: ["English", "Hindi", "Marathi"],
     price: "₹1400/session",
@@ -185,6 +204,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Career Counselling", "Stress", "Self Esteem"],
     image:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(6, 10),
     location: "Bangalore",
     language: ["English", "Hindi", "Gujarati"],
     price: "₹1300/session",
@@ -202,6 +222,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Addiction", "Family Therapy", "Grief", "Stress"],
     image:
       "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(1, 11),
     location: "Mumbai",
     language: ["English", "Hindi", "Gujarati"],
     price: "₹1700/session",
@@ -217,6 +238,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Couples Therapy", "Communication", "Anxiety"],
     image:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(3, 15),
     location: "Bangalore",
     language: ["English", "Hindi"],
     price: "₹1600/session",
@@ -232,6 +254,7 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Trauma", "PTSD", "Mindfulness"],
     image:
       "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(4, 9),
     location: "Kochi",
     language: ["English", "Malayalam", "Tamil"],
     price: "₹1900/session",
@@ -247,9 +270,10 @@ export const dummyDoctors: Doctor[] = [
     expertise: ["Body Image", "Self Esteem", "Eating Disorders"],
     image:
       "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop",
+    nextAvailableSlot: daysFromNow(2, 14),
     location: "Mumbai",
     language: ["English", "Hindi", "Marathi"],
     price: "₹1750/session",
     sessionTypes: "In-person & Online sessions",
   },
-]; 
+];

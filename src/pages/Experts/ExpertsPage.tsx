@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Users,
   UserRound,
@@ -37,6 +37,7 @@ import ExpertiseMarquee from "./Components/ExpertiseMarquee";
 import ExpertMedia from "./Components/ExpertMedia";
 import "./Components/doctorCard.css";
 import clinicianService from "../../services/clinicianService";
+import centreService from "../../services/centreService";
 import StickySearchBar from "../../components/StickySearchBar";
 import { useScrollDirection } from "../../hooks/useScrollDirection";
 import type { Doctor } from "./data/doctors";
@@ -113,13 +114,48 @@ function FilterDropdown({
 
 export default function ExpertsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedDoctorId, setCopiedDoctorId] = useState<string | number | null>(null);
+
+  // --- View Profile modal open/close, kept in sync with a `?doctor=` query
+  // param so the modal is actually deep-linkable (and therefore shareable). ---
+  const openProfile = (doc: Doctor) => {
+    setSelectedProfile(doc);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("doctor", String(doc.id));
+      return next;
+    });
+  };
+
+  const closeProfile = () => {
+    setSelectedProfile(null);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("doctor");
+      return next;
+    });
+  };
+
+  // If the page loads with a `?doctor=<id>` param (e.g. from a shared "View
+  // Profile" link), open that doctor's profile modal once their data is available.
+  useEffect(() => {
+    const doctorId = searchParams.get("doctor");
+    if (!doctorId || doctors.length === 0) return;
+    const match = doctors.find((d) => String(d.id) === doctorId);
+    if (match) setSelectedProfile(match);
+    // Only re-run when the param or the doctor list changes, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, doctors]);
+
   // --- Share doctor link to clipboard ---
+  // Shares the "View Profile" link (this page, deep-linked via `?doctor=`),
+  // and shows a temporary "Copied!" feedback badge on the clicked doctor's card.
   const handleShareDoctor = async (doctorId: string | number) => {
-    const shareUrl = `${window.location.origin}/book-appointment/${doctorId}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?doctor=${doctorId}`;
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(shareUrl);
@@ -314,8 +350,36 @@ export default function ExpertsPage() {
     try {
       setLoading(true);
 
-      // Fetch clinicians from database (public endpoint, no auth required)
-      const clinicians = await clinicianService.getClinicians();
+      // Fetch clinicians and the authoritative centre list (id -> city) in
+      // parallel. The centre list is the only reliable source of truth for
+      // "which city is this clinician's centre actually in" — clinician
+      // records only carry a `primaryCentreId` FK, not a normalized city.
+      const [clinicians, centres] = await Promise.all([
+        clinicianService.getClinicians(),
+        centreService.getCentres().catch(() => centreService.getFallbackCentres()),
+      ]);
+
+      // Map: centre id -> proper-cased city label ("Bangalore" | "Kochi" | "Mumbai")
+      const normalizeCity = (raw: string | undefined): "Bangalore" | "Kochi" | "Mumbai" | null => {
+        const v = raw?.toLowerCase().trim();
+        if (!v) return null;
+        if (v === "bangalore" || v === "banglore" || v === "bengaluru") return "Bangalore";
+        if (v === "kochi" || v === "cochin") return "Kochi";
+        if (v === "mumbai" || v === "bombay") return "Mumbai";
+        return null;
+      };
+
+      const cityById = new Map<string, "Bangalore" | "Kochi" | "Mumbai">();
+      centres.forEach((centre) => {
+        const normalized = normalizeCity(centre.city);
+        // Key on the string form of the id — `Clinician.id` is documented as
+        // "string or number depending on the DB", and `primaryCentreId` is
+        // just as likely to arrive typed inconsistently between local/dev
+        // and production. A Map keyed by `number` silently fails to match a
+        // string id (or vice versa) since Map lookups use strict equality —
+        // stringifying both sides removes that whole class of bug.
+        if (normalized) cityById.set(String(centre.id), normalized);
+      });
 
       // Transform backend data to match Doctor interface
       const transformedDoctors: Doctor[] = clinicians.map((c: any) => {
@@ -328,6 +392,41 @@ export default function ExpertsPage() {
         const qualification = Array.isArray(c.qualification)
           ? c.qualification.join(", ")
           : c.qualification || "";
+
+        // Resolve the city from the centre's id or name, with a fallback to Bangalore if unrecognized
+        const centreId = c.primaryCentreId ?? c.primary_centre_id;
+        const centreName: string =
+          c.primaryCentreName || c.primary_centre_name || c.centreName || c.centre_name || "";
+
+        // Primary source of truth: join on primaryCentreId against the
+        // authoritative centre list ({ id, city }). Both sides are coerced
+        // to strings — see the note by cityById above.
+        let resolvedCity =
+          centreId !== undefined && centreId !== null
+            ? cityById.get(String(centreId))
+            : undefined;
+
+        // Fallback: centre display names look like "Mibo Kochi" / "Mibo
+        // Bangalore Centre" — if the id-based join misses (e.g. centres API
+        // failed, or the id doesn't line up), fall back to spotting the
+        // city name inside that string rather than silently mislabeling
+        // the doctor as Bangalore.
+        if (!resolvedCity && centreName) {
+          const nameLower = centreName.toLowerCase();
+          if (nameLower.includes("banglore") || nameLower.includes("bangalore") || nameLower.includes("bengaluru")) {
+            resolvedCity = "Bangalore";
+          } else if (nameLower.includes("kochi") || nameLower.includes("cochin")) {
+            resolvedCity = "Kochi";
+          } else if (nameLower.includes("mumbai") || nameLower.includes("bombay")) {
+            resolvedCity = "Mumbai";
+          }
+        }
+
+        if (!resolvedCity && import.meta.env.DEV) {
+          console.warn(
+            `Clinician "${c.name || c.fullName}" has an unrecognized centre (id: ${centreId}, name: "${centreName}"); defaulting to Bangalore. The location filter may not match this doctor correctly.`,
+          );
+        }
 
         const transformed = {
           id: c.id, 
@@ -349,14 +448,14 @@ export default function ExpertsPage() {
               : undefined),
           videoUrl:
             c.profileVideoUrl || c.profile_video_url || c.videoUrl || c.video_url || undefined,
-          location: (c.primaryCentreName ||
-            c.primary_centre_name ||
-            c.centreName ||
-            c.centre_name ||
-            "Bangalore") as "Bangalore" | "Kochi" | "Mumbai",
+          // Resolved from the centre's own `city` field via primaryCentreId,
+          // with a name-substring fallback (see above) — never a blind
+          // default that would silently corrupt the location filter.
+          location: resolvedCity ?? "Bangalore",
           language: c.languages || ["English"],
           price: `₹${c.consultationFee || c.consultation_fee || 0}/session`,
           sessionTypes: getSessionTypes(
+
             c.consultationModes || c.consultation_modes || [],
           ),
         };
@@ -535,7 +634,7 @@ export default function ExpertsPage() {
         visible={barsVisible}
         className="mt-6 sm:mt-8"
         topSlot={
-          <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-2 sm:gap-2.5 bg-white py-3 -mx-4 sm:-mx-6 px-4 md:px-0 md:mx-0 overflow-x-auto no-scrollbar snap-x snap-mandatory md:snap-none">
+          <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-2 sm:gap-2.5 bg-white py-3 px-4 sm:px-6 md:px-0 overflow-x-auto no-scrollbar snap-x snap-mandatory md:snap-none scroll-pl-4 sm:scroll-pl-6">
             {CATEGORIES.map(({ label, icon: Icon }) => (
               <button
                 key={label}
@@ -697,13 +796,19 @@ export default function ExpertsPage() {
             const reviewCount = 40 + ratingSeed * 17;
             const isOnline = doc.sessionTypes.includes("Online");
             const isInPerson = doc.sessionTypes.includes("In-person");
+            // Check if the nextAvailableSlot is a valid date
+            const nextSlotDate = doc.nextAvailableSlot
+              ? new Date(doc.nextAvailableSlot)
+              : null;
+            const hasValidSlot =
+              !!nextSlotDate && !isNaN(nextSlotDate.getTime());
 
             return (
               <div
                 key={doc.id}
-                className="h-full flex flex-col border border-[#e4f7ec] rounded-[18px] p-4 sm:p-[22px] shadow-[0_1px_2px_rgba(12,59,46,0.04),0_8px_24px_-8px_rgba(12,59,46,0.10)] bg-white hover:shadow-[0_4px_8px_rgba(12,59,46,.05),0_16px_32px_-10px_rgba(12,59,46,.16)] hover:-translate-y-0.5 hover:border-[#e1f4ec] transition-all"
+                className="h-full flex flex-col border border-[#e4f7ec] rounded-[18px] p-4 sm:p-[22px] shadow-[0_1px_2px_rgba(12,59,46,0.04),0_8px_24px_-8px_rgba(12,59,46,0.10)] bg-white hover:shadow-[0_4px_8px_rgba(12,59,46,.05),0_16px_32px_-10px_rgba(12,59,46,.16)] hover:-translate-y-0.5 hover:border-[#e1f4ec] transition-all overflow-hidden"
               >
-                <div className="grid grid-cols-[104px_1fr] sm:grid-cols-[190px_1fr_172px] gap-3 sm:gap-[18px] sm:gap-x-5 min-w-0">
+                <div className="grid grid-cols-[104px_1fr] md:grid-cols-[128px_1fr] lg:grid-cols-[150px_1fr_160px] gap-3 sm:gap-[18px] lg:gap-x-5 min-w-0">
                   <ExpertMedia
                     image={doc.image}
                     videoUrl={doc.videoUrl}
@@ -746,12 +851,12 @@ export default function ExpertsPage() {
                     </div>
                   </div>
 
-                  <div className="col-span-2 sm:col-span-1 min-w-0 flex flex-row flex-wrap sm:flex-col gap-2 items-stretch border-t sm:border-t-0 sm:border-l border-[#eef4f1] pt-3.5 sm:pt-0 sm:pl-[18px] mt-1 sm:mt-0">
-                    <div className="text-[11px] font-bold text-[#0e6b4f] uppercase tracking-wide whitespace-nowrap hidden sm:block">
+                  <div className="col-span-2 lg:col-span-1 min-w-0 flex flex-row flex-wrap lg:flex-col gap-2 items-stretch border-t lg:border-t-0 lg:border-l border-[#eef4f1] pt-3.5 lg:pt-0 lg:pl-[18px] mt-1 lg:mt-0">
+                    <div className="text-[11px] font-bold text-[#0e6b4f] uppercase tracking-wide whitespace-nowrap hidden lg:block">
                       Available {isOnline ? "Online" : "In-person"}
                     </div>
                     <div
-                      className={`flex-1 sm:flex-none flex items-center gap-1.5 text-[12.5px] font-semibold whitespace-nowrap rounded-lg px-2.5 py-1.5 border ${
+                      className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-1.5 text-[12.5px] font-semibold whitespace-nowrap rounded-lg px-2.5 py-1.5 border ${
                         isOnline
                           ? "border-[#bfe9d8] bg-[#e9f9f2] text-[#0e6b4f]"
                           : "border-[#e6ede9] text-[#94a39b]"
@@ -761,7 +866,7 @@ export default function ExpertsPage() {
                       Online
                     </div>
                     <div
-                      className={`flex-1 sm:flex-none flex items-center gap-1.5 text-[12.5px] font-semibold whitespace-nowrap rounded-lg px-2.5 py-1.5 border ${
+                      className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-1.5 text-[12.5px] font-semibold whitespace-nowrap rounded-lg px-2.5 py-1.5 border ${
                         isInPerson
                           ? "border-[#bfe9d8] bg-[#e9f9f2] text-[#0e6b4f]"
                           : "border-[#e6ede9] text-[#94a39b]"
@@ -770,16 +875,38 @@ export default function ExpertsPage() {
                       <User className="w-3.5 h-3.5 shrink-0" />
                       In-person
                     </div>
-                    <div className="flex basis-full sm:basis-auto sm:w-full items-start gap-1.5 text-[12.5px] mt-2 min-w-0 rounded-lg px-2.5 py-1.5 border border-[#bfe9d8] bg-[#e9f9f2]">
-                      <CalendarClock className="w-3.5 h-3.5 text-[#0e6b4f] mt-0.5 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-[#16241f]">Next Available</div>
-                        {/* need to replace with actual availability data this is  dummy data */}
-                        <div className="text-[#0e6b4f] font-semibold whitespace-normal break-words leading-snug">
-                          {new Date(doc.nextAvailableSlot).toLocaleString()}
+                    {hasValidSlot ? (
+                      <div className="flex basis-full lg:basis-auto lg:w-full items-start gap-1.5 text-[12.5px] mt-2 min-w-0 rounded-lg px-2.5 py-1.5 border border-[#bfe9d8] bg-[#e9f9f2]">
+                        <CalendarClock className="w-3.5 h-3.5 text-[#0e6b4f] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-[#16241f]">Next Available</div>
+                          <div className="text-[#0e6b4f] font-semibold leading-snug">
+                            <div className="whitespace-nowrap truncate">
+                              {nextSlotDate!.toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </div>
+                            <div className="whitespace-nowrap truncate">
+                              {nextSlotDate!.toLocaleTimeString(undefined, {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex basis-full lg:basis-auto lg:w-full items-start gap-1.5 text-[12.5px] mt-2 min-w-0 rounded-lg px-2.5 py-1.5 border border-[#e6ede9] bg-[#f7faf9]">
+                        <CalendarClock className="w-3.5 h-3.5 text-[#94a39b] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-[#16241f]">Availability</div>
+                          <div className="text-[#637268] font-semibold whitespace-normal break-words leading-snug">
+                            Contact for next slot
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 {/* Expertise */}
@@ -799,7 +926,7 @@ export default function ExpertsPage() {
 
                 <div className="flex gap-3 mt-auto pt-[18px] border-t border-[#eef4f1]">
                   <button
-                    onClick={() => setSelectedProfile(doc)}
+                    onClick={() => openProfile(doc)}
                     className="flex-1 flex items-center justify-center gap-1.5 text-xs px-3 py-3 rounded-[9px] border border-[#e6ede9] bg-white font-bold text-[#16241f] hover:border-[#138158] hover:text-[#0e6b4f] transition-colors"
                   >
                     <Eye className="w-3.5 h-3.5 shrink-0" />
@@ -1001,14 +1128,14 @@ export default function ExpertsPage() {
         createPortal(
           <div
             className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4"
-            onMouseDown={() => setSelectedProfile(null)}
+            onMouseDown={() => closeProfile()}
           >
             <div
               className="bg-white rounded-2xl max-w-[560px] w-full max-h-[88vh] sm:max-h-[85vh] overflow-y-auto p-5 sm:p-7 relative shadow-2xl"
               onMouseDown={(e) => e.stopPropagation()}
             >
               <button
-                onClick={() => setSelectedProfile(null)}
+                onClick={() => closeProfile()}
                 aria-label="Close"
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[#637268] hover:bg-[#f4faf7] hover:text-[#16241f] transition-colors"
               >
@@ -1119,7 +1246,7 @@ export default function ExpertsPage() {
               <button
                 onClick={() => {
                   const id = selectedProfile.id;
-                  setSelectedProfile(null);
+                  closeProfile();
                   navigate(`/book-appointment/${id}`);
                 }}
                 className="w-full flex items-center justify-center gap-1.5 text-xs px-3 py-3.5 rounded-[9px] bg-[#0e6b4f] text-white font-bold hover:bg-[#138158] transition-colors"

@@ -34,7 +34,7 @@ export default function ExpertMedia({
             : undefined
         }
         aria-label={hasVideo ? `Watch ${doctorName}'s intro video` : undefined}
-        className={`relative w-[104px] h-[104px] sm:w-[190px] sm:h-[190px] rounded-2xl overflow-hidden shrink-0 ${
+        className={`relative w-[104px] h-[104px] md:w-[128px] md:h-[128px] lg:w-[150px] lg:h-[150px] rounded-2xl overflow-hidden shrink-0 ${
           hasVideo ? "cursor-pointer" : "cursor-default"
         }`}
       >
