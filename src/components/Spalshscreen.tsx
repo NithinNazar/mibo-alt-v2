@@ -12,11 +12,11 @@ const PremiumSplashScreen = ({ onComplete }: PremiumSplashScreenProps) => {
   );
 
   useEffect(() => {
-    const enterTimer = setTimeout(() => setAnimationPhase("reveal"), 2000);
+    const enterTimer = setTimeout(() => setAnimationPhase("reveal"), 1000);
     const exitTimer = setTimeout(() => {
       setIsVisible(false);
       onComplete();
-    }, 3500);
+    }, 1800);
 
     return () => {
       clearTimeout(enterTimer);
@@ -28,7 +28,7 @@ const PremiumSplashScreen = ({ onComplete }: PremiumSplashScreenProps) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center overflow-hidden transition-transform duration-[1600ms] ease-[cubic-bezier(0.77,0,0.175,1)] ${
+      className={`fixed inset-0 z-50 flex items-center justify-center overflow-hidden transition-transform duration-[800ms] ease-[cubic-bezier(0.77,0,0.175,1)] ${
         animationPhase === "reveal" ? "-translate-y-full" : "translate-y-0"
       }`}
       style={{
