@@ -163,9 +163,7 @@ function generateMockSlots(date: Date): TimeSlot[] {
   if (slotCount === 0) return [];
 
   const pool =
-    slotCount <= 2
-      ? ["11:00", "16:00"]
-      : ["09:00", "11:00", "14:00", "16:00"];
+    slotCount <= 2 ? ["11:00", "16:00"] : ["09:00", "11:00", "14:00", "16:00"];
 
   return pool.slice(0, slotCount).map((start) => {
     const [h, m] = start.split(":").map(Number);
@@ -384,26 +382,20 @@ export default function Step1SessionDetails({
 
         const realDates: { date: string; slotCount: number }[] =
           data.data || [];
-        const finalDates =
-          realDates.length > 0 ? realDates : generateMockDatesWithSlots();
-        setDatesWithSlots(finalDates);
+
+        // ✅ FIX: Only use real API data, no fallback to mock slots
+        setDatesWithSlots(realDates);
 
         // Auto-select first available date if no date is selected
-        if (!selectedDate && finalDates.length > 0) {
-          const firstDate = new Date(finalDates[0].date + "T00:00:00");
+        if (!selectedDate && realDates.length > 0) {
+          const firstDate = new Date(realDates[0].date + "T00:00:00");
           setSelectedDate(firstDate);
           console.log("Auto-selected first available date:", firstDate);
         }
       } catch (error) {
-        console.error(
-          "Error fetching dates with slots — falling back to dummy data:",
-          error,
-        );
-        const mockDates = generateMockDatesWithSlots();
-        setDatesWithSlots(mockDates);
-        if (!selectedDate && mockDates.length > 0) {
-          setSelectedDate(new Date(mockDates[0].date + "T00:00:00"));
-        }
+        console.error("Error fetching dates with slots:", error);
+        // ✅ FIX: Show empty state, no fallback to dummy data
+        setDatesWithSlots([]);
       } finally {
         setDatesLoading(false);
       }
@@ -451,18 +443,13 @@ export default function Step1SessionDetails({
           available: slot.available,
         }));
 
-        setAvailableSlots(
-          transformedSlots.length > 0
-            ? transformedSlots
-            : generateMockSlots(selectedDate),
-        );
+        // ✅ FIX: Only use real API data, no fallback to mock slots
+        setAvailableSlots(transformedSlots);
       } catch (error) {
-        console.error(
-          "Error fetching slots — falling back to dummy data:",
-          error,
-        );
+        console.error("Error fetching slots:", error);
         setSlotsError(null);
-        setAvailableSlots(generateMockSlots(selectedDate));
+        // ✅ FIX: Show empty state, no fallback to dummy slots
+        setAvailableSlots([]);
       } finally {
         setSlotsLoading(false);
       }
@@ -656,9 +643,7 @@ export default function Step1SessionDetails({
       {/* Main Content - Only show when clinician data is loaded */}
       {!clinicianLoading && (
         <>
-          <div 
-          className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10 h-fit"
-          >
+          <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10 h-fit">
             {/* <div className="mb-6 flex items-center gap-4">
               <div
                 className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14"
@@ -690,7 +675,10 @@ export default function Step1SessionDetails({
                     className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
                     style={{ background: MIBO.accentSoft }}
                   >
-                    <Users className="h-4.5 w-4.5" style={{ color: MIBO.primary }} />
+                    <Users
+                      className="h-4.5 w-4.5"
+                      style={{ color: MIBO.primary }}
+                    />
                   </span>
                   <h3
                     className="text-base font-bold"
@@ -744,7 +732,10 @@ export default function Step1SessionDetails({
                         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
                         style={{ background: MIBO.accentSoft }}
                       >
-                        <Clock className="h-4.5 w-4.5" style={{ color: MIBO.primary }} />
+                        <Clock
+                          className="h-4.5 w-4.5"
+                          style={{ color: MIBO.primary }}
+                        />
                       </span>
                       <h3
                         className="text-base font-bold"
@@ -755,7 +746,10 @@ export default function Step1SessionDetails({
                     </div>
                     <div
                       className="flex flex-col items-stretch overflow-hidden rounded-xl border shadow-sm sm:flex-row"
-                      style={{ borderColor: "#e5efeb", background: MIBO.accentSoft }}
+                      style={{
+                        borderColor: "#e5efeb",
+                        background: MIBO.accentSoft,
+                      }}
                     >
                       <div className="flex flex-1 items-center gap-2 px-4 py-3.5">
                         <Clock
@@ -766,8 +760,8 @@ export default function Step1SessionDetails({
                           className="text-sm font-semibold whitespace-nowrap"
                           style={{ color: MIBO.primary }}
                         >
-                          {selectedClinician.defaultDurationMinutes || 50}{" "}
-                          mins, 1 session
+                          {selectedClinician.defaultDurationMinutes || 50} mins,
+                          1 session
                         </span>
                       </div>
                       <div
@@ -908,74 +902,72 @@ export default function Step1SessionDetails({
                         ref={dateStripRef}
                         className="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-smooth py-1 sm:gap-3"
                       >
-                        {dateStrip.map(
-                          ({ date, key, availability, slots }) => {
-                            const { top, mid } = formatShort(date);
-                            const disabled = availability === "unavailable";
-                            const selected = selectedDate
-                              ? sameYMD(date, selectedDate)
-                              : false;
+                        {dateStrip.map(({ date, key, availability, slots }) => {
+                          const { top, mid } = formatShort(date);
+                          const disabled = availability === "unavailable";
+                          const selected = selectedDate
+                            ? sameYMD(date, selectedDate)
+                            : false;
 
-                            const base =
-                              "flex min-w-[72px] flex-col items-center justify-center gap-0.5 rounded-xl border px-2.5 py-2 text-center transition-all duration-200 sm:min-w-[84px] sm:px-3.5 sm:py-2.5";
-                            let cls = "";
-                            if (disabled) {
-                              cls =
-                                "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400";
-                            } else if (selected) {
-                              cls = "text-white shadow-md";
-                            } else {
-                              cls =
-                                "border-gray-200 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md";
-                            }
+                          const base =
+                            "flex min-w-[72px] flex-col items-center justify-center gap-0.5 rounded-xl border px-2.5 py-2 text-center transition-all duration-200 sm:min-w-[84px] sm:px-3.5 sm:py-2.5";
+                          let cls = "";
+                          if (disabled) {
+                            cls =
+                              "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400";
+                          } else if (selected) {
+                            cls = "text-white shadow-md";
+                          } else {
+                            cls =
+                              "border-gray-200 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md";
+                          }
 
-                            return (
-                              <button
-                                key={key}
-                                disabled={disabled}
-                                onClick={() => {
-                                  setSelectedDate(date);
-                                  setSelectedTime("");
-                                }}
-                                className={`${base} ${cls}`}
-                                style={
+                          return (
+                            <button
+                              key={key}
+                              disabled={disabled}
+                              onClick={() => {
+                                setSelectedDate(date);
+                                setSelectedTime("");
+                              }}
+                              className={`${base} ${cls}`}
+                              style={
+                                selected
+                                  ? {
+                                      background: MIBO.primary,
+                                      borderColor: MIBO.primary,
+                                    }
+                                  : {}
+                              }
+                            >
+                              <span
+                                className={`text-[10px] font-semibold uppercase tracking-wide ${
                                   selected
-                                    ? {
-                                        background: MIBO.primary,
-                                        borderColor: MIBO.primary,
-                                      }
-                                    : {}
-                                }
+                                    ? "text-white/80"
+                                    : disabled
+                                      ? "text-gray-400"
+                                      : "text-gray-500"
+                                }`}
                               >
-                                <span
-                                  className={`text-[10px] font-semibold uppercase tracking-wide ${
-                                    selected
-                                      ? "text-white/80"
-                                      : disabled
-                                        ? "text-gray-400"
-                                        : "text-gray-500"
-                                  }`}
-                                >
-                                  {top}
-                                </span>
-                                <span className="text-[13px] font-semibold">
-                                  {mid}
-                                </span>
-                                <span
-                                  className={`text-[10px] ${
-                                    selected
-                                      ? "text-white/80"
-                                      : disabled
-                                        ? "text-gray-400"
-                                        : "text-gray-500"
-                                  }`}
-                                >
-                                  {disabled ? "no slots" : `${slots} slots`}
-                                </span>
-                              </button>
-                            );
-                          },
-                        )}
+                                {top}
+                              </span>
+                              <span className="text-[13px] font-semibold">
+                                {mid}
+                              </span>
+                              <span
+                                className={`text-[10px] ${
+                                  selected
+                                    ? "text-white/80"
+                                    : disabled
+                                      ? "text-gray-400"
+                                      : "text-gray-500"
+                                }`}
+                              >
+                                {disabled ? "no slots" : `${slots} slots`}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
 
                       <button
@@ -1055,8 +1047,7 @@ export default function Step1SessionDetails({
                             </div>
                             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-2 xl:grid-cols-4">
                               {slots.map((slot) => {
-                                const active =
-                                  selectedTime === slot.start_time;
+                                const active = selectedTime === slot.start_time;
 
                                 return (
                                   <button
@@ -1117,8 +1108,8 @@ export default function Step1SessionDetails({
                   <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
                     <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-500" />
                     <p className="text-xs text-indigo-800">
-                      Please make sure you have selected Mode of Session,
-                      Date and Time before continuing
+                      Please make sure you have selected Mode of Session, Date
+                      and Time before continuing
                     </p>
                   </div>
 
@@ -1147,7 +1138,10 @@ export default function Step1SessionDetails({
                   </button>
 
                   {/* Mobile: floating pill button, centered at the bottom of the viewport */}
-                  <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 pt-2 sm:hidden" style={{ background: "white" }}>
+                  <div
+                    className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 pt-2 sm:hidden"
+                    style={{ background: "white" }}
+                  >
                     <button
                       onClick={handleContinue}
                       disabled={
@@ -1187,9 +1181,7 @@ export default function Step1SessionDetails({
                 {/* Modal header */}
                 <div className="flex-shrink-0 border-b border-gray-100 px-5 pb-3 pt-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-base font-semibold">
-                      Choose a date
-                    </div>
+                    <div className="text-base font-semibold">Choose a date</div>
                     <button
                       onClick={() => setCalendarOpen(false)}
                       className="rounded-lg p-2 hover:bg-gray-50"
