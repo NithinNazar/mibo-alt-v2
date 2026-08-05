@@ -22,6 +22,7 @@ export interface Doctor {
   language: string[];
   price: string;
   sessionTypes: string;
+  nextAvailableSlot?: string; // optional ISO date string; shown as "Next Available" when present
 }
 
 /**

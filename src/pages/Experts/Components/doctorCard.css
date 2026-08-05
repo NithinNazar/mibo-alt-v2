@@ -9,6 +9,9 @@
 }
 
 .animate-expertise-marquee {
+  /* Fallback duration used only for the brief instant before JS measures
+     the track and sets an explicit inline animation-duration (see
+     ExpertiseMarquee.tsx) so every card scrolls at the same px/s speed. */
   animation: expertise-marquee 26s linear infinite;
 }
 

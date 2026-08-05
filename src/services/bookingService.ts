@@ -120,7 +120,7 @@ class BookingService {
    * Retrieves all appointments for the authenticated patient.
    *
    * @returns Promise with appointments list
-   * @throws {AxiosError} If not authenticated
+   * @throws {AxiosError} If not authenticated 
    *
    * @example
    * ```typescript
