@@ -44,16 +44,38 @@ const apiClient: AxiosInstance = axios.create({
  * Automatically adds the JWT authentication token to all requests
  * if the user is authenticated. The token is retrieved from localStorage.
  *
+ * Public endpoints (no auth required) are excluded from automatic token addition.
+ *
  * @param config - Axios request configuration
  * @returns Modified request configuration with auth token
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // List of public endpoints that don't require authentication
+    const publicEndpoints = [
+      "/users/clinicians",
+      "/centres",
+      "/patient-auth/login",
+      "/patient-auth/signup",
+      "/patient-auth/verify-otp",
+      "/patient-auth/refresh-token",
+      "/booking/available-slots",
+      "/booking/dates-with-slots",
+      "/booking/next-available-slot",
+    ];
+
+    // Check if this is a public endpoint
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      config.url?.includes(endpoint),
+    );
+
     // Get authentication token from localStorage
     const token = localStorage.getItem("mibo_access_token");
 
-    // Add token to Authorization header if it exists
-    if (token && config.headers) {
+    // Add token to Authorization header only if:
+    // 1. Token exists
+    // 2. Not a public endpoint
+    if (token && config.headers && !isPublicEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -70,7 +92,7 @@ apiClient.interceptors.request.use(
  * Response Interceptor
  *
  * Handles API response errors and implements automatic error handling:
- * - 401 Unauthorized: Try to refresh token, then retry request
+ * - 401 Unauthorized: Try to refresh token, then retry request (ONLY for protected endpoints)
  * - Network errors: Return user-friendly error message
  * - Other errors: Pass through for component-level handling
  *
@@ -88,8 +110,33 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
+    // List of public endpoints that don't require authentication
+    // (same list as in request interceptor)
+    const publicEndpoints = [
+      "/users/clinicians",
+      "/centres",
+      "/patient-auth/login",
+      "/patient-auth/signup",
+      "/patient-auth/verify-otp",
+      "/patient-auth/refresh-token",
+      "/booking/available-slots",
+      "/booking/dates-with-slots",
+      "/booking/next-available-slot",
+    ];
+
+    // Check if this is a public endpoint
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      originalRequest.url?.includes(endpoint),
+    );
+
     // Handle 401 Unauthorized - token expired or invalid
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // BUT: Do NOT handle 401 on public endpoints (they shouldn't return 401 anyway,
+    // but if they do, it's a server error, not an auth issue - don't redirect)
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isPublicEndpoint
+    ) {
       originalRequest._retry = true;
 
       try {
