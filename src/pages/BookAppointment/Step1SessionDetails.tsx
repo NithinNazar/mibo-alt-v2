@@ -104,78 +104,30 @@ function formatShort(d: Date) {
   return { top: day, mid: `${dd} ${mon}` };
 }
 
-/** Create a static-but-natural looking availability map for a month */
-function makeMonthAvailability(seedMonth: Date): Record<string, Availability> {
+/**
+ * Build a per-day availability map for the calendar UI from REAL
+ * `/booking/dates-with-slots` data. Days not present in `datesWithSlots`
+ * (including days outside the fetched 60-day window) are treated as
+ * unavailable rather than guessed — no synthetic/random data.
+ */
+function makeMonthAvailability(
+  seedMonth: Date,
+  datesWithSlots: { date: string; slotCount: number }[],
+): Record<string, Availability> {
   const first = startOfMonth(seedMonth);
   const last = endOfMonth(seedMonth);
+  const slotCountByDate = new Map(
+    datesWithSlots.map((d) => [d.date, d.slotCount]),
+  );
   const map: Record<string, Availability> = {};
   for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
     const date = new Date(d);
-    const dow = date.getDay();
-    // Weekend: fewer/unavailable more often
-    let status: Availability;
-    if (dow === 0) status = "unavailable";
-    else if (dow === 6) status = "few";
-    else {
-      // Weekdays: mix
-      const r = (date.getDate() * 7 + (seedMonth.getMonth() + 1)) % 10;
-      status = r < 2 ? "few" : r < 8 ? "available" : "unavailable";
-    }
-    map[toISODateKey(date)] = status;
+    const key = toISODateKey(date);
+    const slotCount = slotCountByDate.get(key) ?? 0;
+    map[key] =
+      slotCount === 0 ? "unavailable" : slotCount <= 2 ? "few" : "available";
   }
   return map;
-}
-
-/**
- * Deterministic "slot count" for a given date — shared by both mock generators
- * below so the date-strip count always matches the actual mock slots returned.
- * No backend required; purely derived from the date itself.
- */
-function mockSlotCountForDate(d: Date): number {
-  const dow = d.getDay();
-  if (dow === 0) return 0; // Sunday — no slots, like the reference design
-  const seed = (d.getDate() * 7 + dow) % 10;
-  if (seed < 3) return 0;
-  if (seed < 6) return 2;
-  return 4;
-}
-
-/** Dummy replacement for the `/booking/dates-with-slots` endpoint. */
-function generateMockDatesWithSlots(
-  days = 14,
-): { date: string; slotCount: number }[] {
-  const today = new Date();
-  const result: { date: string; slotCount: number }[] = [];
-  for (let i = 0; i < days; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const slotCount = mockSlotCountForDate(d);
-    if (slotCount > 0) {
-      result.push({ date: toISODateKey(d), slotCount });
-    }
-  }
-  return result;
-}
-
-/** Dummy replacement for the `/booking/available-slots` endpoint. */
-function generateMockSlots(date: Date): TimeSlot[] {
-  const slotCount = mockSlotCountForDate(date);
-  if (slotCount === 0) return [];
-
-  const pool =
-    slotCount <= 2 ? ["11:00", "16:00"] : ["09:00", "11:00", "14:00", "16:00"];
-
-  return pool.slice(0, slotCount).map((start) => {
-    const [h, m] = start.split(":").map(Number);
-    const endMinutesTotal = h * 60 + m + 50;
-    const endH = Math.floor(endMinutesTotal / 60) % 24;
-    const endM = endMinutesTotal % 60;
-    return {
-      start_time: start,
-      end_time: `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`,
-      available: true,
-    };
-  });
 }
 
 export default function Step1SessionDetails({
@@ -191,14 +143,12 @@ export default function Step1SessionDetails({
   // Date/time state (preserve previous if any)
   const initialDate = bookingData.date ? new Date(bookingData.date) : null;
   const today = new Date();
-  const initialAvailableToday = makeMonthAvailability(startOfMonth(today));
-  const todayKey = toISODateKey(today);
-  const isTodayAvailable =
-    initialAvailableToday[todayKey] &&
-    initialAvailableToday[todayKey] !== "unavailable";
-
+  // Real availability isn't known yet on first render (it depends on the
+  // `/booking/dates-with-slots` API call below), so default to showing
+  // today and let the slots/dates effects correct the selection once real
+  // data arrives.
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    initialDate ?? (isTodayAvailable ? today : null),
+    initialDate ?? today,
   );
   const [selectedTime, setSelectedTime] = useState<string>(
     bookingData.time || "",
@@ -264,8 +214,8 @@ export default function Step1SessionDetails({
         if (centreResponse.ok) {
           const centreData = await centreResponse.json();
           setSelectedCentre(centreData.data);
-        } else {
-          // Fallback centre data if API fails
+        } else if (import.meta.env.DEV) {
+          // Dev-only fallback centre data if the centre API fails.
           setSelectedCentre({
             id: clinicianData.primaryCentreId,
             name: clinicianData.primaryCentreName,
@@ -276,39 +226,53 @@ export default function Step1SessionDetails({
             contact_phone: "+919876543210",
             is_active: true,
           });
+        } else {
+          // Production: surface the real failure instead of a fabricated
+          // centre record.
+          throw new Error("Failed to fetch centre details");
         }
       } catch (error) {
         console.error("Error fetching clinician data:", error);
-        // Set fallback data to prevent UI from breaking
-        setSelectedClinician({
-          id: doctor.id,
-          userId: Number(doctor.id),
-          fullName: doctor.name,
-          phone: "+919876543210",
-          email: null,
-          primaryCentreId: 1,
-          primaryCentreName: `Mibo ${doctor.location}`,
-          specialization: doctor.designation,
-          registrationNumber: null,
-          yearsOfExperience: parseInt(doctor.experience) || 5,
-          consultationFee: 1600,
-          defaultDurationMinutes: 50,
-          bio: null,
-          qualification: null,
-          expertise: [],
-          languages: [],
-          isActive: true,
-        });
-        setSelectedCentre({
-          id: 1,
-          name: `Mibo ${doctor.location}`,
-          city: doctor.location.toLowerCase() as any,
-          address_line_1: `${doctor.location} Centre`,
-          address_line_2: null,
-          pincode: "560001",
-          contact_phone: "+919876543210",
-          is_active: true,
-        });
+        if (import.meta.env.DEV) {
+          // Dev-only fallback so the UI is still usable without a running
+          // backend. Never used in production — real bookings must be tied
+          // to a real clinician/centre record.
+          setSelectedClinician({
+            id: doctor.id,
+            userId: Number(doctor.id),
+            fullName: doctor.name,
+            phone: "+919876543210",
+            email: null,
+            primaryCentreId: 1,
+            primaryCentreName: `Mibo ${doctor.location}`,
+            specialization: doctor.designation,
+            registrationNumber: null,
+            yearsOfExperience: parseInt(doctor.experience) || 5,
+            consultationFee: 1600,
+            defaultDurationMinutes: 50,
+            bio: null,
+            qualification: null,
+            expertise: [],
+            languages: [],
+            isActive: true,
+          });
+          setSelectedCentre({
+            id: 1,
+            name: `Mibo ${doctor.location}`,
+            city: doctor.location.toLowerCase() as any,
+            address_line_1: `${doctor.location} Centre`,
+            address_line_2: null,
+            pincode: "560001",
+            contact_phone: "+919876543210",
+            is_active: true,
+          });
+        } else {
+          // Production: don't fabricate a clinician/centre. Leave both
+          // null so the UI shows a real error state instead of letting
+          // someone book against fake data.
+          setSelectedClinician(null);
+          setSelectedCentre(null);
+        }
       } finally {
         setClinicianLoading(false);
       }
@@ -338,10 +302,10 @@ export default function Step1SessionDetails({
 
   // ========== COMPUTED VALUES ==========
 
-  /** Month availability map - for calendar UI */
+  /** Month availability map - for calendar UI, derived from real API data */
   const availabilityMap = useMemo(
-    () => makeMonthAvailability(calendarMonth),
-    [calendarMonth],
+    () => makeMonthAvailability(calendarMonth, datesWithSlots),
+    [calendarMonth, datesWithSlots],
   );
 
   // ========== FETCH DATES WITH SLOTS FROM API ==========
@@ -593,9 +557,13 @@ export default function Step1SessionDetails({
           ? "PHONE"
           : "IN_PERSON";
 
-    // Use real data from API
-    const durationMinutes = selectedClinician.defaultDurationMinutes || 50;
-    const consultationFee = selectedClinician.consultationFee || 1600;
+    // Use real data from API. consultationFee is a required field on a
+    // real clinician record — never fabricate it. defaultDurationMinutes
+    // is optional in the type; only dev gets a placeholder if it's missing.
+    const durationMinutes =
+      selectedClinician.defaultDurationMinutes ??
+      (import.meta.env.DEV ? 50 : 0);
+    const consultationFee = selectedClinician.consultationFee;
 
     // Format date as YYYY-MM-DD to avoid timezone issues
     const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
@@ -640,8 +608,26 @@ export default function Step1SessionDetails({
         </div>
       )}
 
+      {/* Error State - clinician/centre could not be loaded from the backend */}
+      {!clinicianLoading && (!selectedClinician || !selectedCentre) && (
+        <div className="flex flex-col items-center justify-center py-24 text-center px-4">
+          <p className="text-lg text-red-600 mb-2">
+            We couldn't load this clinician's details right now.
+          </p>
+          <p className="text-sm text-[#3a463f] mb-6">
+            Please go back and try again in a moment.
+          </p>
+          <button
+            onClick={onBack}
+            className="px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#0b5940] transition"
+          >
+            Back
+          </button>
+        </div>
+      )}
+
       {/* Main Content - Only show when clinician data is loaded */}
-      {!clinicianLoading && (
+      {!clinicianLoading && selectedClinician && selectedCentre && (
         <>
           <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10 h-fit">
             {/* <div className="mb-6 flex items-center gap-4">
@@ -760,8 +746,9 @@ export default function Step1SessionDetails({
                           className="text-sm font-semibold whitespace-nowrap"
                           style={{ color: MIBO.primary }}
                         >
-                          {selectedClinician.defaultDurationMinutes || 50} mins,
-                          1 session
+                          {selectedClinician.defaultDurationMinutes ??
+                            (import.meta.env.DEV ? 50 : 0)}{" "}
+                          mins, 1 session
                         </span>
                       </div>
                       <div
@@ -777,7 +764,7 @@ export default function Step1SessionDetails({
                           className="text-sm font-semibold whitespace-nowrap"
                           style={{ color: MIBO.primary }}
                         >
-                          {selectedClinician.consultationFee || 1600} / session
+                          {selectedClinician.consultationFee} / session
                         </span>
                       </div>
                     </div>

@@ -38,14 +38,35 @@ import ExpertMedia from "./Components/ExpertMedia";
 import "./Components/doctorCard.css";
 import clinicianService from "../../services/clinicianService";
 import centreService from "../../services/centreService";
+import { API_BASE_URL } from "../../services/api";
 import StickySearchBar from "../../components/StickySearchBar";
 import { useScrollDirection } from "../../hooks/useScrollDirection";
-import type { Doctor } from "./data/doctors";
-import { dummyDoctors } from "./data/dummyDoctors";
+// --- The Doctor type is shared between ExpertsPage and the BookAppointment flow ---
+// import type { Doctor } from "./data/doctors";
+// import { dummyDoctors } from "./data/dummyDoctors";
 
 import iso from "./assets/iso.jpeg";
 import hipaa from "./assets/hippa.jpeg";
 import gdpr from "./assets/eu.jpeg";
+
+/**
+ * Format the backend's clinician gender enum (MALE/FEMALE/OTHER) into a
+ * display label. Returns null when gender isn't set on the record, so
+ * callers can conditionally omit the UI element entirely rather than
+ * showing an empty/placeholder value.
+ */
+function formatGender(gender?: "MALE" | "FEMALE" | "OTHER" | null): string | null {
+  switch (gender) {
+    case "MALE":
+      return "Male";
+    case "FEMALE":
+      return "Female";
+    case "OTHER":
+      return "Other";
+    default:
+      return null;
+  }
+}
 
 const CATEGORIES = [
   { label: "All Experts", icon: Users },
@@ -115,9 +136,15 @@ function FilterDropdown({
 export default function ExpertsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  // --- USE_DUMMY_DOCTORS is a temporary flag to use hardcoded doctor data for
+  //  development and testing. In production, this should be set to false to
+  //  fetch real data from the backend. ---
+  // const USE_DUMMY_DOCTORS = true;
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [copiedDoctorId, setCopiedDoctorId] = useState<string | number | null>(
     null,
   );
@@ -189,6 +216,7 @@ export default function ExpertsPage() {
     Expertise: [],
     Language: [],
     Price: [],
+    Gender: [],
   });
 
   // --- Filter dropdown state ---
@@ -224,6 +252,16 @@ export default function ExpertsPage() {
   const parseExperience = (exp: string) =>
     parseInt(exp.replace(/[^0-9]/g, ""), 10) || 0;
 
+  // Fixed price bands rather than one option per exact fee — clinician fees
+  // vary continuously from the backend, so bucketing into ranges gives a
+  // usable filter instead of a dropdown with a different entry per doctor.
+  const PRICE_BANDS: { label: string; test: (price: number) => boolean }[] = [
+    { label: "Under ₹1,000", test: (p) => p < 1000 },
+    { label: "₹1,000 - ₹2,000", test: (p) => p >= 1000 && p <= 2000 },
+    { label: "₹2,000 - ₹3,000", test: (p) => p > 2000 && p <= 3000 },
+    { label: "Above ₹3,000", test: (p) => p > 3000 },
+  ];
+
   const FILTER_OPTIONS: Record<string, string[]> = {
     Location: ["Bangalore", "Kochi", "Mumbai"],
     Expertise: [
@@ -255,7 +293,8 @@ export default function ExpertsPage() {
       "Telugu",
       "Marathi",
     ],
-    Price: ["₹1600/session"],
+    Price: PRICE_BANDS.map((band) => band.label),
+    Gender: ["Male", "Female", "Other"],
   };
 
   // Maps the visible pill label to the key used in selectedFilters state
@@ -264,6 +303,7 @@ export default function ExpertsPage() {
     Expertise: "Expertise",
     Languages: "Language",
     Price: "Price",
+    Gender: "Gender",
   };
 
   const toggleFilterOption = (filterKey: string, value: string) => {
@@ -370,15 +410,23 @@ export default function ExpertsPage() {
     try {
       setLoading(true);
 
+      // --- USE_DUMMY_DOCTORS is a temporary flag to use hardcoded doctor data for
+      //  development and testing. In production, this should be set to false to fetch real data from the backend. ---
+      // if (USE_DUMMY_DOCTORS) {
+      //   setDoctors(dummyDoctors);
+      //   setLoading(false);
+      //   return;
+      // }
+
       // Fetch clinicians and the authoritative centre list (id -> city) in
       // parallel. The centre list is the only reliable source of truth for
       // "which city is this clinician's centre actually in" — clinician
       // records only carry a `primaryCentreId` FK, not a normalized city.
+      // Both calls hit the real backend with no fallback data — if either
+      // fails, the catch block below surfaces a real error/empty state.
       const [clinicians, centres] = await Promise.all([
         clinicianService.getClinicians(),
-        centreService
-          .getCentres()
-          .catch(() => centreService.getFallbackCentres()),
+        centreService.getCentres(),
       ]);
 
       // Map: centre id -> proper-cased city label ("Bangalore" | "Kochi" | "Mumbai")
@@ -500,33 +548,80 @@ export default function ExpertsPage() {
           sessionTypes: getSessionTypes(
             c.consultationModes || c.consultation_modes || [],
           ),
+          // Real value from the backend (clinician_profiles.gender via
+          // GET /api/clinicians) — MALE, FEMALE, OTHER, or null/undefined
+          // if not set on the clinician's record. Never inferred or
+          // defaulted client-side.
+          gender: c.gender ?? null,
         };
 
         return transformed;
       });
 
-      setDoctors(
-        transformedDoctors.length > 0 ? transformedDoctors : dummyDoctors,
-      );
-    } catch (error: any) {
-      if (import.meta.env.DEV) {
-        //
-        console.warn(
-          "Clinicians API unavailable — using local dummy data instead:",
-          {
-            message: error.message,
-            code: error.code,
-            status: error.response?.status,
-            url: error.config?.url,
-          },
-        );
+      // Show doctors immediately, then enrich with each one's real
+      // "next available slot" from the backend (non-blocking — a slow or
+      // failed lookup for one doctor just means their badge stays hidden).
+      // An empty array here is a legitimate state (no active clinicians
+      // yet) and renders the normal "no experts found" empty state below —
+      // never substituted with fake data.
+      setFetchError(null);
+      setDoctors(transformedDoctors);
+      if (transformedDoctors.length > 0) {
+        void enrichWithNextAvailableSlot(transformedDoctors);
       }
-      // API unreachable, empty, or errored — fall back to dummy data
-      // seamlessly. Same Doctor[] shape either way, so the UI is unaffected.
-      setDoctors(dummyDoctors);
+    } catch (error: any) {
+      // Real API failure — surface an error state instead of fabricated
+      // doctors, in both dev and production.
+      console.error("Clinicians API unavailable:", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        url: error.config?.url,
+      });
+      setDoctors([]);
+      setFetchError(
+        "We couldn't load our experts right now. Please try again in a moment.",
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Fetch each doctor's real next-available-slot from
+   * `/booking/next-available-slot` and merge it in. Runs after the initial
+   * doctor list is shown so the grid isn't blocked on N extra requests.
+   */
+  const enrichWithNextAvailableSlot = async (list: Doctor[]) => {
+    const results = await Promise.allSettled(
+      list.map(async (doc) => {
+        const response = await fetch(
+          `${API_BASE_URL}/booking/next-available-slot?clinicianId=${doc.id}`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch next slot");
+        const json = await response.json();
+        const slot = json?.data as { date: string; time: string } | null;
+        if (!slot?.date || !slot?.time) return null;
+        return { id: doc.id, nextAvailableSlot: `${slot.date}T${slot.time}` };
+      }),
+    );
+
+    const slotById = new Map<string | number, string>();
+    results.forEach((result) => {
+      if (result.status === "fulfilled" && result.value) {
+        slotById.set(result.value.id, result.value.nextAvailableSlot);
+      }
+    });
+
+    if (slotById.size === 0) return;
+
+    setDoctors((prev) =>
+      prev.map((d) =>
+        slotById.has(d.id)
+          ? { ...d, nextAvailableSlot: slotById.get(d.id) }
+          : d,
+      ),
+    );
   };
 
   // Determine session types based on available consultation modes
@@ -616,10 +711,23 @@ export default function ExpertsPage() {
       );
     }
 
-    // Filter by Price
+    // Filter by Price (band match, since fees vary per doctor)
     if (selectedFilters.Price.length > 0) {
+      filtered = filtered.filter((doc) => {
+        const docPrice = parsePrice(doc.price);
+        return selectedFilters.Price.some((bandLabel) => {
+          const band = PRICE_BANDS.find((b) => b.label === bandLabel);
+          return band ? band.test(docPrice) : false;
+        });
+      });
+    }
+
+    // Filter by Gender — matched against the real backend value via
+    // formatGender(); doctors with no gender set never match a selected
+    // option (never guessed or defaulted).
+    if (selectedFilters.Gender.length > 0) {
       filtered = filtered.filter((doc) =>
-        selectedFilters.Price.includes(doc.price),
+        selectedFilters.Gender.includes(formatGender(doc.gender) || ""),
       );
     }
 
@@ -704,7 +812,7 @@ export default function ExpertsPage() {
                   { label: "Expertise", icon: Star },
                   { label: "Languages", icon: Globe },
                   { label: "Price", icon: Tag },
-                  { label: "Gender", icon: UserRound },
+                  { label: "Gender", icon: User },
                 ].map(({ label, icon: Icon }) => {
                   const filterKey = FILTER_KEY_MAP[label];
                   const activeCount = filterKey
@@ -762,6 +870,7 @@ export default function ExpertsPage() {
                       Expertise: [],
                       Language: [],
                       Price: [],
+                      Gender: [],
                     });
                     setSortBy(null);
                     setOpenFilter(null);
@@ -887,6 +996,12 @@ export default function ExpertsPage() {
                         <MapPin className="w-[13px] h-[13px] shrink-0" />
                         {doc.location}
                       </span>
+                      {formatGender(doc.gender) && (
+                        <span className="flex items-center gap-1 text-[#637268] font-medium shrink-0">
+                          <User className="w-[13px] h-[13px] shrink-0" />
+                          {formatGender(doc.gender)}
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-col gap-1.5 text-[12.5px] leading-[1.3] text-[#3a463f] mb-2.5 font-semibold">
                       <div className="flex items-center gap-1.5 whitespace-nowrap">
@@ -1027,8 +1142,30 @@ export default function ExpertsPage() {
               </div>
             );
           })
+        ) : fetchError ? (
+          // Real API failure — distinct from "no results for your filters"
+          // so users aren't told to clear filters when the problem is the
+          // backend being unreachable.
+          <div className="col-span-1 xl:col-span-2 text-center py-12 px-4">
+            <p className="text-[#637268] text-base sm:text-lg">
+              {fetchError}
+            </p>
+            <button
+              onClick={() => fetchClinicians()}
+              className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : doctors.length === 0 ? (
+          // No clinicians currently active in the backend.
+          <div className="col-span-1 xl:col-span-2 text-center py-12 px-4">
+            <p className="text-[#637268] text-base sm:text-lg">
+              No experts are available right now. Please check back soon.
+            </p>
+          </div>
         ) : (
-          // No experts found message with a button to clear all filters
+          // Doctors exist, but none match the current filters
           <div className="col-span-1 xl:col-span-2 text-center py-12 px-4">
             <p className="text-[#637268] text-base sm:text-lg">
               No experts found matching your filters.
@@ -1041,6 +1178,7 @@ export default function ExpertsPage() {
                   Expertise: [],
                   Language: [],
                   Price: [],
+                  Gender: [],
                 });
               }}
               className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"
@@ -1241,9 +1379,17 @@ export default function ExpertsPage() {
                   <div className="text-[#0e6b4f] text-[13.5px] font-bold mb-1">
                     {selectedProfile.designation}
                   </div>
-                  <div className="flex items-center gap-1 text-[12.5px] text-[#637268] font-medium">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {selectedProfile.location}
+                  <div className="flex items-center gap-3 text-[12.5px] text-[#637268] font-medium flex-wrap">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {selectedProfile.location}
+                    </span>
+                    {formatGender(selectedProfile.gender) && (
+                      <span className="flex items-center gap-1">
+                        <User className="w-3.5 h-3.5" />
+                        {formatGender(selectedProfile.gender)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

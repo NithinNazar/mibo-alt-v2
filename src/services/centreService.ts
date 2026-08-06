@@ -5,12 +5,14 @@
  * It provides methods to:
  * - Fetch all centres
  * - Get individual centre details
- * - Fallback to hardcoded data if API fails
+ * - Fall back to hardcoded data in development only, if the API fails
  *
  * Fallback Strategy:
  * - Primary: Fetch centres from backend API
- * - Fallback: Use hardcoded centre data for Bangalore, Mumbai, and Kochi
- * - This ensures the booking flow works even if the centres API is unavailable
+ * - Dev-only fallback: Use hardcoded centre data for Bangalore, Mumbai, and
+ *   Kochi so the app is browsable without a running backend
+ * - Production: never falls back to fabricated data — a failed request
+ *   throws so the UI can show a real error/empty state
  *
  * @module services/centreService
  */
@@ -101,12 +103,19 @@ class CentreService {
       console.log("Centres fetched from API successfully");
       return response.data.data;
     } catch (error) {
-      // API call failed - use fallback data
-      console.warn(
-        "Failed to fetch centres from API, using fallback data:",
-        error
-      );
-      return this.fallbackCentres;
+      if (import.meta.env.DEV) {
+        // Dev-only fallback so the UI is still browsable without a
+        // running backend. Never used in production.
+        console.warn(
+          "Failed to fetch centres from API, using dev fallback data:",
+          error
+        );
+        return this.fallbackCentres;
+      }
+      // Production: surface the real failure instead of fabricated
+      // centre data (fake addresses/phone numbers).
+      console.error("Failed to fetch centres from API:", error);
+      throw error;
     }
   }
 
@@ -143,21 +152,25 @@ class CentreService {
       console.log(`Centre ${id} fetched from API successfully`);
       return response.data.data;
     } catch (error) {
-      // API call failed - try fallback data
-      console.warn(
-        `Failed to fetch centre ${id} from API, checking fallback data:`,
-        error
-      );
+      if (import.meta.env.DEV) {
+        // Dev-only fallback so the UI is still browsable without a
+        // running backend. Never used in production.
+        console.warn(
+          `Failed to fetch centre ${id} from API, checking dev fallback data:`,
+          error
+        );
 
-      const fallbackCentre = this.fallbackCentres.find((c) => c.id === id);
+        const fallbackCentre = this.fallbackCentres.find((c) => c.id === id);
 
-      if (fallbackCentre) {
-        console.log(`Using fallback data for centre ${id}`);
-        return fallbackCentre;
+        if (fallbackCentre) {
+          console.log(`Using dev fallback data for centre ${id}`);
+          return fallbackCentre;
+        }
       }
 
-      // Centre not found in fallback data either
-      console.error(`Centre ${id} not found in API or fallback data`);
+      // Production (or dev with no matching fallback): surface the real
+      // failure instead of fabricated centre data.
+      console.error(`Centre ${id} not found or API failed:`, error);
       throw error;
     }
   }
@@ -209,7 +222,9 @@ class CentreService {
    * Get fallback centres
    *
    * Returns the hardcoded fallback centre data without making an API call.
-   * Useful for testing or when you explicitly want to use fallback data.
+   * Intended for development/testing use only — callers must not use this
+   * in a production code path (see getCentres/getCentreById, which already
+   * gate their own fallback behind import.meta.env.DEV).
    *
    * @returns Array of fallback centres
    *

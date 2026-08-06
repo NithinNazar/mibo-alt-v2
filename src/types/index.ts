@@ -43,6 +43,13 @@ export interface AuthTokens {
 // ============================================================================
 
 /**
+ * Clinician gender, as stored by the backend (clinician_profiles.gender).
+ * Distinct from the broader patient `Gender` type below — the clinician
+ * table's CHECK constraint only allows these three values.
+ */
+export type ClinicianGender = "MALE" | "FEMALE" | "OTHER";
+
+/**
  * Clinician (doctor/therapist) object
  * Represents a healthcare professional who provides consultations
  */
@@ -67,6 +74,7 @@ export interface Clinician {
   profileVideoUrl?: string; // video introduction URL 
   consultationModes?: string[];
   defaultDurationMinutes?: number;
+  gender?: ClinicianGender | null;
 }
 
 /**

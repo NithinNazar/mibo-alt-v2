@@ -255,6 +255,8 @@ export default function Step3ConfirmBooking({
   const [hasPaidRegistrationFee, setHasPaidRegistrationFee] =
     useState<boolean>(true);
   const [loadingFeeStatus, setLoadingFeeStatus] = useState<boolean>(true);
+  // Fee status error state (true if backend failed to return fee info)
+  const [feeStatusError, setFeeStatusError] = useState<boolean>(false);
 
   // Patient notes state
   const [patientNotes, setPatientNotes] = useState<string>("");
@@ -264,6 +266,7 @@ export default function Step3ConfirmBooking({
     const fetchRegistrationFeeStatus = async () => {
       try {
         setLoadingFeeStatus(true);
+        setFeeStatusError(false);
         const accessToken = localStorage.getItem("mibo_access_token");
 
         if (!accessToken) {
@@ -290,16 +293,24 @@ export default function Step3ConfirmBooking({
           const data = await response.json();
           setHasPaidRegistrationFee(data.data.hasPaidRegistrationFee);
           setRegistrationFee(data.data.registrationFee);
-        } else {
-          // If API fails, assume new user for safety
+        } else if (import.meta.env.DEV) {
+          // Dev-only fallback so the flow is still testable without a
+          // running backend.
           setHasPaidRegistrationFee(false);
           setRegistrationFee(100);
+        } else {
+          // Production: don't fabricate a fee — surface a real error
+          // state so the user isn't shown/charged a made-up amount.
+          setFeeStatusError(true);
         }
       } catch (error) {
         console.error("Error fetching registration fee status:", error);
-        // If error, assume new user for safety
-        setHasPaidRegistrationFee(false);
-        setRegistrationFee(100);
+        if (import.meta.env.DEV) {
+          setHasPaidRegistrationFee(false);
+          setRegistrationFee(100);
+        } else {
+          setFeeStatusError(true);
+        }
       } finally {
         setLoadingFeeStatus(false);
       }
@@ -308,8 +319,10 @@ export default function Step3ConfirmBooking({
     fetchRegistrationFeeStatus();
   }, []);
 
-  // Calculate total amount
-  const consultationFee = bookingData.amount || bookingData.price || 1600;
+  // Calculate total amount. consultationFee falls back to the doctor's
+  // listed price only if bookingData didn't carry an amount through —
+  // this is real data from earlier in the flow, not fabricated.
+  const consultationFee = bookingData.amount || bookingData.price || 0;
   const totalAmount = consultationFee + registrationFee;
 
   /**
@@ -627,6 +640,46 @@ export default function Step3ConfirmBooking({
   };
 
   // Render different views based on payment step
+
+  // Registration-fee status couldn't be loaded from the backend in
+  // production (no dev fallback applies here) — show a real error state
+  // instead of letting the user proceed with a fabricated fee.
+  if (feeStatusError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#eef6f2] text-[#0a2e23] p-6">
+        <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-12 h-12 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-red-800 mb-2">
+              Couldn't Load Booking Details
+            </h2>
+            <p className="text-gray-600 mb-4">
+              We couldn't confirm the fees for this booking right now.
+              Please try again in a moment.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 bg-[#0e6b4f] text-white font-semibold rounded-full hover:bg-[#0b5940] transition-all"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={onBack}
+              className="w-full py-3 border border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-all"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (paymentStep === "failed") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#eef6f2] text-[#0a2e23] p-6">

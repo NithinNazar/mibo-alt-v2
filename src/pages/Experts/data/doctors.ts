@@ -1,8 +1,9 @@
 // src/pages/Experts/data/doctors.ts
 /**
  * Doctor type definition for Experts page
- * Clinician data is now fetched from the database via API
- * This file only maintains the type definition for backward compatibility
+ * Clinician data is fetched from the database via clinicianService — this
+ * file only maintains the shared type definition consumed by ExpertsPage
+ * and the BookAppointment flow.
  */
 
 export interface Doctor {
@@ -23,11 +24,8 @@ export interface Doctor {
   price: string;
   sessionTypes: string;
   nextAvailableSlot?: string; // optional ISO date string; shown as "Next Available" when present
+  // Clinician gender as returned by the backend (clinician_profiles.gender:
+  // MALE, FEMALE, or OTHER). Optional/nullable since older records may not
+  // have it set. Never fabricate this — only render what the API returns.
+  gender?: "MALE" | "FEMALE" | "OTHER" | null;
 }
-
-/**
- * @deprecated Static doctor data is no longer used
- * Clinicians are now managed through the admin panel and fetched from database
- * This export is kept for backward compatibility only
- */
-export const doctors: Doctor[] = [];

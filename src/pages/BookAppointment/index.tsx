@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import clinicianService from "../../services/clinicianService";
 import authService from "../../services/authService";
 import type { Doctor } from "../Experts/data/doctors";
-import { dummyDoctors } from "../Experts/data/dummyDoctors";
 import Step1SessionDetails from "./Step1SessionDetails";
 import Step2PhoneVerification from "./Step2PhoneVerification";
 import Step3ConfirmBooking from "./Step3ConfirmBooking";
@@ -32,15 +31,8 @@ export default function BookAppointment() {
   // Fetch doctor data on mount and when doctorId changes
   useEffect(() => {
     const fetchDoctor = async () => {
-      // If no doctorId is provided, fall back to the first dummy doctor
+      // A real doctorId is always required — no dummy fallback.
       if (!doctorId) {
-        const dummy = dummyDoctors[0]; 
-        if (dummy) {
-          console.warn("No doctor ID provided — using dummy doctor data.");
-          setDoctor(dummy);
-          setLoading(false);
-          return;
-        }
         setError("No doctor ID provided");
         setLoading(false);
         return;
@@ -48,29 +40,16 @@ export default function BookAppointment() {
 
       try {
         setLoading(true);
-        // Fetch all clinicians and find the matching one
-        const clinicians = await clinicianService.getClinicians();
-
-        // Find clinician by ID (handle both string and number IDs)
-        const clinician = clinicians.find(
-          (c: any) =>
-            String(c.id) === String(doctorId) ||
-            parseInt(c.id) === parseInt(doctorId),
+        // Fetch only the single clinician being booked, instead of the
+        // entire clinician list — much faster than fetching everyone
+        // just to find one by ID.
+        const clinician = await clinicianService.getClinicianById(
+          parseInt(doctorId),
         );
 
         if (!clinician) {
-          // No matching real clinician (or none at all) — fall back to dummy data
-          const dummy =
-            dummyDoctors.find((d) => String(d.id) === String(doctorId)) ||
-            dummyDoctors[0];
-          if (dummy) {
-            console.warn(
-              "Clinician not found via API — using dummy doctor data instead.",
-            );
-            setDoctor(dummy);
-            setLoading(false);
-            return;
-          }
+          // No matching real clinician — show a real "not found" error
+          // instead of a fabricated doctor.
           setError("Doctor not found");
           setLoading(false);
           return;
@@ -100,24 +79,18 @@ export default function BookAppointment() {
           language: clinician.languages || ["English"],
           price: `₹${clinician.consultationFee || 0}/session`,
           sessionTypes: getSessionTypes(clinician.consultationModes || []),
+          // Real value from the backend, kept for consistency with the
+          // Doctor type — not currently displayed in the booking flow.
+          gender: clinician.gender ?? null,
         };
 
         setDoctor(transformedDoctor);
         setLoading(false);
       } catch (err) {
-        // API unreachable (e.g. no backend running) — fall back to dummy data
-        console.warn(
-          "Failed to fetch doctor from API — using dummy doctor data instead:",
-          err,
-        );
-        const dummy =
-          dummyDoctors.find((d) => String(d.id) === String(doctorId)) ||
-          dummyDoctors[0];
-        if (dummy) {
-          setDoctor(dummy);
-        } else {
-          setError("Failed to load doctor information");
-        }
+        // API unreachable — a real failure, surfaced as an error state
+        // rather than silently swapped for fake data.
+        console.error("Failed to fetch doctor from API:", err);
+        setError("Failed to load doctor information");
         setLoading(false);
       }
     };
