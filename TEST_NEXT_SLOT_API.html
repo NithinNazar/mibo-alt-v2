@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Next Available Slot API</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      .info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 10px;
+        overflow-x: auto;
+        border-radius: 3px;
+      }
+      h2 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Next Available Slot API Tester</h1>
+
+    <div class="test-section info">
+      <h2>Test Configuration</h2>
+      <p>
+        <strong>API Base URL:</strong> <span id="apiBaseUrl">Loading...</span>
+      </p>
+      <p>
+        <strong>Test Clinician IDs:</strong> 77 (has slots), 58, 57 (no slots)
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Controls</h2>
+      <button onclick="testClinicianWithSlots()">
+        Test Clinician 77 (Has Slots)
+      </button>
+      <button onclick="testClinicianWithoutSlots()">
+        Test Clinician 58 (No Slots)
+      </button>
+      <button onclick="testAllClinicians()">Test All Clinicians</button>
+      <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+      // Get API_BASE_URL from environment or use default
+      const API_BASE_URL = "https://api.mibo.care/api";
+      document.getElementById("apiBaseUrl").textContent = API_BASE_URL;
+
+      function addResult(title, type, content) {
+        const resultsDiv = document.getElementById("results");
+        const section = document.createElement("div");
+        section.className = `test-section ${type}`;
+        section.innerHTML = `
+                <h2>${title}</h2>
+                <pre>${content}</pre>
+            `;
+        resultsDiv.appendChild(section);
+      }
+
+      function clearResults() {
+        document.getElementById("results").innerHTML = "";
+      }
+
+      async function testNextSlotAPI(clinicianId) {
+        const url = `${API_BASE_URL}/booking/next-available-slot?clinicianId=${clinicianId}`;
+
+        try {
+          console.log(`🔍 Testing: ${url}`);
+
+          const startTime = Date.now();
+          const response = await fetch(url);
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          const json = await response.json();
+
+          const result = {
+            clinicianId,
+            url,
+            status: response.status,
+            statusText: response.statusText,
+            duration: `${duration}ms`,
+            headers: {
+              "content-type": response.headers.get("content-type"),
+              "access-control-allow-origin": response.headers.get(
+                "access-control-allow-origin",
+              ),
+            },
+            response: json,
+          };
+
+          const hasSlot = json?.data?.date && json?.data?.time;
+          const type = hasSlot ? "success" : "info";
+
+          addResult(
+            `Clinician ${clinicianId} - ${hasSlot ? "✅ Has Slot" : "⚠️ No Slot"}`,
+            type,
+            JSON.stringify(result, null, 2),
+          );
+
+          return result;
+        } catch (error) {
+          const result = {
+            clinicianId,
+            url,
+            error: error.message,
+            stack: error.stack,
+          };
+
+          addResult(
+            `Clinician ${clinicianId} - ❌ Error`,
+            "error",
+            JSON.stringify(result, null, 2),
+          );
+
+          return result;
+        }
+      }
+
+      async function testClinicianWithSlots() {
+        await testNextSlotAPI(77);
+      }
+
+      async function testClinicianWithoutSlots() {
+        await testNextSlotAPI(58);
+      }
+
+      async function testAllClinicians() {
+        clearResults();
+        addResult("🚀 Testing Multiple Clinicians", "info", "Running tests...");
+
+        const clinicianIds = [77, 58, 57, 64, 73, 76, 71, 56];
+
+        for (const id of clinicianIds) {
+          await testNextSlotAPI(id);
+        }
+
+        addResult("✅ All Tests Complete", "success", "Check results above");
+      }
+
+      // Simulate the exact ExpertsPage.tsx enrichWithNextAvailableSlot logic
+      async function simulateExpertsPageFlow() {
+        addResult("📋 Simulating ExpertsPage.tsx Flow", "info", "Starting...");
+
+        const testDoctors = [
+          { id: "77", name: "Ajay Siby" },
+          { id: "58", name: "Abhinand P S" },
+          { id: "57", name: "Dr. Srinivasa Reddy" },
+        ];
+
+        const results = await Promise.allSettled(
+          testDoctors.map(async (doc) => {
+            const response = await fetch(
+              `${API_BASE_URL}/booking/next-available-slot?clinicianId=${doc.id}`,
+            );
+            if (!response.ok) throw new Error("Failed to fetch next slot");
+            const json = await response.json();
+            const slot = json?.data;
+            if (!slot?.date || !slot?.time) return null;
+            return {
+              id: doc.id,
+              name: doc.name,
+              nextAvailableSlot: `${slot.date}T${slot.time}`,
+            };
+          }),
+        );
+
+        const slotById = new Map();
+        results.forEach((result) => {
+          if (result.status === "fulfilled" && result.value) {
+            slotById.set(result.value.id, result.value.nextAvailableSlot);
+          }
+        });
+
+        addResult(
+          "📊 ExpertsPage Flow Results",
+          slotById.size > 0 ? "success" : "error",
+          `Found ${slotById.size} clinician(s) with available slots:\n\n` +
+            JSON.stringify(Array.from(slotById.entries()), null, 2),
+        );
+      }
+
+      // Auto-run simulation on page load
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          simulateExpertsPageFlow();
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

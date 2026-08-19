@@ -55,7 +55,9 @@ import gdpr from "./assets/eu.jpeg";
  * callers can conditionally omit the UI element entirely rather than
  * showing an empty/placeholder value.
  */
-function formatGender(gender?: "MALE" | "FEMALE" | "OTHER" | null): string | null {
+function formatGender(
+  gender?: "MALE" | "FEMALE" | "OTHER" | null,
+): string | null {
   switch (gender) {
     case "MALE":
       return "Male";
@@ -593,18 +595,108 @@ export default function ExpertsPage() {
    * doctor list is shown so the grid isn't blocked on N extra requests.
    */
   const enrichWithNextAvailableSlot = async (list: Doctor[]) => {
+    console.log(
+      "🔍 [NEXT SLOT] Starting enrichment for",
+      list.length,
+      "clinicians",
+    );
+
     const results = await Promise.allSettled(
       list.map(async (doc) => {
-        const response = await fetch(
-          `${API_BASE_URL}/booking/next-available-slot?clinicianId=${doc.id}`,
-        );
-        if (!response.ok) throw new Error("Failed to fetch next slot");
-        const json = await response.json();
-        const slot = json?.data as { date: string; time: string } | null;
-        if (!slot?.date || !slot?.time) return null;
-        return { id: doc.id, nextAvailableSlot: `${slot.date}T${slot.time}` };
+        try {
+          const url = `${API_BASE_URL}/booking/next-available-slot?clinicianId=${doc.id}`;
+          console.log(
+            `📡 [NEXT SLOT] Fetching for clinician ${doc.id} (${doc.name}):`,
+            url,
+          );
+
+          const response = await fetch(url);
+          console.log(
+            `✅ [NEXT SLOT] Response for ${doc.id}:`,
+            response.status,
+            response.statusText,
+          );
+
+          if (!response.ok)
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+          const json = await response.json();
+          console.log(`📦 [NEXT SLOT] Data for ${doc.id}:`, json);
+
+          const slot = json?.data as { date: string; time: string } | null;
+          if (!slot?.date || !slot?.time) {
+            console.warn(
+              `⚠️ [NEXT SLOT] No slot data for clinician ${doc.id} (${doc.name})`,
+            );
+            return null;
+          }
+
+          console.log(
+            `✅ [NEXT SLOT] Found slot for ${doc.id} (${doc.name}):`,
+            slot,
+          );
+
+          // Convert 12-hour time to 24-hour format for ISO 8601 compatibility
+          const convert12to24Hour = (time12: string): string => {
+            try {
+              const trimmed = time12.trim();
+              const parts = trimmed.split(" ");
+
+              if (parts.length !== 2) return time12;
+
+              const [time, period] = parts;
+              const timeParts = time.split(":");
+
+              if (timeParts.length !== 2) return time12;
+
+              let hours = parseInt(timeParts[0], 10);
+              const minutes = parseInt(timeParts[1], 10);
+
+              if (isNaN(hours) || isNaN(minutes)) return time12;
+
+              // Convert to 24-hour format
+              if (period.toUpperCase() === "PM" && hours !== 12) {
+                hours += 12;
+              } else if (period.toUpperCase() === "AM" && hours === 12) {
+                hours = 0;
+              }
+
+              return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+            } catch (error) {
+              console.error(`Error converting time "${time12}":`, error);
+              return time12;
+            }
+          };
+
+          const time24Hour = convert12to24Hour(slot.time);
+          const isoDateString = `${slot.date}T${time24Hour}:00`;
+
+          console.log(`🔧 [NEXT SLOT] Converted for ${doc.id}:`, {
+            original: slot.time,
+            converted: time24Hour,
+            final: isoDateString,
+          });
+
+          return { id: doc.id, nextAvailableSlot: isoDateString };
+        } catch (error) {
+          console.error(
+            `❌ [NEXT SLOT] Error for clinician ${doc.id} (${doc.name}):`,
+            error,
+          );
+          throw error;
+        }
       }),
     );
+
+    // Log rejected promises
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(
+          `❌ [NEXT SLOT] Promise rejected for clinician ${list[index].id} (${list[index].name}):`,
+          result.reason,
+        );
+      }
+    });
 
     const slotById = new Map<string | number, string>();
     results.forEach((result) => {
@@ -613,7 +705,18 @@ export default function ExpertsPage() {
       }
     });
 
-    if (slotById.size === 0) return;
+    console.log(
+      `📊 [NEXT SLOT] Enrichment complete. Found ${slotById.size} slots out of ${list.length} clinicians`,
+    );
+    console.log(
+      `📋 [NEXT SLOT] Clinicians with slots:`,
+      Array.from(slotById.keys()),
+    );
+
+    if (slotById.size === 0) {
+      console.warn("⚠️ [NEXT SLOT] No slots found for any clinician");
+      return;
+    }
 
     setDoctors((prev) =>
       prev.map((d) =>
@@ -622,6 +725,8 @@ export default function ExpertsPage() {
           : d,
       ),
     );
+
+    console.log("✅ [NEXT SLOT] State updated with slot data");
   };
 
   // Determine session types based on available consultation modes
@@ -967,6 +1072,16 @@ export default function ExpertsPage() {
             const hasValidSlot =
               !!nextSlotDate && !isNaN(nextSlotDate.getTime());
 
+            // Debug log for clinicians with slots
+            if (doc.nextAvailableSlot) {
+              console.log(`🔍 [RENDER] Clinician ${doc.id} (${doc.name}):`, {
+                nextAvailableSlot: doc.nextAvailableSlot,
+                nextSlotDate,
+                hasValidSlot,
+                isValidDate: !isNaN(nextSlotDate?.getTime() || NaN),
+              });
+            }
+
             return (
               <div
                 key={doc.id}
@@ -1147,9 +1262,7 @@ export default function ExpertsPage() {
           // so users aren't told to clear filters when the problem is the
           // backend being unreachable.
           <div className="col-span-1 xl:col-span-2 text-center py-12 px-4">
-            <p className="text-[#637268] text-base sm:text-lg">
-              {fetchError}
-            </p>
+            <p className="text-[#637268] text-base sm:text-lg">{fetchError}</p>
             <button
               onClick={() => fetchClinicians()}
               className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"

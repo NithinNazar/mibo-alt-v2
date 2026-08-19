@@ -4,6 +4,7 @@ import authService from "../../services/authService";
 import BookingSummarySidebar from "../../components/BookingSummarySidebar";
 import type { Doctor } from "../Experts/data/doctors";
 import phoneVerifyBg from "../Experts/assets/phone-verify-bg.jpg";
+import { loadRazorpay } from "../../utils/loadRazorpay";
 import {
   ArrowLeft,
   Loader2,
@@ -154,6 +155,7 @@ export default function Step3ConfirmBooking({
   const navigate = useNavigate();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>("review");
   const [error, setError] = useState("");
+  const [razorpayLoading, setRazorpayLoading] = useState(false);
 
   // Top-center toast notifications (success / error)
   const [toast, setToast] = useState<{
@@ -176,7 +178,9 @@ export default function Step3ConfirmBooking({
     if (toastHideRef.current) clearTimeout(toastHideRef.current);
     setToast({ type, message });
     // Let the element mount first, then trigger the entrance transition
-    requestAnimationFrame(() => requestAnimationFrame(() => setToastVisible(true)));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => setToastVisible(true)),
+    );
     toastTimerRef.current = setTimeout(dismissToast, duration);
   };
 
@@ -200,9 +204,7 @@ export default function Step3ConfirmBooking({
   const [firstName, setFirstName] = useState(initialName.first);
   const [lastName, setLastName] = useState(initialName.last);
   const [email, setEmail] = useState(currentUser?.email || "");
-  const [age, setAge] = useState(
-    bookingData.age || currentUser?.age || "",
-  );
+  const [age, setAge] = useState(bookingData.age || currentUser?.age || "");
   const [gender, setGender] = useState(
     bookingData.gender || currentUser?.gender || "",
   );
@@ -498,12 +500,24 @@ export default function Step3ConfirmBooking({
   /**
    * Open Razorpay payment modal
    */
-  const openRazorpayModal = (
+  const openRazorpayModal = async (
     orderId: string,
     amount: number,
     appointmentId: number,
     razorpayKeyId: string,
   ) => {
+    // Load Razorpay SDK dynamically if not already loaded
+    try {
+      setRazorpayLoading(true);
+      await loadRazorpay();
+      setRazorpayLoading(false);
+    } catch (err) {
+      setRazorpayLoading(false);
+      setError("Failed to load payment gateway. Please refresh and try again.");
+      showToast("error", "Failed to load payment gateway");
+      return;
+    }
+
     // Check if Razorpay is loaded
     if (!window.Razorpay) {
       setError("Payment gateway not loaded. Please refresh and try again.");
@@ -656,8 +670,8 @@ export default function Step3ConfirmBooking({
               Couldn't Load Booking Details
             </h2>
             <p className="text-gray-600 mb-4">
-              We couldn't confirm the fees for this booking right now.
-              Please try again in a moment.
+              We couldn't confirm the fees for this booking right now. Please
+              try again in a moment.
             </p>
           </div>
 
@@ -847,12 +861,16 @@ export default function Step3ConfirmBooking({
         <div className="mx-auto w-full max-w-[1440px] py-2.5 sm:py-3">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(260px,300px)_1fr] lg:gap-6">
             {/* ================= LEFT: shared booking summary sidebar ================= */}
-            <BookingSummarySidebar doctor={doctor} currentStep={3} onBack={onBack} />
+            <BookingSummarySidebar
+              doctor={doctor}
+              currentStep={3}
+              onBack={onBack}
+            />
 
             {/* ================= RIGHT: Review & Pay content (unchanged logic) ================= */}
             <div className="w-full max-w-[900px] space-y-3.5 sm:space-y-4">
-        {/* Header */}
-        {/* <div className="flex items-center gap-2.5 pt-1 pb-1">
+              {/* Header */}
+              {/* <div className="flex items-center gap-2.5 pt-1 pb-1">
           <button
             onClick={onBack}
             aria-label="Go back"
@@ -870,249 +888,264 @@ export default function Step3ConfirmBooking({
           </div>
         </div> */}
 
-        {/* User Details Form */}
-        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
-          <div className="flex items-center gap-2.5 mb-3.5">
-            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-[#0e6b4f]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-[#0a2e23]">
-                Your Details
-              </h3>
-              <p className="text-xs text-[#6b7a74]">
-                Review your booking information
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <DetailField
-              icon={User}
-              label="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter your first name"
-              required
-            />
-            <DetailField
-              icon={User}
-              label="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter your last name"
-              required
-            />
-            <DetailField
-              icon={Mail}
-              label="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              placeholder="your.email@example.com"
-            />
-            <DetailField
-              icon={Calendar}
-              label="Age"
-              value={age}
-              onChange={(e) =>
-                setAge(e.target.value.replace(/\D/g, "").slice(0, 3))
-              }
-              placeholder="Enter your age"
-              suffix={age ? "years" : undefined}
-            />
-            <DetailField
-              icon={Phone}
-              label="Phone Number"
-              value={bookingData.phone || ""}
-              readOnly
-              required
-            />
-            <div>
-              <label className="block text-[13px] font-semibold text-[#0a2e23] mb-1.5">
-                Gender
-              </label>
-              <div className="flex items-center gap-2.5 border border-[#dfe8e4] rounded-xl px-3.5 py-2.5 bg-white focus-within:ring-2 focus-within:ring-[#0e6b4f]/30 focus-within:border-[#0e6b4f] transition-all">
-                <User className="w-4 h-4 text-[#0e6b4f] shrink-0" />
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-[#0a2e23] appearance-none"
-                >
-                  <option value="">Select gender</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="NON_BINARY">Non-Binary</option>
-                  <option value="PREFER_NOT_TO_SAY">Rather not say</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-[#6b7a74] mt-2.5">
-            We'll send booking confirmation to this email
-          </p>
-        </div>
-
-        {/* Patient Notes Section */}
-        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
-              <SquarePen className="w-5 h-5 text-[#0e6b4f]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-[#0a2e23]">
-                Additional Notes
-              </h3>
-              <p className="text-xs text-[#6b7a74]">
-                Optional: Share any special needs or conditions
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Your Notes <span className="text-gray-400">(Optional)</span>
-            </label>
-            <textarea
-              value={patientNotes}
-              onChange={(e) => setPatientNotes(e.target.value)}
-              placeholder="E.g., First time consultation, anxiety about specific topics, preferred communication style, etc."
-              rows={3}
-              maxLength={300}
-              className="w-full px-4 py-2.5 border border-[#dfe8e4] rounded-xl focus:ring-2 focus:ring-[#0e6b4f]/30 focus:border-[#0e6b4f] focus:outline-none transition-all resize-none"
-            />
-            <div className="flex items-center justify-between mt-1.5">
-              <p className="text-xs text-[#6b7a74] italic">
-                Help your clinician prepare for your session
-              </p>
-              <p className="text-xs text-gray-400">{patientNotes.length}/300</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Summary Card */}
-        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-[#0e6b4f]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-[#0a2e23]">
-                Payment Summary
-              </h3>
-              <p className="text-xs text-[#6b7a74]">
-                Review your payment details
-              </p>
-            </div>
-          </div>
-
-          {loadingFeeStatus ? (
-            <div className="text-center py-3">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#0e6b4f]"></div>
-              <p className="text-xs text-gray-600 mt-1.5">Calculating fees...</p>
-            </div>
-          ) : (
-            <div className="space-y-2 mb-3">
-              <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                <span className="text-sm text-gray-600">
-                  Consultation Fee
-                </span>
-                <span className="font-semibold">₹{consultationFee}</span>
-              </div>
-
-              {!hasPaidRegistrationFee && registrationFee > 0 && (
-                <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">
-                    One time registration fee (For new booking)
-                  </span>
-                  <span className="font-semibold">₹{registrationFee}</span>
+              {/* User Details Form */}
+              <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+                <div className="flex items-center gap-2.5 mb-3.5">
+                  <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#0e6b4f]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-[#0a2e23]">
+                      Your Details
+                    </h3>
+                    <p className="text-xs text-[#6b7a74]">
+                      Review your booking information
+                    </p>
+                  </div>
                 </div>
-              )}
 
-              <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                <span className="text-sm text-gray-600">Platform Fee</span>
-                <span className="font-semibold text-green-600">FREE</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2.5 bg-[#eaf6f1] rounded-lg px-3">
-                <span className="font-bold text-[#0a2e23]">Total Amount</span>
-                <span className="font-bold text-2xl text-[#0e6b4f]">
-                  ₹{totalAmount}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Notices */}
-          <div className="space-y-1.5 mt-3">
-            {!hasPaidRegistrationFee && registrationFee > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-800">
-                    This is your first booking with MIBO. A one-time
-                    registration fee of ₹{registrationFee} will be added to
-                    your consultation fee.
-                  </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <DetailField
+                    icon={User}
+                    label="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Enter your first name"
+                    required
+                  />
+                  <DetailField
+                    icon={User}
+                    label="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Enter your last name"
+                    required
+                  />
+                  <DetailField
+                    icon={Mail}
+                    label="Email Address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    placeholder="your.email@example.com"
+                  />
+                  <DetailField
+                    icon={Calendar}
+                    label="Age"
+                    value={age}
+                    onChange={(e) =>
+                      setAge(e.target.value.replace(/\D/g, "").slice(0, 3))
+                    }
+                    placeholder="Enter your age"
+                    suffix={age ? "years" : undefined}
+                  />
+                  <DetailField
+                    icon={Phone}
+                    label="Phone Number"
+                    value={bookingData.phone || ""}
+                    readOnly
+                    required
+                  />
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#0a2e23] mb-1.5">
+                      Gender
+                    </label>
+                    <div className="flex items-center gap-2.5 border border-[#dfe8e4] rounded-xl px-3.5 py-2.5 bg-white focus-within:ring-2 focus-within:ring-[#0e6b4f]/30 focus-within:border-[#0e6b4f] transition-all">
+                      <User className="w-4 h-4 text-[#0e6b4f] shrink-0" />
+                      <select
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="flex-1 min-w-0 bg-transparent outline-none text-[14px] text-[#0a2e23] appearance-none"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="NON_BINARY">Non-Binary</option>
+                        <option value="PREFER_NOT_TO_SAY">
+                          Rather not say
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-              <div className="flex items-start gap-2">
-                <Shield className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-800">
-                  Your payment is secured with 256-bit SSL encryption.
+
+                <p className="text-xs text-[#6b7a74] mt-2.5">
+                  We'll send booking confirmation to this email
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Appointment Summary */}
-        <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-[#0e6b4f]" />
-            </div>
-            <h3 className="font-bold text-base text-[#0a2e23]">
-              Appointment Summary
-            </h3>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Doctor</span>
-              <span className="font-medium text-right">
-                {bookingData.clinicianName}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Centre</span>
-              <span className="font-medium text-right">
-                {bookingData.centreName}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Mode</span>
-              <span className="font-medium">{bookingData.mode}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Date & Time</span>
-              <span className="font-medium text-right">
-                {parseLocalDate(bookingData.date).toLocaleDateString("en-IN", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}{" "}
-                • {formatTime12Hour(bookingData.time)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Duration</span>
-              <span className="font-medium">{bookingData.duration}</span>
-            </div>
-          </div>
-        </div>
+              {/* Patient Notes Section */}
+              <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+                    <SquarePen className="w-5 h-5 text-[#0e6b4f]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-[#0a2e23]">
+                      Additional Notes
+                    </h3>
+                    <p className="text-xs text-[#6b7a74]">
+                      Optional: Share any special needs or conditions
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Your Notes <span className="text-gray-400">(Optional)</span>
+                  </label>
+                  <textarea
+                    value={patientNotes}
+                    onChange={(e) => setPatientNotes(e.target.value)}
+                    placeholder="E.g., First time consultation, anxiety about specific topics, preferred communication style, etc."
+                    rows={3}
+                    maxLength={300}
+                    className="w-full px-4 py-2.5 border border-[#dfe8e4] rounded-xl focus:ring-2 focus:ring-[#0e6b4f]/30 focus:border-[#0e6b4f] focus:outline-none transition-all resize-none"
+                  />
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-xs text-[#6b7a74] italic">
+                      Help your clinician prepare for your session
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {patientNotes.length}/300
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Summary Card */}
+              <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-[#0e6b4f]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-[#0a2e23]">
+                      Payment Summary
+                    </h3>
+                    <p className="text-xs text-[#6b7a74]">
+                      Review your payment details
+                    </p>
+                  </div>
+                </div>
+
+                {loadingFeeStatus ? (
+                  <div className="text-center py-3">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#0e6b4f]"></div>
+                    <p className="text-xs text-gray-600 mt-1.5">
+                      Calculating fees...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                      <span className="text-sm text-gray-600">
+                        Consultation Fee
+                      </span>
+                      <span className="font-semibold">₹{consultationFee}</span>
+                    </div>
+
+                    {!hasPaidRegistrationFee && registrationFee > 0 && (
+                      <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">
+                          One time registration fee (For new booking)
+                        </span>
+                        <span className="font-semibold">
+                          ₹{registrationFee}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                      <span className="text-sm text-gray-600">
+                        Platform Fee
+                      </span>
+                      <span className="font-semibold text-green-600">FREE</span>
+                    </div>
+
+                    <div className="flex items-center justify-between py-2.5 bg-[#eaf6f1] rounded-lg px-3">
+                      <span className="font-bold text-[#0a2e23]">
+                        Total Amount
+                      </span>
+                      <span className="font-bold text-2xl text-[#0e6b4f]">
+                        ₹{totalAmount}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notices */}
+                <div className="space-y-1.5 mt-3">
+                  {!hasPaidRegistrationFee && registrationFee > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-blue-800">
+                          This is your first booking with MIBO. A one-time
+                          registration fee of ₹{registrationFee} will be added
+                          to your consultation fee.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+                    <div className="flex items-start gap-2">
+                      <Shield className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-blue-800">
+                        Your payment is secured with 256-bit SSL encryption.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Appointment Summary */}
+              <div className="bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(10,46,35,0.08)] border border-[#dfe8e4]">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-10 h-10 bg-[#eaf6f1] rounded-full flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-[#0e6b4f]" />
+                  </div>
+                  <h3 className="font-bold text-base text-[#0a2e23]">
+                    Appointment Summary
+                  </h3>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Doctor</span>
+                    <span className="font-medium text-right">
+                      {bookingData.clinicianName}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Centre</span>
+                    <span className="font-medium text-right">
+                      {bookingData.centreName}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Mode</span>
+                    <span className="font-medium">{bookingData.mode}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Date & Time</span>
+                    <span className="font-medium text-right">
+                      {parseLocalDate(bookingData.date).toLocaleDateString(
+                        "en-IN",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}{" "}
+                      • {formatTime12Hour(bookingData.time)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Duration</span>
+                    <span className="font-medium">{bookingData.duration}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

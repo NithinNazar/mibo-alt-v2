@@ -27,9 +27,7 @@ const Home = () => {
       style={{ willChange: "scroll-position" }}
     >
       {/*  HEADER */}
-      <ScrollRevealWrapper direction="fade" delay={400}>
-        <Header />
-      </ScrollRevealWrapper>
+      <Header />
 
       {/*  HERO SECTION */}
       <HeroSection />

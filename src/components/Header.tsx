@@ -29,7 +29,7 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
+    const timer = setTimeout(() => setIsVisible(true), 0);
     return () => clearTimeout(timer);
   }, []);
 
@@ -60,7 +60,7 @@ const Header = () => {
 
   return (
     <header
-      className={`w-full fixed top-0 left-0 z-50 bg-white shadow-sm border-b border-gray-100 transition-all duration-1000 ease-out ${
+      className={`w-full fixed top-0 left-0 z-50 bg-white shadow-sm border-b border-gray-100 transition-all duration-300 ease-out ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
