@@ -15,6 +15,21 @@
   animation: expertise-marquee 26s linear infinite;
 }
 
+/* Continuous right-to-left auto-scroll for language text */
+@keyframes language-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-language-marquee {
+  animation: language-marquee 28s linear infinite;
+  white-space: nowrap;
+}
+
 /* Soft pulse ring behind the video play button */
 @keyframes ping-slow {
   0% {
@@ -83,6 +98,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-expertise-marquee,
+  .animate-language-marquee,
   .animate-ping-slow {
     animation: none;
   }

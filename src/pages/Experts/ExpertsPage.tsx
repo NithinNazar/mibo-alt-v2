@@ -595,46 +595,22 @@ export default function ExpertsPage() {
    * doctor list is shown so the grid isn't blocked on N extra requests.
    */
   const enrichWithNextAvailableSlot = async (list: Doctor[]) => {
-    console.log(
-      "🔍 [NEXT SLOT] Starting enrichment for",
-      list.length,
-      "clinicians",
-    );
-
     const results = await Promise.allSettled(
       list.map(async (doc) => {
         try {
           const url = `${API_BASE_URL}/booking/next-available-slot?clinicianId=${doc.id}`;
-          console.log(
-            `📡 [NEXT SLOT] Fetching for clinician ${doc.id} (${doc.name}):`,
-            url,
-          );
 
           const response = await fetch(url);
-          console.log(
-            `✅ [NEXT SLOT] Response for ${doc.id}:`,
-            response.status,
-            response.statusText,
-          );
 
           if (!response.ok)
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
           const json = await response.json();
-          console.log(`📦 [NEXT SLOT] Data for ${doc.id}:`, json);
 
           const slot = json?.data as { date: string; time: string } | null;
           if (!slot?.date || !slot?.time) {
-            console.warn(
-              `⚠️ [NEXT SLOT] No slot data for clinician ${doc.id} (${doc.name})`,
-            );
             return null;
           }
-
-          console.log(
-            `✅ [NEXT SLOT] Found slot for ${doc.id} (${doc.name}):`,
-            slot,
-          );
 
           // Convert 12-hour time to 24-hour format for ISO 8601 compatibility
           const convert12to24Hour = (time12: string): string => {
@@ -671,32 +647,13 @@ export default function ExpertsPage() {
           const time24Hour = convert12to24Hour(slot.time);
           const isoDateString = `${slot.date}T${time24Hour}:00`;
 
-          console.log(`🔧 [NEXT SLOT] Converted for ${doc.id}:`, {
-            original: slot.time,
-            converted: time24Hour,
-            final: isoDateString,
-          });
-
           return { id: doc.id, nextAvailableSlot: isoDateString };
         } catch (error) {
-          console.error(
-            `❌ [NEXT SLOT] Error for clinician ${doc.id} (${doc.name}):`,
-            error,
-          );
-          throw error;
+          // Silently handle errors - clinicians without slots just won't show the badge
+          return null;
         }
       }),
     );
-
-    // Log rejected promises
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.error(
-          `❌ [NEXT SLOT] Promise rejected for clinician ${list[index].id} (${list[index].name}):`,
-          result.reason,
-        );
-      }
-    });
 
     const slotById = new Map<string | number, string>();
     results.forEach((result) => {
@@ -705,16 +662,7 @@ export default function ExpertsPage() {
       }
     });
 
-    console.log(
-      `📊 [NEXT SLOT] Enrichment complete. Found ${slotById.size} slots out of ${list.length} clinicians`,
-    );
-    console.log(
-      `📋 [NEXT SLOT] Clinicians with slots:`,
-      Array.from(slotById.keys()),
-    );
-
     if (slotById.size === 0) {
-      console.warn("⚠️ [NEXT SLOT] No slots found for any clinician");
       return;
     }
 
@@ -725,8 +673,6 @@ export default function ExpertsPage() {
           : d,
       ),
     );
-
-    console.log("✅ [NEXT SLOT] State updated with slot data");
   };
 
   // Determine session types based on available consultation modes
@@ -1128,12 +1074,22 @@ export default function ExpertsPage() {
                         {doc.price.replace("/session", "")} per session
                       </div>
                     </div>
-                    <div className="text-[12.5px] leading-[1.3] text-[#3a463f] mb-3 font-semibold truncate">
+                    <div className="text-[12.5px] leading-[1.3] text-[#3a463f] mb-3 font-semibold overflow-hidden">
                       <span className="font-bold text-[#16241f]">
                         Languages:
                       </span>{" "}
-                      <span className="font-medium text-[#637268]">
-                        {doc.language.join(", ")}
+                      <span className="inline-block">
+                        <span className="animate-language-marquee inline-flex gap-8">
+                          <span className="font-medium text-[#637268]">
+                            {doc.language.join(", ")}
+                          </span>
+                          <span
+                            className="font-medium text-[#637268]"
+                            aria-hidden="true"
+                          >
+                            {doc.language.join(", ")}
+                          </span>
+                        </span>
                       </span>
                     </div>
                   </div>
