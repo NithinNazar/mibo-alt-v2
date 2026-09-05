@@ -15,7 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
-import heroImage from "../../assets/mibo-doc-pat.jpg?w=1920&format=webp&quality=90";
+import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
 import familyImage from "../../assets/mibo-family.jpg?w=600&format=webp&quality=75";
@@ -54,6 +54,7 @@ const BangaloreLanding = () => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [touchStart, setTouchStart] = React.useState(0);
   const [touchEnd, setTouchEnd] = React.useState(0);
+  const [openFaqIndex, setOpenFaqIndex] = React.useState(0); // FAQ state - first question open by default
 
   const centreImages = [
     bangaloreImage,
@@ -246,6 +247,75 @@ const BangaloreLanding = () => {
     },
   ];
 
+  const faqData = [
+    {
+      question:
+        "How do I know if I should see a psychologist or a psychiatrist?",
+      answer:
+        "A psychologist provides therapy and counselling to help manage emotional, behavioural, and mental health concerns. A psychiatrist is a medical doctor who can diagnose mental health conditions and prescribe medication when required. Our team will help you choose the right specialist based on your needs.",
+    },
+    {
+      question:
+        "What mental health conditions do your psychologists and psychiatrists treat?",
+      answer:
+        "Our psychologists and psychiatrists in Bengaluru provide treatment for anxiety, depression, stress, OCD, panic attacks, trauma, PTSD, relationship issues, sleep disorders, addiction recovery, grief, anger management and other mental health concerns.",
+    },
+    {
+      question: "Are my consultations confidential?",
+      answer:
+        "Yes. Every consultation at Mibo is completely confidential. Your privacy is respected, and your personal information and treatment details are kept secure.",
+    },
+    {
+      question: "Do you offer online consultations?",
+      answer:
+        "Yes. We offer both in-person consultations at our Bengaluru centre and secure online therapy sessions.",
+    },
+    {
+      question: "How can I book an appointment?",
+      answer:
+        "You can book an appointment by calling our care team at +91 9083335000. We'll help you schedule a consultation with the most suitable psychologist or psychiatrist based on your concerns.",
+    },
+    {
+      question: "How many therapy sessions will I need?",
+      answer:
+        "The number of sessions varies depending on your concerns and treatment goals. During your first consultation, your psychologist or psychiatrist will recommend a personalised treatment plan.",
+    },
+    {
+      question: "Do you provide treatment for children and teenagers?",
+      answer:
+        "Yes. Our mental health professionals provide assessment, counselling and treatment for children, adolescents and adults based on their individual needs.",
+    },
+    {
+      question: "Can I consult a psychiatrist without a referral?",
+      answer:
+        "Yes. You can directly book an appointment with one of our psychiatrists. No referral is required.",
+    },
+    {
+      question: "What happens during my first consultation?",
+      answer:
+        "During your first consultation, our specialist will understand your concerns, discuss your symptoms and recommend the most appropriate treatment plan.",
+    },
+    {
+      question: "Why choose Mibo for mental health care in Bengaluru?",
+      answer:
+        "Mibo provides evidence-based mental health care through experienced psychologists and psychiatrists. We offer confidential consultations, personalised treatment plans and both online and in-person appointments.",
+    },
+  ];
+
+  // FAQ Schema for SEO
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqData.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+
   const experts = [
     {
       image: drMiller,
@@ -275,6 +345,12 @@ const BangaloreLanding = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-miboLightGreen/20 to-white">
+      {/* FAQ Schema for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       {/* Floating Action Button */}
       <div
         className="fixed bottom-8 right-8 z-[9999]"
@@ -316,13 +392,15 @@ const BangaloreLanding = () => {
 
             {/* Heading */}
             <h1 className="text-4xl md:text-6xl font-bold leading-tight text-white">
-              Psychologists & Psychiatrists in Bangalore, Talk to a Mental
-              Health Expert Today
+              Psychologists & Psychiatrists in Bengaluru — Confidential Mental
+              Health Care for Anxiety, Depression, Stress, OCD & More
             </h1>
 
             <p className="text-xl md:text-2xl text-white/90 font-semibold">
-              Consult experienced psychologists and psychiatrists in Bangalore
-              for therapy, counselling and mental health treatment.
+              Consult experienced psychologists and psychiatrists in Bengaluru
+              for anxiety, depression, stress, OCD, relationship counselling and
+              other mental health concerns. Book your confidential consultation
+              today.
             </p>
 
             {/* Trust Badges */}
@@ -375,9 +453,10 @@ const BangaloreLanding = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#212154]/80 to-[#212154]/40 flex items-center justify-center px-6">
               <p className="text-white text-lg md:text-2xl text-center max-w-xl font-semibold leading-relaxed">
-                Premier mental health care in India's Silicon Valley. From
-                one-on-one therapy to psychiatry and wellness programs, Mibo
-                offers evidence-based care designed around your goals.
+                Mibo combines experienced psychologists, psychiatrists and
+                evidence-based treatments to provide personalised mental health
+                care in Bengaluru. Every consultation is confidential,
+                compassionate and tailored to your needs.
               </p>
             </div>
           </div>
@@ -418,6 +497,34 @@ const BangaloreLanding = () => {
         </div>
       </section>
 
+      {/* We Can Help With Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+            We Can Help With
+          </h2>
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+            Experiencing any of these concerns? Our specialists can help.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {concerns.map((concern, index) => (
+              <div
+                key={index}
+                className="bg-[#30baa3]/14 p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-[#30baa3]/50"
+              >
+                <CheckCircle className="w-8 h-8 text-[#212154] mx-auto mb-3" />
+
+                <p className="text-[#212154] font-semibold text-lg">
+                  {concern}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Services Section with Scrollable Cards */}
       <section className="py-20 bg-[#30baa3]/10">
         <div className="container mx-auto px-6">
@@ -426,9 +533,9 @@ const BangaloreLanding = () => {
           </h2>
 
           <p className="text-center text-miboText text-lg mb-16 max-w-3xl mx-auto">
-            We are a mental health ecosystem that brings together multiple
-            treatment options to create an experience that makes getting help
-            easy and seamless.
+            Choose the right therapy based on your needs. Our psychologists and
+            psychiatrists provide evidence-based treatment for individuals,
+            couples, families and online consultations.
           </p>
 
           <div className="overflow-x-auto pb-8 hide-scrollbar">
@@ -464,34 +571,6 @@ const BangaloreLanding = () => {
         </div>
       </section>
 
-      {/* Mental Health Concerns Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
-            We Can Help With
-          </h2>
-
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
-            Our expert team specializes in treating a wide range of mental
-            health concerns with compassion and evidence-based approaches.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {concerns.map((concern, index) => (
-              <div
-                key={index}
-                className="bg-[#30baa3]/14 p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-[#30baa3]/50"
-              >
-                <CheckCircle className="w-8 h-8 text-[#212154] mx-auto mb-3" />
-
-                <p className="text-[#212154] font-semibold text-lg">
-                  {concern}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
       {/* Meet Our Experts Section */}
       <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
         <div className="container mx-auto px-6">
@@ -538,10 +617,11 @@ const BangaloreLanding = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-[#212154] mb-6">
-              Need Help Now?
+              Ready to Speak with a Mental Health Expert?
             </h2>
             <p className="text-xl text-miboText mb-10 font-semibold">
-              Our care team can guide you to the right specialist quickly.
+              Our care team will help you choose the right psychologist or
+              psychiatrist.
             </p>
 
             <div className="flex justify-center">
@@ -841,16 +921,85 @@ const BangaloreLanding = () => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+            Frequently Asked Questions
+          </h2>
+
+          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+            Find answers to common questions about mental health care at Mibo
+            Bengaluru.
+          </p>
+
+          <div className="max-w-4xl mx-auto space-y-4">
+            {faqData.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-[#212154]/10"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? -1 : index)}
+                    className="w-full flex items-center justify-between p-6 text-left hover:bg-[#30baa3]/5 transition-colors duration-300"
+                    aria-expanded={isOpen}
+                  >
+                    <div className="flex items-start gap-4 flex-1 pr-4">
+                      <span className="flex-shrink-0 w-8 h-8 bg-[#30baa3] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {index + 1}
+                      </span>
+                      <h3 className="text-lg md:text-xl font-bold text-[#212154] leading-relaxed">
+                        {faq.question}
+                      </h3>
+                    </div>
+                    <svg
+                      className={`w-6 h-6 text-[#30baa3] flex-shrink-0 transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${
+                      isOpen ? "max-h-96" : "max-h-0"
+                    }`}
+                  >
+                    <div className="px-6 pb-6 pl-[72px] pr-6">
+                      <p className="text-miboText leading-relaxed text-base md:text-lg">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#212154] to-[#1a1a46] text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Take the First Step Today
+            Book Your Confidential Mental Health Consultation Today
           </h2>
 
           <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90 font-semibold">
-            Your mental health matters. Reach out to us and begin your journey
-            to wellness. We're here to support you every step of the way.
+            Call now to book a confidential consultation with an experienced
+            psychologist or psychiatrist in Bengaluru.
           </p>
 
           <div className="flex justify-center">
