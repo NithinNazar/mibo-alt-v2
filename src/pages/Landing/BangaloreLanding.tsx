@@ -15,6 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
+import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -351,6 +352,9 @@ const BangaloreLanding = () => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
+      {/* Header Navigation */}
+      <ExpertsHeader />
+
       {/* Floating Action Button */}
       <div
         className="fixed bottom-8 right-8 z-[9999]"
@@ -367,7 +371,7 @@ const BangaloreLanding = () => {
       </div>
 
       {/* Hero Section with Background Image */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center"

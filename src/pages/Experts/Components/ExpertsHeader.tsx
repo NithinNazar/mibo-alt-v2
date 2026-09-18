@@ -14,6 +14,7 @@ const ExpertsHeader = () => {
   }, []);
 
   const navItems = [
+    { label: "HOME", path: "/" },
     { label: "ABOUT US", path: "/about" },
     {
       label: "SERVICES",
@@ -173,7 +174,11 @@ const ExpertsHeader = () => {
               <Phone size={16} />
               Call
             </button>
-            <Link to="/patientAuth" className="flex-1" onClick={() => setMenuOpen(false)}>
+            <Link
+              to="/patientAuth"
+              className="flex-1"
+              onClick={() => setMenuOpen(false)}
+            >
               <button className="w-full h-11 bg-[#1c0d54] text-white rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300">
                 SIGN IN
               </button>
