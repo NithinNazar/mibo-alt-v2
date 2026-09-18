@@ -83,6 +83,14 @@ export interface Clinician {
 export interface GetCliniciansParams {
   centreId?: number;
   specialization?: string;
+  /**
+   * Optional server-side pagination params (see PaginationParams below).
+   * Only honored by endpoints/methods that explicitly document paginated
+   * support (see ClinicianService.getCliniciansPaged) — the base
+   * getClinicians() call is unpaginated and ignores these.
+   */
+  page?: number;
+  limit?: number;
 }
 
 // ============================================================================

@@ -45,18 +45,25 @@ const Header = () => {
     setMobileServicesOpen(false);
   };
 
-  const handleExpertClick = (specialization: string) => {
-    // Navigate to experts page and store the filter in sessionStorage
-    sessionStorage.setItem("expertsFilter", specialization);
-    navigate("/experts");
-    setMenuOpen(false);
-    setMobileExpertsOpen(false);
-  };
+  // Handle expert click based on specialization
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    setMenuOpen(false);
-  };
+const handleExpertClick = (specialization: string) => {
+  setMenuOpen(false);
+  setMobileExpertsOpen(false);
+
+  if (specialization === "Psychiatrist") {
+    window.location.href = "/psychiatrist";
+    return;
+  }
+
+  sessionStorage.setItem("expertsFilter", specialization);
+  navigate("/experts");
+};
+
+const handleNavigate = (path: string) => {
+  navigate(path);
+  setMenuOpen(false);
+};
 
   return (
     <header

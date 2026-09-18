@@ -17,7 +17,27 @@
  */
 
 import apiClient from "./api";
-import type { Clinician, GetCliniciansParams, APIResponse } from "../types";
+import type {
+  Clinician,
+  GetCliniciansParams,
+  APIResponse,
+  PaginatedResponse,
+} from "../types";
+
+/**
+ * Result shape for getCliniciansPaged().
+ *
+ * `pagination` is null whenever the backend response did not include
+ * pagination metadata (e.g. the current /users/clinicians endpoint, which
+ * ignores page/limit and always returns the full unpaginated list). Callers
+ * MUST treat a null `pagination` as "server-side pagination unavailable"
+ * and must never slice/paginate `data` themselves to compensate — that
+ * would silently fabricate pages the backend never produced.
+ */
+export interface PagedCliniciansResult {
+  data: Clinician[];
+  pagination: PaginatedResponse<Clinician>["pagination"] | null;
+}
 
 /**
  * Cache structure for storing clinician data
@@ -151,6 +171,69 @@ class ClinicianService {
 
       throw error;
     }
+  }
+
+  /**
+   * Get clinicians using server-side pagination
+   *
+   * Sends `page` and `limit` as query params on the existing
+   * `/users/clinicians` endpoint (same endpoint getClinicians() uses —
+   * no new endpoint is introduced), plus the existing `specialization`
+   * filter, and asks the backend to return only that page's records.
+   *
+   * IMPORTANT — current backend limitation: as of this writing,
+   * `/users/clinicians` does not implement page/limit/specialization
+   * server-side; it always returns the full active-clinician list with
+   * no `pagination` metadata, and the specialization filter is applied
+   * on the client (see filterClinicians). This method detects that case
+   * (no `pagination` object in the response) and reports it back to the
+   * caller via `pagination: null` rather than pretending the requested
+   * page was honored. Callers must disable page navigation in that case
+   * — this method deliberately does NOT slice `data` down to `limit`
+   * items to fake a page, since that would be client-side pagination of
+   * exactly the kind this method exists to avoid.
+   *
+   * Once the backend adds real pagination (returning a `pagination`
+   * object shaped like PaginatedResponse['pagination']: { page, limit,
+   * total, totalPages }), this method starts returning it automatically
+   * and no frontend changes are required.
+   *
+   * This method intentionally bypasses the 5-minute getClinicians()
+   * cache (which stores the single unpaginated list) — paginated pages
+   * are fetched fresh each time so page N always reflects the current
+   * backend state.
+   *
+   * @param params - specialization/centreId filters plus required page & limit
+   * @throws {AxiosError} If the API request fails
+   */
+  async getCliniciansPaged(
+    params: GetCliniciansParams & { page: number; limit: number },
+  ): Promise<PagedCliniciansResult> {
+    const response = await apiClient.get<
+      APIResponse<Clinician[]> | PaginatedResponse<Clinician>
+    >("/users/clinicians", {
+      params: {
+        isActive: true,
+        ...(params.centreId !== undefined ? { centreId: params.centreId } : {}),
+        ...(params.specialization ? { specialization: params.specialization } : {}),
+        page: params.page,
+        limit: params.limit,
+      },
+      timeout: this.API_TIMEOUT,
+    });
+
+    const payload = response.data as Partial<PaginatedResponse<Clinician>> &
+      Partial<APIResponse<Clinician[]>>;
+    const rawData: Clinician[] = Array.isArray(payload?.data) ? payload.data : [];
+    const pagination = payload?.pagination ?? null;
+
+    // Legacy/current response shape: no pagination metadata means the
+    // backend returned its full flat list (ignoring page/limit) — apply
+    // the existing client-side specialization filter for parity with
+    // getClinicians(), but do NOT slice to `limit` (see doc comment above).
+    const data = pagination ? rawData : this.filterClinicians(rawData, params);
+
+    return { data, pagination };
   }
 
   /**
