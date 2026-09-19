@@ -1137,7 +1137,7 @@ const PsychiatristLanding = () => {
                     Fee
                   </div>
                   <div className="text-[14px] font-bold text-[#16241f]">
-                    {selectedProfile.price.replace("/session", "")} / 50 mins
+                    {selectedProfile.price.replace("/session", "")} 
                   </div>
                 </div>
               </div>
