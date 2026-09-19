@@ -9,6 +9,7 @@
 // and never link to booking/profile routes for a real clinician id.
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
@@ -31,6 +32,7 @@ import {
   Sparkles,
   Star,
   User,
+  Users,
   Video,
   X,
 } from "lucide-react";
@@ -44,6 +46,7 @@ import ExpertiseMarquee from "../Experts/Components/ExpertiseMarquee";
 import ExpertMedia from "../Experts/Components/ExpertMedia";
 // import { dummyDoctors } from "../Experts/data/dummyDoctors";
 import heroBanner from "./banner.jpg";
+import heroBannerMobile from "./banner-mobile.png";
 import notAloneImg from "./you-are-not-alone.jpg";
 import client1 from "./client1.jpg";
 import client2 from "./client2.jpg";
@@ -213,10 +216,11 @@ function toList(value: string | string[] | null | undefined): string[] {
   return Array.isArray(value) ? value.filter(Boolean) : [value].filter(Boolean);
 }
 
-// const SAMPLE_FALLBACK: DisplayDoctor[] = dummyDoctors
-//   .filter((doc) => doc.designation === "Psychiatrist")
-//   .slice(0, 8)
-//   .map(fromDummyDoctor);
+// Sample profiles are disabled (the dummyDoctors import is commented out
+// above), so the fallback is an empty list. This constant MUST stay defined:
+// it is referenced when the API fails or returns no psychiatrists, and a
+// missing definition threw a ReferenceError that left the section blank.
+const SAMPLE_FALLBACK: DisplayDoctor[] = [];
 
 // Experts shown per page. If the backend ever returns real pagination
 // metadata, that is used as-is. Until then (the current live behavior: the
@@ -329,7 +333,7 @@ const PsychiatristLanding = () => {
         setUsingFallback(true);
         setExpertsPagination(null);
         setFetchError(
-          "We couldn't load live availability right now, so we're showing sample profiles below.",
+          "We couldn't load our psychiatrists right now. Please try again.",
         );
       }
     } finally {
@@ -438,52 +442,69 @@ const PsychiatristLanding = () => {
         {/* Hero                                                             */}
         {/* ---------------------------------------------------------------- */}
         <section
-          className="relative bg-cover bg-center "
-          style={{ backgroundImage: `url(${heroBanner})` }}
+          className="relative flex flex-col md:block aspect-[941/1672] md:aspect-auto bg-cover bg-[position:85%_bottom] md:bg-center bg-[image:var(--hero-bg-mobile)] md:bg-[image:var(--hero-bg-desktop)]"
+          style={
+            {
+              "--hero-bg-mobile": `url(${heroBannerMobile})`,
+              "--hero-bg-desktop": `url(${heroBanner})`,
+            } as CSSProperties
+          }
         >
           {/* Scrim for text legibility over the banner photo */}
+          {/* Mobile scrim: white on the text side, fading out over the doctor */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 md:hidden"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.93) 45%, rgba(255,255,255,0.65) 64%, rgba(255,255,255,0) 86%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 hidden md:block"
             style={{
               background:
                 "linear-gradient(to right, #ffffff 0%, #ffffff 32%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0) 62%)",
             }}
           />
 
-          <div className="relative container mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-10 md:py-12">
-            <div className="max-w-2xl">
+          <div className="relative container mx-auto px-4 sm:px-6 lg:px-10 pt-6 pb-4 sm:py-10 md:py-12">
+            <div className="max-w-[64%] sm:max-w-2xl">
               <span className="inline-block bg-[#eaf7f2] text-[#138158] text-xs font-bold tracking-wide px-4 py-1.5 rounded-full mb-4 sm:mb-5">
                 Your Mental Health Matters
               </span>
-              <h1 className="text-[32px] leading-[1.2] sm:text-5xl sm:leading-tight font-extrabold text-[#212154] mb-4">
-                Expert Psychiatric Care
+              <h1 className="text-[27px] min-[400px]:text-[30px] leading-[1.15] tracking-tight sm:tracking-normal sm:text-5xl sm:leading-tight font-extrabold text-[#212154] mb-4">
+                Expert <br className="sm:hidden" />
+                Psychiatric Care
                 <br />
-                <span className="text-[#138158]">for You and Your Family</span>
+                <span className="text-[#138158]">
+                  for You and <br className="sm:hidden" />
+                  Your Family
+                </span>
               </h1>
-              <p className="text-miboText text-base sm:text-lg mb-7 sm:mb-8 max-w-xl">
+              <p className="text-[#3f4a5a] font-medium text-[13px] leading-relaxed -mx-3 px-3 py-2 rounded-xl bg-white/85 backdrop-blur-sm sm:mx-0 sm:p-0 sm:rounded-none sm:bg-transparent sm:backdrop-blur-none sm:text-miboText sm:font-normal sm:text-lg sm:leading-normal mb-5 sm:mb-8 max-w-full sm:max-w-xl">
                 Compassionate, evidence-based care for adults, adolescents and
                 older adults. Take the first step towards a calmer, healthier
                 and happier you.
               </p>
 
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4 mb-2 sm:mb-10 w-[88%] sm:w-auto">
                 <button
                   onClick={() => navigate("/experts")}
-                  className="bg-[#138158] hover:bg-[#0e6b4f] text-white font-semibold px-6 sm:px-7 py-3 sm:py-3.5 rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                  className="bg-[#138158] hover:bg-[#0e6b4f] text-white font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Book an Appointment
                   <span aria-hidden>→</span>
                 </button>
                 <button
                   onClick={() => navigate("/services/online")}
-                  className="border border-[#212154]/20 hover:border-[#138158] bg-white/70 backdrop-blur-sm text-[#212154] font-semibold px-6 sm:px-7 py-3 sm:py-3.5 rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                  className="border border-[#212154]/20 hover:border-[#138158] bg-white/70 backdrop-blur-sm text-[#212154] font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <Video className="w-4 h-4 shrink-0" />
                   Online Consultation
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-4 sm:gap-6">
+              <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-4 sm:gap-6">
                 <div className="flex items-center gap-2 min-w-0">
                   <Calendar className="w-5 h-5 text-[#138158] shrink-0" />
                   <span className="text-xs sm:text-sm font-semibold text-[#212154] leading-snug">
@@ -510,6 +531,32 @@ const PsychiatristLanding = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Mobile-only feature card (matches the mobile design). The
+              inline strip above is used from the sm breakpoint up. */}
+          <div className="relative sm:hidden mt-auto mx-[4.7%] mb-[10%] grid grid-cols-2 rounded-2xl bg-white/95 shadow-[0_8px_28px_rgba(19,129,88,0.12)]">
+            {[
+              { Icon: Calendar, title: "In-Person & Online", sub: "Flexible consultation options" },
+              { Icon: ShieldCheck, title: "Confidential & Safe", sub: "Your privacy is our priority" },
+              { Icon: Users, title: "Experienced Psychiatrists", sub: "Trusted and qualified experts" },
+              { Icon: Heart, title: "Personalized Care Plans", sub: "Tailored to your unique needs" },
+            ].map(({ Icon, title, sub }, i) => (
+              <div
+                key={title}
+                className={`flex items-center gap-2 p-3 min-w-0 ${
+                  i % 2 === 0 ? "border-r border-[#e6ede9]" : ""
+                } ${i >= 2 ? "border-t border-[#e6ede9]" : ""}`}
+              >
+                <span className="flex items-center justify-center w-9 h-9 shrink-0 rounded-full bg-[#eaf7f2]">
+                  <Icon className="w-[18px] h-[18px] text-[#138158]" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[12px] font-bold leading-tight text-[#212154]">{title}</span>
+                  <span className="block text-[10px] leading-tight text-miboText mt-0.5">{sub}</span>
+                </span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -547,9 +594,18 @@ const PsychiatristLanding = () => {
             ) : displayDoctors.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-miboText text-base sm:text-lg">
-                  No psychiatrists are available right now. Please check back
-                  soon.
+                  {fetchError ??
+                    "No psychiatrists are available right now. Please check back soon."}
                 </p>
+                {fetchError && (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    className="mt-5 border border-[#212154]/20 hover:border-[#138158] text-[#212154] font-semibold px-5 py-2.5 rounded-full transition-colors"
+                  >
+                    Try again
+                  </button>
+                )}
               </div>
             ) : (
               <>
