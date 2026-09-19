@@ -2,10 +2,11 @@
 //
 // Dedicated Psychiatrist Landing Page.
 // Renders between the existing shared Header/Footer and pulls real
-// psychiatrist data from the backend via clinicianService — the same
-// getClinicians() call the Experts page uses, filtered with the same
-// "Psychiatrists" rule. No sample/dummy data: a failed request shows an
-// error state with Retry, and zero psychiatrists shows an empty state.
+// psychiatrist data from the backend via clinicianService. If the API
+// call fails, or succeeds but returns zero psychiatrists, a small set of
+// local sample profiles (dummyDoctors) is shown instead so the section
+// never looks broken/empty. Sample cards are clearly labeled "Sample"
+// and never link to booking/profile routes for a real clinician id.
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -211,33 +212,21 @@ function toList(value: string | string[] | null | undefined): string[] {
   return Array.isArray(value) ? value.filter(Boolean) : [value].filter(Boolean);
 }
 
-/**
- * Same rule ExpertsPage applies for its "Psychiatrists" category tab, so
- * this page lists exactly the clinicians that tab does. The Clinician
- * record has no dedicated role field: ExpertsPage treats
- * `designation || specialization` as the role, and also accepts a
- * psychiatry-type qualification. Matching on `specialization` alone (what
- * this page used before) misses clinicians whose psychiatrist status is
- * only recorded in their qualification.
- */
-function isPsychiatrist(clinician: Clinician): boolean {
-  const designation = (
-    (clinician as { designation?: string }).designation ||
-    toList(clinician.specialization).join(", ")
-  ).toLowerCase();
-  const qualification = toList(clinician.qualification).join(", ").toLowerCase();
-  return (
-    designation.includes("psychiatrist") ||
-    qualification.includes("psychiatry") ||
-    qualification.includes("mbbs") ||
-    qualification.includes("md")
-  );
-}
+// const SAMPLE_FALLBACK: DisplayDoctor[] = dummyDoctors
+//   .filter((doc) => doc.designation === "Psychiatrist")
+//   .slice(0, 8)
+//   .map(fromDummyDoctor);
+
+// Experts shown per page. Enforced by asking the backend for this page
+// size via getCliniciansPaged({ page, limit: EXPERTS_PAGE_SIZE }) — never
+// by slicing a larger response on the client.
+const EXPERTS_PAGE_SIZE = 4;
 
 const PsychiatristLanding = () => {
   const navigate = useNavigate();
 
   const [displayDoctors, setDisplayDoctors] = useState<DisplayDoctor[]>([]);
+  const [usingFallback, setUsingFallback] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -294,33 +283,45 @@ const PsychiatristLanding = () => {
     }
   };
 
-  const loadPsychiatrists = async (cancelledRef?: { current: boolean }) => {
+  const loadExpertsPage = async (pageNum: number, cancelledRef?: { current: boolean }) => {
     try {
       setLoading(true);
       setFetchError(null);
-      // Same request ExpertsPage makes (GET /users/clinicians?isActive=true,
-      // no extra params). Filtering to psychiatrists happens client-side
-      // with isPsychiatrist(), exactly as ExpertsPage's category tab does.
-      const clinicians = await clinicianService.getClinicians();
+      // Filter to psychiatrists specifically — this is a psychiatrist-
+      // focused landing page. Server-side pagination is requested via
+      // page/limit; see clinicianService.getCliniciansPaged for what
+      // happens when the backend doesn't yet honor those params.
+      const result = await clinicianService.getCliniciansPaged({
+        specialization: "Psychiatr",
+        page: pageNum,
+        limit: EXPERTS_PAGE_SIZE,
+      });
       if (cancelledRef?.current) return;
 
-      setDisplayDoctors(clinicians.filter(isPsychiatrist).map(fromClinician));
-      // The backend returns the full list with no pagination metadata, so
-      // page controls stay disabled rather than faking pages.
-      setExpertsPagination(null);
-    } catch (error: any) {
-      if (cancelledRef?.current) return;
-      console.error("Failed to load psychiatrists:", {
-        message: error?.message,
-        code: error?.code,
-        status: error?.response?.status,
-        url: error?.config?.url,
-      });
-      setDisplayDoctors([]);
-      setExpertsPagination(null);
-      setFetchError(
-        "We couldn't load our psychiatrists right now. Please try again in a moment.",
-      );
+      if (result.data.length > 0) {
+        setDisplayDoctors(result.data.map(fromClinician));
+        setUsingFallback(false);
+        setExpertsPagination(result.pagination);
+      } else {
+        // API returned successfully but with no psychiatrists — fall
+        // back to local sample profiles rather than showing an empty
+        // section. Pagination doesn't apply to the static sample set.
+        setDisplayDoctors(SAMPLE_FALLBACK);
+        setUsingFallback(true);
+        setExpertsPagination(null);
+      }
+    } catch (error) {
+      console.error("Failed to load psychiatrists:", error);
+      if (!cancelledRef?.current) {
+        // API call failed — fall back to local sample profiles instead
+        // of an error-only empty state.
+        setDisplayDoctors(SAMPLE_FALLBACK);
+        setUsingFallback(true);
+        setExpertsPagination(null);
+        setFetchError(
+          "We couldn't load live availability right now, so we're showing sample profiles below.",
+        );
+      }
     } finally {
       if (!cancelledRef?.current) setLoading(false);
     }
@@ -328,19 +329,20 @@ const PsychiatristLanding = () => {
 
   useEffect(() => {
     const cancelledRef = { current: false };
-    loadPsychiatrists(cancelledRef);
+    loadExpertsPage(expertsPage, cancelledRef);
     return () => {
       cancelledRef.current = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expertsPage]);
 
   const handleRetry = () => {
-    loadPsychiatrists();
+    loadExpertsPage(expertsPage);
   };
 
-  // Page navigation is only possible when the backend reports real
-  // pagination metadata; otherwise it's a no-op (and the buttons are
-  // disabled).
+  // Server-driven page navigation. Guarded so it's a no-op (and the UI
+  // disables the buttons) whenever the backend hasn't reported real
+  // pagination metadata for the current listing.
   const goToExpertsPage = (nextPage: number) => {
     if (!expertsPagination) return;
     if (nextPage < 1 || nextPage > expertsPagination.totalPages) return;
@@ -504,17 +506,6 @@ const PsychiatristLanding = () => {
             {loading ? (
               <div className="flex justify-center items-center min-h-[420px]">
                 <div className="w-10 h-10 border-4 border-[#138158]/20 border-t-[#138158] rounded-full animate-spin" />
-              </div>
-            ) : fetchError ? (
-              <div className="text-center py-16 px-4">
-                <p className="text-miboText text-base sm:text-lg">{fetchError}</p>
-                <button
-                  type="button"
-                  onClick={handleRetry}
-                  className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"
-                >
-                  Try Again
-                </button>
               </div>
             ) : displayDoctors.length === 0 ? (
               <div className="text-center py-16">
@@ -691,65 +682,68 @@ const PsychiatristLanding = () => {
                   })}
                 </div>
 
-                {/* Pagination controls (enabled only when the backend reports
-                    pagination metadata). */}
-                <div className="flex flex-col items-center gap-2 mt-10">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => goToExpertsPage(expertsPage - 1)}
-                      disabled={!expertsPagination || expertsPage <= 1}
-                      aria-label="Previous page"
-                      className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
+                {/* Pagination — only for the live/backend-driven listing.
+                    The sample fallback set is static local data, so no
+                    controls are shown for it. */}
+                {!usingFallback && (
+                  <div className="flex flex-col items-center gap-2 mt-10">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => goToExpertsPage(expertsPage - 1)}
+                        disabled={!expertsPagination || expertsPage <= 1}
+                        aria-label="Previous page"
+                        className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
 
-                    {expertsPagination ? (
-                      Array.from(
-                        { length: expertsPagination.totalPages },
-                        (_, i) => i + 1,
-                      ).map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          onClick={() => goToExpertsPage(num)}
-                          aria-current={num === expertsPage ? "page" : undefined}
-                          className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-colors ${
-                            num === expertsPage
-                              ? "bg-[#0e6b4f] text-white"
-                              : "border border-[#e6ede9] bg-white text-[#212154] hover:border-[#138158] hover:text-[#0e6b4f]"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))
-                    ) : (
-                      <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#0e6b4f] text-white font-semibold text-sm">
-                        {expertsPage}
-                      </span>
+                      {expertsPagination ? (
+                        Array.from(
+                          { length: expertsPagination.totalPages },
+                          (_, i) => i + 1,
+                        ).map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => goToExpertsPage(num)}
+                            aria-current={num === expertsPage ? "page" : undefined}
+                            className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-colors ${
+                              num === expertsPage
+                                ? "bg-[#0e6b4f] text-white"
+                                : "border border-[#e6ede9] bg-white text-[#212154] hover:border-[#138158] hover:text-[#0e6b4f]"
+                            }`}
+                          >
+                            {num}
+                          </button>
+                        ))
+                      ) : (
+                        <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#0e6b4f] text-white font-semibold text-sm">
+                          {expertsPage}
+                        </span>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => goToExpertsPage(expertsPage + 1)}
+                        disabled={
+                          !expertsPagination ||
+                          expertsPage >= expertsPagination.totalPages
+                        }
+                        aria-label="Next page"
+                        className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {!expertsPagination && (
+                      <p className="text-xs text-[#94a39b] font-medium">
+                        More pages will be available once server-side pagination is enabled.
+                      </p>
                     )}
-
-                    <button
-                      type="button"
-                      onClick={() => goToExpertsPage(expertsPage + 1)}
-                      disabled={
-                        !expertsPagination ||
-                        expertsPage >= expertsPagination.totalPages
-                      }
-                      aria-label="Next page"
-                      className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
                   </div>
-
-                  {!expertsPagination && (
-                    <p className="text-xs text-[#94a39b] font-medium">
-                      More pages will be available once server-side pagination is enabled.
-                    </p>
-                  )}
-                </div>
+                )}
               </>
             )}
           </div>
