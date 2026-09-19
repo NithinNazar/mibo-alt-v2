@@ -8,7 +8,7 @@
 // never looks broken/empty. Sample cards are clearly labeled "Sample"
 // and never link to booking/profile routes for a real clinician id.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
@@ -38,6 +38,7 @@ import {
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import clinicianService from "../../services/clinicianService";
+import { isPsychiatrist } from "../../utils/isPsychiatrist";
 import type { Clinician } from "../../types";
 import ExpertiseMarquee from "../Experts/Components/ExpertiseMarquee";
 import ExpertMedia from "../Experts/Components/ExpertMedia";
@@ -217,9 +218,9 @@ function toList(value: string | string[] | null | undefined): string[] {
 //   .slice(0, 8)
 //   .map(fromDummyDoctor);
 
-// Experts shown per page. Enforced by asking the backend for this page
-// size via getCliniciansPaged({ page, limit: EXPERTS_PAGE_SIZE }) — never
-// by slicing a larger response on the client.
+// Experts shown per page. If the backend ever returns real pagination
+// metadata, that is used as-is. Until then (the current live behavior: the
+// API returns the full list) the page slices the list itself, 4 per page.
 const EXPERTS_PAGE_SIZE = 4;
 
 const PsychiatristLanding = () => {
@@ -232,6 +233,9 @@ const PsychiatristLanding = () => {
 
   // --- Server-side pagination state for the expert listing ---
   const [expertsPage, setExpertsPage] = useState(1);
+  // True once a full list has been loaded; page changes then only re-slice
+  // it (no repeat request) unless the backend paginates.
+  const hasLoadedRef = useRef(false);
   // Null pagination = the backend hasn't returned pagination metadata for
   // this request (current live behavior — see clinicianService docs).
   // Page controls are disabled in that state rather than faked.
@@ -292,14 +296,20 @@ const PsychiatristLanding = () => {
       // page/limit; see clinicianService.getCliniciansPaged for what
       // happens when the backend doesn't yet honor those params.
       const result = await clinicianService.getCliniciansPaged({
-        specialization: "Psychiatr",
         page: pageNum,
         limit: EXPERTS_PAGE_SIZE,
       });
       if (cancelledRef?.current) return;
 
-      if (result.data.length > 0) {
-        setDisplayDoctors(result.data.map(fromClinician));
+      // Same psychiatrist rule as the Experts page (utils/isPsychiatrist).
+      // Applied here because the backend doesn't filter by it.
+      const psychiatrists = result.pagination
+        ? result.data
+        : result.data.filter(isPsychiatrist);
+
+      if (psychiatrists.length > 0) {
+        hasLoadedRef.current = true;
+        setDisplayDoctors(psychiatrists.map(fromClinician));
         setUsingFallback(false);
         setExpertsPagination(result.pagination);
       } else {
@@ -329,7 +339,11 @@ const PsychiatristLanding = () => {
 
   useEffect(() => {
     const cancelledRef = { current: false };
-    loadExpertsPage(expertsPage, cancelledRef);
+    // List already loaded and the backend doesn't paginate: the page change
+    // is handled by slicing, no new request needed.
+    if (!(hasLoadedRef.current && !expertsPagination)) {
+      loadExpertsPage(expertsPage, cancelledRef);
+    }
     return () => {
       cancelledRef.current = true;
     };
@@ -343,9 +357,32 @@ const PsychiatristLanding = () => {
   // Server-driven page navigation. Guarded so it's a no-op (and the UI
   // disables the buttons) whenever the backend hasn't reported real
   // pagination metadata for the current listing.
+  // Server pagination when the backend provides it; otherwise pagination
+  // computed from the full list the backend returned.
+  const effectivePagination =
+    expertsPagination ??
+    (!usingFallback && displayDoctors.length > 0
+      ? {
+          page: expertsPage,
+          limit: EXPERTS_PAGE_SIZE,
+          total: displayDoctors.length,
+          totalPages: Math.max(
+            1,
+            Math.ceil(displayDoctors.length / EXPERTS_PAGE_SIZE),
+          ),
+        }
+      : null);
+  const pagedDoctors =
+    expertsPagination || usingFallback
+      ? displayDoctors
+      : displayDoctors.slice(
+          (expertsPage - 1) * EXPERTS_PAGE_SIZE,
+          expertsPage * EXPERTS_PAGE_SIZE,
+        );
+
   const goToExpertsPage = (nextPage: number) => {
-    if (!expertsPagination) return;
-    if (nextPage < 1 || nextPage > expertsPagination.totalPages) return;
+    if (!effectivePagination) return;
+    if (nextPage < 1 || nextPage > effectivePagination.totalPages) return;
     if (nextPage === expertsPage) return;
     setExpertsPage(nextPage);
   };
@@ -517,7 +554,7 @@ const PsychiatristLanding = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 xl:gap-10">
-                  {displayDoctors.map((doc) => {
+                  {pagedDoctors.map((doc) => {
                     // Rating/reviews are deterministic display placeholders
                     // (no ratings backend yet) — identical derivation to
                     // ExpertsPage so both listings show the same numbers
@@ -691,16 +728,16 @@ const PsychiatristLanding = () => {
                       <button
                         type="button"
                         onClick={() => goToExpertsPage(expertsPage - 1)}
-                        disabled={!expertsPagination || expertsPage <= 1}
+                        disabled={!effectivePagination || expertsPage <= 1}
                         aria-label="Previous page"
                         className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
 
-                      {expertsPagination ? (
+                      {effectivePagination ? (
                         Array.from(
-                          { length: expertsPagination.totalPages },
+                          { length: effectivePagination.totalPages },
                           (_, i) => i + 1,
                         ).map((num) => (
                           <button
@@ -727,8 +764,8 @@ const PsychiatristLanding = () => {
                         type="button"
                         onClick={() => goToExpertsPage(expertsPage + 1)}
                         disabled={
-                          !expertsPagination ||
-                          expertsPage >= expertsPagination.totalPages
+                          !effectivePagination ||
+                          expertsPage >= effectivePagination.totalPages
                         }
                         aria-label="Next page"
                         className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
@@ -737,11 +774,6 @@ const PsychiatristLanding = () => {
                       </button>
                     </div>
 
-                    {!expertsPagination && (
-                      <p className="text-xs text-[#94a39b] font-medium">
-                        More pages will be available once server-side pagination is enabled.
-                      </p>
-                    )}
                   </div>
                 )}
               </>

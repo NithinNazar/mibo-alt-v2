@@ -215,7 +215,9 @@ class ClinicianService {
       params: {
         isActive: true,
         ...(params.centreId !== undefined ? { centreId: params.centreId } : {}),
-        ...(params.specialization ? { specialization: params.specialization } : {}),
+        // NOTE: `specialization` is intentionally NOT sent to the server. The
+        // backend's ILIKE filter errors on this database (500), so we fetch the
+        // active list and filter by specialization on the client below.
         page: params.page,
         limit: params.limit,
       },
@@ -231,7 +233,7 @@ class ClinicianService {
     // backend returned its full flat list (ignoring page/limit) — apply
     // the existing client-side specialization filter for parity with
     // getClinicians(), but do NOT slice to `limit` (see doc comment above).
-    const data = pagination ? rawData : this.filterClinicians(rawData, params);
+    const data = this.filterClinicians(rawData, params);
 
     return { data, pagination };
   }

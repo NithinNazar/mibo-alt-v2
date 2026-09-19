@@ -62,6 +62,7 @@ export interface Clinician {
   primaryCentreId: number;
   primaryCentreName: string;
   specialization: string | string[];
+  designation?: string | null; // from staff_profiles; used by isPsychiatrist()
   registrationNumber: string | null;
   yearsOfExperience: number;
   consultationFee: number;

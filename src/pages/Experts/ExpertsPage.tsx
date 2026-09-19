@@ -37,6 +37,7 @@ import ExpertiseMarquee from "./Components/ExpertiseMarquee";
 import ExpertMedia from "./Components/ExpertMedia";
 import "./Components/doctorCard.css";
 import clinicianService from "../../services/clinicianService";
+import { isPsychiatrist } from "../../utils/isPsychiatrist";
 import centreService from "../../services/centreService";
 import { API_BASE_URL } from "../../services/api";
 import StickySearchBar from "../../components/StickySearchBar";
@@ -708,12 +709,7 @@ export default function ExpertsPage() {
               designation.includes("counseling")
             );
           case "Psychiatrists":
-            return (
-              designation.includes("psychiatrist") ||
-              qualification.includes("psychiatry") ||
-              qualification.includes("mbbs") ||
-              qualification.includes("md")
-            );
+            return isPsychiatrist(doc);
           case "Clinical Psychologists":
             return (
               designation.includes("clinical psychologist") ||
