@@ -262,6 +262,9 @@ const SAMPLE_FALLBACK: DisplayDoctor[] = [];
 // API returns the full list) the page slices the list itself, 4 per page.
 const EXPERTS_PAGE_SIZE = 4;
 
+// Location pre-selected when the page first loads.
+const DEFAULT_LOCATION = "Bangalore";
+
 /** First number in a price string like "₹1900/session" (decimal-safe). */
 const parsePrice = (price: string): number => {
   const match = price.match(/\d+(\.\d+)?/);
@@ -292,7 +295,12 @@ const PsychiatristLanding = () => {
   } | null>(null);
 
   // --- Filter / sort state (same model as ExpertsPage) ---
-  const [filters, setFilters] = useState<SelectedFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<SelectedFilters>({
+    ...EMPTY_FILTERS,
+    Location: [DEFAULT_LOCATION],
+  });
+  // The default location is validated against the data once, on first load.
+  const defaultLocationCheckedRef = useRef(false);
   const [sortBy, setSortBy] = useState<SortOption | null>(null);
 
   // centre id -> city, fetched once. Used to resolve each psychiatrist's
@@ -385,9 +393,18 @@ const PsychiatristLanding = () => {
 
       if (psychiatrists.length > 0) {
         hasLoadedRef.current = true;
-        setDisplayDoctors(
-          psychiatrists.map((doc) => fromClinician(doc, cityByCentreId)),
+        const mapped = psychiatrists.map((doc) =>
+          fromClinician(doc, cityByCentreId),
         );
+        setDisplayDoctors(mapped);
+        // If nobody is in the default city, drop the default rather than
+        // landing visitors on an empty list.
+        if (!defaultLocationCheckedRef.current) {
+          defaultLocationCheckedRef.current = true;
+          if (!mapped.some((d) => d.location === DEFAULT_LOCATION)) {
+            setFilters((prev) => ({ ...prev, Location: [] }));
+          }
+        }
         setUsingFallback(false);
         setExpertsPagination(result.pagination);
       } else {
@@ -1349,7 +1366,7 @@ const PsychiatristLanding = () => {
                     Fee
                   </div>
                   <div className="text-[14px] font-bold text-[#16241f]">
-                    {selectedProfile.price.replace("/session", "")} /session
+                    {selectedProfile.price.replace("/session", "")} / session
                   </div>
                 </div>
               </div>
