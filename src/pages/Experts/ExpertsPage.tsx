@@ -1486,7 +1486,7 @@ export default function ExpertsPage() {
                     Fee
                   </div>
                   <div className="text-[14px] font-bold text-[#16241f]">
-                    {selectedProfile.price.replace("/session", "")} /
+                    {selectedProfile.price.replace("/session", "")} /session
                   </div>
                 </div>
               </div>

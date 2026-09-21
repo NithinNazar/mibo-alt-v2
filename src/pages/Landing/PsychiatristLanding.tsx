@@ -40,10 +40,23 @@ import {
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import clinicianService from "../../services/clinicianService";
+import centreService from "../../services/centreService";
 import { isPsychiatrist } from "../../utils/isPsychiatrist";
 import type { Clinician } from "../../types";
 import ExpertiseMarquee from "../Experts/Components/ExpertiseMarquee";
 import ExpertMedia from "../Experts/Components/ExpertMedia";
+import PsychiatristFilterBar, {
+  EMPTY_FILTERS,
+  GENDER_OPTIONS,
+  LANGUAGE_OPTIONS,
+  LOCATION_OPTIONS,
+  PRICE_BANDS,
+} from "./PsychiatristFilterBar";
+import type {
+  FilterKey,
+  SelectedFilters,
+  SortOption,
+} from "./PsychiatristFilterBar";
 // import { dummyDoctors } from "../Experts/data/dummyDoctors";
 import heroBanner from "./banner.jpg";
 import heroBannerMobile from "./banner-mobile.png";
@@ -129,8 +142,30 @@ function resolveCityFromCentreName(centreName: string | undefined): string {
   return "Bangalore";
 }
 
-function fromClinician(doc: Clinician): DisplayDoctor {
+/** Normalizes a centre's `city` value to the labels used by the Location filter. */
+function normalizeCity(raw: string | undefined): string | null {
+  const v = raw?.toLowerCase().trim();
+  if (!v) return null;
+  if (v === "bangalore" || v === "banglore" || v === "bengaluru") return "Bangalore";
+  if (v === "kochi" || v === "cochin") return "Kochi";
+  if (v === "mumbai" || v === "bombay") return "Mumbai";
+  return null;
+}
+
+/**
+ * `cityByCentreId` (centre id -> city) is the authoritative source, joined on
+ * the clinician's primaryCentreId exactly like ExpertsPage. When it isn't
+ * available (or has no match) we fall back to the centre-name heuristic.
+ */
+function fromClinician(
+  doc: Clinician,
+  cityByCentreId?: Map<string, string>,
+): DisplayDoctor {
   const years = doc.yearsOfExperience || 0;
+  const joinedCity =
+    doc.primaryCentreId !== undefined && doc.primaryCentreId !== null
+      ? cityByCentreId?.get(String(doc.primaryCentreId))
+      : undefined;
   return {
     id: doc.id,
     isSample: false,
@@ -144,7 +179,7 @@ function fromClinician(doc: Clinician): DisplayDoctor {
     experienceLabel: `${years}+ years`,
     languages: toList(doc.languages),
     expertise: doc.expertise || [],
-    location: resolveCityFromCentreName(doc.primaryCentreName),
+    location: joinedCity ?? resolveCityFromCentreName(doc.primaryCentreName),
     gender: doc.gender ?? null,
     price: `₹${doc.consultationFee || 0}/session`,
     sessionTypes: getSessionTypes(doc.consultationModes),
@@ -227,6 +262,12 @@ const SAMPLE_FALLBACK: DisplayDoctor[] = [];
 // API returns the full list) the page slices the list itself, 4 per page.
 const EXPERTS_PAGE_SIZE = 4;
 
+/** First number in a price string like "₹1900/session" (decimal-safe). */
+const parsePrice = (price: string): number => {
+  const match = price.match(/\d+(\.\d+)?/);
+  return match ? parseFloat(match[0]) : 0;
+};
+
 const PsychiatristLanding = () => {
   const navigate = useNavigate();
 
@@ -249,6 +290,14 @@ const PsychiatristLanding = () => {
     total: number;
     totalPages: number;
   } | null>(null);
+
+  // --- Filter / sort state (same model as ExpertsPage) ---
+  const [filters, setFilters] = useState<SelectedFilters>(EMPTY_FILTERS);
+  const [sortBy, setSortBy] = useState<SortOption | null>(null);
+
+  // centre id -> city, fetched once. Used to resolve each psychiatrist's
+  // city for the Location filter (same join ExpertsPage does).
+  const cityByCentreIdRef = useRef<Map<string, string> | null>(null);
 
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
@@ -291,6 +340,26 @@ const PsychiatristLanding = () => {
     }
   };
 
+  // Loads the centre list once and caches centre id -> city. A failure here
+  // is non-fatal: the listing still renders and falls back to matching the
+  // city from the centre name.
+  const getCityByCentreId = async (): Promise<Map<string, string> | undefined> => {
+    if (cityByCentreIdRef.current) return cityByCentreIdRef.current;
+    try {
+      const centres = await centreService.getCentres();
+      const map = new Map<string, string>();
+      centres.forEach((centre) => {
+        const city = normalizeCity(centre.city);
+        if (city) map.set(String(centre.id), city);
+      });
+      cityByCentreIdRef.current = map;
+      return map;
+    } catch (error) {
+      console.error("Failed to load centres for location filter:", error);
+      return undefined;
+    }
+  };
+
   const loadExpertsPage = async (pageNum: number, cancelledRef?: { current: boolean }) => {
     try {
       setLoading(true);
@@ -299,10 +368,13 @@ const PsychiatristLanding = () => {
       // focused landing page. Server-side pagination is requested via
       // page/limit; see clinicianService.getCliniciansPaged for what
       // happens when the backend doesn't yet honor those params.
-      const result = await clinicianService.getCliniciansPaged({
-        page: pageNum,
-        limit: EXPERTS_PAGE_SIZE,
-      });
+      const [result, cityByCentreId] = await Promise.all([
+        clinicianService.getCliniciansPaged({
+          page: pageNum,
+          limit: EXPERTS_PAGE_SIZE,
+        }),
+        getCityByCentreId(),
+      ]);
       if (cancelledRef?.current) return;
 
       // Same psychiatrist rule as the Experts page (utils/isPsychiatrist).
@@ -313,7 +385,9 @@ const PsychiatristLanding = () => {
 
       if (psychiatrists.length > 0) {
         hasLoadedRef.current = true;
-        setDisplayDoctors(psychiatrists.map(fromClinician));
+        setDisplayDoctors(
+          psychiatrists.map((doc) => fromClinician(doc, cityByCentreId)),
+        );
         setUsingFallback(false);
         setExpertsPagination(result.pagination);
       } else {
@@ -358,28 +432,138 @@ const PsychiatristLanding = () => {
     loadExpertsPage(expertsPage);
   };
 
-  // Server-driven page navigation. Guarded so it's a no-op (and the UI
-  // disables the buttons) whenever the backend hasn't reported real
-  // pagination metadata for the current listing.
+  // --- Filter options -------------------------------------------------
+  // Location / Language / Price / Gender use the same fixed options as the
+  // Experts page. Expertise is built from the psychiatrists actually loaded
+  // so every option can match at least one card (the Experts page's generic
+  // list has no psychiatry-specific terms such as "Dementia" or "PMDD").
+  const filterOptions = useMemo<Record<FilterKey, string[]>>(() => {
+    const seen = new Map<string, string>();
+    displayDoctors.forEach((doc) =>
+      doc.expertise.forEach((item) => {
+        const label = item.trim();
+        if (label && !seen.has(label.toLowerCase())) {
+          seen.set(label.toLowerCase(), label);
+        }
+      }),
+    );
+    return {
+      Location: LOCATION_OPTIONS,
+      Expertise: Array.from(seen.values()).sort((a, b) => a.localeCompare(b)),
+      Language: LANGUAGE_OPTIONS,
+      Price: PRICE_BANDS.map((band) => band.label),
+      Gender: GENDER_OPTIONS,
+    };
+  }, [displayDoctors]);
+
+  const hasActiveFilters = Object.values(filters).some((v) => v.length > 0);
+
+  // Apply filters (AND across categories, OR within one) then sort.
+  const filteredDoctors = useMemo(() => {
+    if (usingFallback) return displayDoctors;
+    let list = [...displayDoctors];
+
+    if (filters.Location.length > 0) {
+      list = list.filter((doc) =>
+        filters.Location.some((l) => l.toLowerCase() === doc.location.toLowerCase()),
+      );
+    }
+    if (filters.Expertise.length > 0) {
+      list = list.filter((doc) =>
+        filters.Expertise.some((wanted) =>
+          doc.expertise.some(
+            (e) => e.trim().toLowerCase() === wanted.toLowerCase(),
+          ),
+        ),
+      );
+    }
+    if (filters.Language.length > 0) {
+      list = list.filter((doc) =>
+        filters.Language.some((wanted) =>
+          doc.languages.some((l) => l.trim().toLowerCase() === wanted.toLowerCase()),
+        ),
+      );
+    }
+    if (filters.Price.length > 0) {
+      list = list.filter((doc) => {
+        const fee = parsePrice(doc.price);
+        return filters.Price.some((label) =>
+          PRICE_BANDS.find((b) => b.label === label)?.test(fee),
+        );
+      });
+    }
+    // Doctors with no gender on record never match a selected gender.
+    if (filters.Gender.length > 0) {
+      list = list.filter((doc) =>
+        filters.Gender.includes(formatGender(doc.gender) || ""),
+      );
+    }
+
+    if (sortBy) {
+      list.sort((a, b) => {
+        switch (sortBy) {
+          case "Price: Low to High":
+            return parsePrice(a.price) - parsePrice(b.price);
+          case "Price: High to Low":
+            return parsePrice(b.price) - parsePrice(a.price);
+          case "Experience: High to Low":
+            return b.yearsOfExperience - a.yearsOfExperience;
+          case "Name: A-Z":
+            return a.fullName.localeCompare(b.fullName);
+          default:
+            return 0;
+        }
+      });
+    }
+    return list;
+  }, [displayDoctors, filters, sortBy, usingFallback]);
+
+  // Changing a filter/sort returns to page 1. Skipped when the backend
+  // paginates, where a page change means a new request.
+  const resetToFirstPage = () => {
+    if (!expertsPagination) setExpertsPage(1);
+  };
+
+  const handleToggleFilter = (key: FilterKey, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: prev[key].includes(value)
+        ? prev[key].filter((v) => v !== value)
+        : [...prev[key], value],
+    }));
+    resetToFirstPage();
+  };
+
+  const handleSortChange = (next: SortOption | null) => {
+    setSortBy(next);
+    resetToFirstPage();
+  };
+
+  const handleClearAll = () => {
+    setFilters(EMPTY_FILTERS);
+    setSortBy(null);
+    resetToFirstPage();
+  };
+
   // Server pagination when the backend provides it; otherwise pagination
-  // computed from the full list the backend returned.
+  // computed from the (filtered) list the backend returned.
   const effectivePagination =
     expertsPagination ??
-    (!usingFallback && displayDoctors.length > 0
+    (!usingFallback && filteredDoctors.length > 0
       ? {
           page: expertsPage,
           limit: EXPERTS_PAGE_SIZE,
-          total: displayDoctors.length,
+          total: filteredDoctors.length,
           totalPages: Math.max(
             1,
-            Math.ceil(displayDoctors.length / EXPERTS_PAGE_SIZE),
+            Math.ceil(filteredDoctors.length / EXPERTS_PAGE_SIZE),
           ),
         }
       : null);
   const pagedDoctors =
     expertsPagination || usingFallback
-      ? displayDoctors
-      : displayDoctors.slice(
+      ? filteredDoctors
+      : filteredDoctors.slice(
           (expertsPage - 1) * EXPERTS_PAGE_SIZE,
           expertsPage * EXPERTS_PAGE_SIZE,
         );
@@ -587,6 +771,19 @@ const PsychiatristLanding = () => {
               </button>
             </div>
 
+            {/* Filters + sort — same controls as the Experts page. Stays
+                mounted while a page reloads; hidden until there is data. */}
+            {displayDoctors.length > 0 && !usingFallback && (
+              <PsychiatristFilterBar
+                options={filterOptions}
+                selected={filters}
+                sortBy={sortBy}
+                onToggle={handleToggleFilter}
+                onSortChange={handleSortChange}
+                onClearAll={handleClearAll}
+              />
+            )}
+
             {loading ? (
               <div className="flex justify-center items-center min-h-[420px]">
                 <div className="w-10 h-10 border-4 border-[#138158]/20 border-t-[#138158] rounded-full animate-spin" />
@@ -604,6 +801,21 @@ const PsychiatristLanding = () => {
                     className="mt-5 border border-[#212154]/20 hover:border-[#138158] text-[#212154] font-semibold px-5 py-2.5 rounded-full transition-colors"
                   >
                     Try again
+                  </button>
+                )}
+              </div>
+            ) : filteredDoctors.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-miboText text-base sm:text-lg">
+                  No psychiatrists match your filters.
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    className="mt-5 border border-[#212154]/20 hover:border-[#138158] text-[#212154] font-semibold px-5 py-2.5 rounded-full transition-colors"
+                  >
+                    Clear All Filters
                   </button>
                 )}
               </div>
@@ -1137,7 +1349,7 @@ const PsychiatristLanding = () => {
                     Fee
                   </div>
                   <div className="text-[14px] font-bold text-[#16241f]">
-                    {selectedProfile.price.replace("/session", "")} 
+                    {selectedProfile.price.replace("/session", "")} /session
                   </div>
                 </div>
               </div>
