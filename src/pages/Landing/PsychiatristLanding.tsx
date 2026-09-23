@@ -220,6 +220,12 @@ function fromClinician(
 
 const PATIENT_PHONE = "9083335000";
 
+// Deep link into the Experts listing, pre-filtered to Bangalore
+// psychiatrists — ExpertsPage reads these two params on mount (see
+// resolveLocationFromParam / resolveCategoryFromParam there).
+const EXPERTS_PSYCHIATRIST_LINK =
+  "/experts?location=Bangalore&specialization=Psychiatrist";
+
 // Real MIBO Bangalore clinic details — reused from the existing
 // BangaloreLanding page rather than invented for this page.
 const CLINIC_ADDRESS =
@@ -731,7 +737,7 @@ const PsychiatristLanding = () => {
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4 mb-2 sm:mb-10 w-[88%] sm:w-auto">
                 <button
-                  onClick={() => navigate("/experts")}
+                  onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
                   className="bg-[#138158] hover:bg-[#0e6b4f] text-white font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Book Psychiatrist Consultation
@@ -1493,7 +1499,7 @@ const PsychiatristLanding = () => {
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
               <button
-                onClick={() => navigate("/experts")}
+                onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
                 className="bg-white text-[#212154] px-7 py-3.5 rounded-full font-semibold hover:bg-white/90 transition-colors w-full sm:w-auto"
               >
                 Book Appointment

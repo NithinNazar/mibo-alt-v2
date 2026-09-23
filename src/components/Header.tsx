@@ -51,10 +51,10 @@ const handleExpertClick = (specialization: string) => {
   setMenuOpen(false);
   setMobileExpertsOpen(false);
 
-  if (specialization === "Psychiatrist") {
-    window.location.href = "/psychiatrist";
-    return;
-  }
+  // if (specialization === "Psychiatrist") {
+  //   window.location.href = "/experts";
+  //   return;
+  // }
 
   sessionStorage.setItem("expertsFilter", specialization);
   navigate("/experts");
@@ -214,6 +214,11 @@ const handleNavigate = (path: string) => {
             className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
           >
             WHY MIBO
+          </span>
+          <span 
+            onClick={() => handleNavigate("/psychiatrist")}
+            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105">
+            PSYCHIATRIST 
           </span>
           <div
             className="relative cursor-pointer"
@@ -382,6 +387,7 @@ const handleNavigate = (path: string) => {
               WHO IT'S FOR
             </span>
             <span onClick={() => handleNavigate("/why-mibo")}>WHY MIBO</span>
+            <span onClick={() => handleNavigate("/psychiatrist")}>PSYCHIATRIST</span>
             <div className="flex flex-col">
               <span
                 onClick={() => setMobileExpertsOpen(!mobileExpertsOpen)}

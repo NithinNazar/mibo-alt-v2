@@ -79,6 +79,33 @@ const CATEGORIES = [
   { label: "Therapists", icon: User },
 ];
 
+// Matches an incoming `?specialization=` URL query value (e.g. the
+// "Psychiatrist" link from PsychiatristLanding) to one of the CATEGORIES
+// pill labels above (e.g. "Psychiatrists"), tolerating singular/plural and
+// casing differences. Falls back to "All Experts" for anything unrecognized.
+function resolveCategoryFromParam(raw: string | null): string {
+  if (!raw) return "All Experts";
+  const wanted = raw.trim().toLowerCase();
+  const match = CATEGORIES.find(
+    (c) =>
+      c.label.toLowerCase() === wanted ||
+      c.label.toLowerCase() === `${wanted}s`,
+  );
+  return match ? match.label : "All Experts";
+}
+
+// Matches an incoming `?location=` URL query value (e.g. "Bangalore" from
+// PsychiatristLanding) to one of the known Location filter options,
+// tolerating casing differences. Mirrors FILTER_OPTIONS.Location below.
+const LOCATION_QUERY_OPTIONS = ["Bangalore", "Kochi", "Mumbai"];
+function resolveLocationFromParam(raw: string | null): string[] {
+  if (!raw) return [];
+  const match = LOCATION_QUERY_OPTIONS.find(
+    (loc) => loc.toLowerCase() === raw.trim().toLowerCase(),
+  );
+  return match ? [match] : [];
+}
+
 const TESTIMONIALS = [
   {
     quote:
@@ -211,11 +238,16 @@ export default function ExpertsPage() {
       console.error("Failed to copy share link:", err);
     }
   };
-  const [selectedCategory, setSelectedCategory] = useState("All Experts");
+  // Both default from the URL (`?location=Bangalore&specialization=Psychiatrist`,
+  // as sent by PsychiatristLanding's CTAs) so a deep link lands pre-filtered.
+  // Read once on mount, same as the rest of this page's initial state.
+  const [selectedCategory, setSelectedCategory] = useState(() =>
+    resolveCategoryFromParam(searchParams.get("specialization")),
+  );
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({
-    Location: [],
+    Location: resolveLocationFromParam(searchParams.get("location")),
     Expertise: [],
     Language: [],
     Price: [],
@@ -1052,9 +1084,13 @@ export default function ExpertsPage() {
                       <span className="flex items-center gap-1 text-[#637268] font-medium shrink-0">
                         <MapPin className="w-[13px] h-[13px] shrink-0" />
                         {doc.location}
-                      </span>
+                      </span> 
+                    
+                    </div>
+
+                    <div className="text-[12.5px] leading-[1.3] text-[#3a463f] mb-2.5 font-semibold">
                       {formatGender(doc.gender) && (
-                        <span className="flex items-center gap-1 text-[#637268] font-medium shrink-0">
+                        <span className="flex items-center gap-1 text-[#637268] font-normal shrink-0">
                           <User className="w-[13px] h-[13px] shrink-0" />
                           {formatGender(doc.gender)}
                         </span>
