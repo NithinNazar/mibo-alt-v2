@@ -736,13 +736,13 @@ const PsychiatristLanding = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4 mb-2 sm:mb-10 w-[88%] sm:w-auto">
-                <button
+                {/* <button
                   onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
                   className="bg-[#138158] hover:bg-[#0e6b4f] text-white font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Book Psychiatrist Consultation
                   <span aria-hidden>→</span>
-                </button>
+                </button> */}
                 <button
                   onClick={handleCall}
                   className="border border-[#212154]/20 hover:border-[#138158] bg-white/70 backdrop-blur-sm text-[#212154] font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -1498,12 +1498,12 @@ const PsychiatristLanding = () => {
               online consultation.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
-              <button
+              {/* <button
                 onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
                 className="bg-white text-[#212154] px-7 py-3.5 rounded-full font-semibold hover:bg-white/90 transition-colors w-full sm:w-auto"
               >
                 Book Appointment
-              </button>
+              </button> */}
               <button
                 onClick={handleCall}
                 className="border border-white/30 text-white px-7 py-3.5 rounded-full font-semibold hover:bg-white/10 transition-colors w-full sm:w-auto"
