@@ -24,6 +24,7 @@ import {
   ClipboardList,
   Eye,
   Flame,
+  Gift,
   HeartPulse,
   Heart,
   IndianRupee,
@@ -72,6 +73,8 @@ import type {
 import heroBanner from "./banner.jpg";
 import heroBannerMobile from "./banner-mobile.png";
 import notAloneImg from "./you-are-not-alone.jpg";
+import adDesktop from "./ad-desktop.png";
+import adMobile from "./ad-mobile.jpg";
 import { psychiatristFaqData } from "./psychiatristFaqData";
 import { psychiatristReviewsData } from "./psychiatristReviewsData";
 
@@ -636,6 +639,17 @@ const PsychiatristLanding = () => {
     setExpertsPage(nextPage);
   };
 
+  const [showPromoPopup, setShowPromoPopup] = useState(true);
+
+  useEffect(() => {
+    if (!showPromoPopup) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowPromoPopup(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showPromoPopup]);
+
   const handleCall = () => {
     window.location.href = `tel:+91${PATIENT_PHONE}`;
   };
@@ -680,6 +694,38 @@ const PsychiatristLanding = () => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+
+      {showPromoPopup && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="World Mental Health Day offer"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setShowPromoPopup(false)}
+        >
+          <div
+            className="relative w-full max-w-[320px] md:max-w-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowPromoPopup(false)}
+              aria-label="Close"
+              className="absolute -top-3 -right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#212154] shadow-lg hover:bg-gray-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <picture>
+              <source media="(min-width: 768px)" srcSet={adDesktop} />
+              <img
+                src={adMobile}
+                alt="World Mental Health Day: 50% off on psychiatric consultation at Mibo Bengaluru. Use code MHM72."
+                className="block w-full h-auto max-h-[85vh] object-contain rounded-2xl bg-white"
+              />
+            </picture>
+          </div>
+        </div>
+      )}
 
       <Header />
 
@@ -745,7 +791,7 @@ const PsychiatristLanding = () => {
                 </button> */}
                 <button
                   onClick={handleCall}
-                  className="border border-[#212154]/20 hover:border-[#138158] bg-white/70 backdrop-blur-sm text-[#212154] font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                  className="bg-[#138158] hover:bg-[#0f6b49] text-white shadow-lg shadow-[#138158]/30 font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <Phone className="w-4 h-4 shrink-0" />
                   Call Now
@@ -795,6 +841,61 @@ const PsychiatristLanding = () => {
                 <span className="block text-[10.5px] font-bold leading-tight text-[#212154]">{title}</span>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* World Mental Health Day promotional banner                       */}
+        {/* ---------------------------------------------------------------- */}
+        <section
+          aria-label="World Mental Health Day offer"
+          className="bg-white py-8 sm:py-10 md:py-12"
+        >
+          <div className="container mx-auto px-4 sm:px-6 lg:px-10">
+            <picture>
+              <source media="(min-width: 768px)" srcSet={adDesktop} width={1672} height={941} />
+              <img
+                src={adMobile}
+                width={1024}
+                height={1536}
+                alt="World Mental Health Day: 50% off on psychiatric consultation at Mibo Bengaluru. Use code MHM72, valid 1st to 30th October."
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full max-w-[320px] md:max-w-4xl mx-auto rounded-2xl"
+              />
+            </picture>
+
+            {/* Offer summary strip */}
+            <div className="mt-4 md:mt-6 mx-auto max-w-[320px] md:max-w-4xl rounded-2xl border border-[#138158]/20 bg-[#eaf6f2] px-4 py-4 sm:px-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+              <div className="flex items-start gap-3 md:flex-1">
+                <Gift className="w-8 h-8 shrink-0 text-[#138158]" />
+                <div>
+                  <p className="font-bold text-[#212154]">Special Offer for a Healthier You</p>
+                  <p className="text-sm text-miboText">
+                    On this World Mental Health Day, take the first step towards
+                    better mental well-being with 50% off on psychiatrist consultation.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-around md:justify-start gap-6 md:gap-8 md:border-l md:border-[#212154]/15 md:pl-6">
+                <div>
+                  <p className="text-xs text-miboText">Regular Price</p>
+                  <p className="text-xl font-bold text-[#212154] line-through decoration-red-500">₹800</p>
+                </div>
+                <div>
+                  <p className="text-xs text-miboText">Offer Price</p>
+                  <p className="text-2xl font-extrabold text-[#212154]">₹400</p>
+                  <p className="text-[11px] text-miboText">Only until 10th October</p>
+                </div>
+              </div>
+              <button
+                onClick={handleCall}
+                className="bg-[#212154] hover:bg-[#1a1a46] text-white font-semibold px-6 py-3 rounded-full transition-colors flex items-center justify-center gap-2"
+              >
+                <Phone className="w-4 h-4 shrink-0" />
+                Call Now <span aria-hidden>→</span>
+              </button>
+            </div>
           </div>
         </section>
 
@@ -882,7 +983,7 @@ const PsychiatristLanding = () => {
                 </p>
               </div>
               <button
-                onClick={() => navigate("/experts")}
+                onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
                 className="md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 border border-[#212154]/20 hover:border-[#138158] text-[#212154] font-semibold px-5 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 whitespace-nowrap w-full max-w-[240px] mx-auto sm:w-auto sm:max-w-none sm:mx-0"
               >
                 View All Experts
