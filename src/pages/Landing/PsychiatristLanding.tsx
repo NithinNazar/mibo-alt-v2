@@ -695,7 +695,9 @@ const PsychiatristLanding = () => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {showPromoPopup && (
+    {/* Promo Popup======== */}
+
+      {/* {showPromoPopup && (
         <div
           role="dialog"
           aria-modal="true"
@@ -725,7 +727,7 @@ const PsychiatristLanding = () => {
             </picture>
           </div>
         </div>
-      )}
+      )} */}
 
       <Header />
 
@@ -847,7 +849,7 @@ const PsychiatristLanding = () => {
         {/* ---------------------------------------------------------------- */}
         {/* World Mental Health Day promotional banner                       */}
         {/* ---------------------------------------------------------------- */}
-        <section
+        {/* <section
           aria-label="World Mental Health Day offer"
           className="bg-white py-8 sm:py-10 md:py-12"
         >
@@ -863,10 +865,10 @@ const PsychiatristLanding = () => {
                 decoding="async"
                 className="block h-auto w-full max-w-[320px] md:max-w-4xl mx-auto rounded-2xl"
               />
-            </picture>
+            </picture> */}
 
             {/* Offer summary strip */}
-            <div className="mt-4 md:mt-6 mx-auto max-w-[320px] md:max-w-4xl rounded-2xl border border-[#138158]/20 bg-[#eaf6f2] px-4 py-4 sm:px-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+            {/* <div className="mt-4 md:mt-6 mx-auto max-w-[320px] md:max-w-4xl rounded-2xl border border-[#138158]/20 bg-[#eaf6f2] px-4 py-4 sm:px-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
               <div className="flex items-start gap-3 md:flex-1">
                 <Gift className="w-8 h-8 shrink-0 text-[#138158]" />
                 <div>
@@ -897,7 +899,7 @@ const PsychiatristLanding = () => {
               </button>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* ---------------------------------------------------------------- */}
         {/* About Psychiatric Care at MIBO                                   */}
