@@ -262,32 +262,43 @@ const KochiLanding = () => {
     {
       image: drAnu,
       name: "Dr.Anu Sobha Jose",
-      specialization:
-        "Consultant Psychiatrist, 10+ Years Of Experience In Women Mental Health, De-addiction, Child and Adolescent Psychiatry",
+      specialization: "Consultant Psychiatrist, 10+ Years Of Experience In",
+      points: [
+        "Women Mental Health",
+        "De-addiction",
+        "Child and Adolescent Psychiatry",
+      ],
     },
     {
       image: drAnet,
       name: "Anet Augustine",
-      specialization:
-        "Clinical Psychologist, 2+ Years Of Experience in Anxeity Dissorder, Psychosis",
+      specialization: "Clinical Psychologist, 2+ Years Of Experience in",
+      points: ["Anxeity Dissorder", "Psychosis"],
     },
     {
       image: drRia,
       name: "Ria Mary Jojo",
-      specialization:
-        "Clinical Psychologist of 3+ Year of Experience ,Licensed by Rehabilitation Council of India In-person & Online Consultations",
+      specialization: "Clinical Psychologist of 3+ Year of Experience",
+      points: [
+        "Licensed by Rehabilitation Council of India",
+        "In-person & Online Consultations",
+      ],
     },
     {
       image: jerryMathew,
       name: "Jerry P Mathew",
-      specialization:
-        "Clinical Psychologist, 5+ Years Of Experience In CBT, DBT, ACT, Anxiety Disorders, OCD",
+      specialization: "Clinical Psychologist, 5+ Years Of Experience In",
+      points: ["CBT", "DBT", "ACT", "Anxiety Disorders", "OCD"],
     },
     {
       image: drSangeetha,
       name: "Dr. Sangeetha O S",
-      specialization:
-        "Consultant Psychiatrist, 4+ Years Of Experience In Child and Adolescent Psychiatry, Mood Disorders, Women Psychiatry",
+      specialization: "Consultant Psychiatrist, 4+ Years Of Experience In",
+      points: [
+        "Child and Adolescent Psychiatry",
+        "Mood Disorders",
+        "Women Psychiatry",
+      ],
     },
   ];
 
@@ -625,6 +636,14 @@ const KochiLanding = () => {
                   <p className="text-miboText font-semibold">
                     {expert.specialization}
                   </p>
+
+                  {expert.points && (
+                    <ul className="mt-2 inline-block text-left list-disc pl-5 text-miboText font-semibold">
+                      {expert.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             ))}
