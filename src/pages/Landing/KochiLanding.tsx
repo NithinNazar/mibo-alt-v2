@@ -47,9 +47,11 @@ import drMuhammed from "./Dr.Muhammed.webp";
 import drAnu from "./DrAnusobha.webp";
 import drAnet from "./Anet Augustine-1.webp";
 import drRia from "./Ria Mary-3.webp";
+import jerryMathew from "../../assets/profile pic/ishvion-expert-8-37171c915931757c.png";
+import drSangeetha from "../../assets/profile pic/ishvion-expert-18-b4f4d380b68fe8d7.png";
 
 const KochiLanding = () => {
-  const phoneNumber = "9083335000";
+  const phoneNumber = "9447511479";
   const email = "reach@mibocare.com";
   const address =
     "13/1818, Kannanthodathu Rd, near Changampuzha Park Metro Station, Devankulangara, Mamangalam, Edappally, Kochi, Ernakulam, Kerala 682024";
@@ -77,7 +79,7 @@ const KochiLanding = () => {
   ];
 
   const handlePhoneClick = () => {
-    window.location.href = `tel:+919083335000`;
+    window.location.href = `tel:+919447511479`;
   };
 
   const nextSlide = () => {
@@ -275,6 +277,18 @@ const KochiLanding = () => {
       specialization:
         "Clinical Psychologist of 3+ Year of Experience ,Licensed by Rehabilitation Council of India In-person & Online Consultations",
     },
+    {
+      image: jerryMathew,
+      name: "Jerry P Mathew",
+      specialization:
+        "Clinical Psychologist, 5+ Years Of Experience In CBT, DBT, ACT, Anxiety Disorders, OCD",
+    },
+    {
+      image: drSangeetha,
+      name: "Dr. Sangeetha O S",
+      specialization:
+        "Consultant Psychiatrist, 4+ Years Of Experience In Child and Adolescent Psychiatry, Mood Disorders, Women Psychiatry",
+    },
   ];
 
   const faqData = [
@@ -303,7 +317,7 @@ const KochiLanding = () => {
     {
       question: "How can I book an appointment?",
       answer:
-        "You can book an appointment by calling our care team at +91 9083335000. We'll help you schedule a consultation with the most suitable psychologist or psychiatrist based on your concerns.",
+        "You can book an appointment by calling our care team at +91 9447511479. We'll help you schedule a consultation with the most suitable psychologist or psychiatrist based on your concerns.",
     },
     {
       question: "How many therapy sessions will I need?",
@@ -436,7 +450,7 @@ const KochiLanding = () => {
                 className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
-                Call Now: +91 9083335000
+                Call Now: +91 9447511479
               </button>
             </div>
           </div>
@@ -641,7 +655,7 @@ const KochiLanding = () => {
                   className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
                 >
                   <Phone className="w-5 h-5" />
-                  +91 9083335000
+                  +91 9447511479
                 </button>
               </div>
             </div>
