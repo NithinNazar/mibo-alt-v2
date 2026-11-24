@@ -1,3 +1,4 @@
+import { BANGALORE_PHONE_DISPLAY, BANGALORE_TEL_LINK } from "../utils/contact";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -88,7 +89,7 @@ const LOCATIONS = [
     areas: ["Indiranagar", "Koramangala", "Whitefield", "Jayanagar"],
     amenities: ["Free Parking", "Wheelchair Accessible", "AC Consultation Rooms", "Waiting Lounge"],
     img: mibo_bangalore,
-    path: "/centres/bengaluru",
+    path: "/bengaluru",
   },
   {
     city: "Mumbai", rating: 4.7, reviews: 289,
@@ -104,7 +105,7 @@ const LOCATIONS = [
     areas: ["Marine Drive", "Ernakulam", "Kakkanad", "Edappally"],
     amenities: ["Sea View", "Garden Area", "Yoga Studio", "Meditation Space"],
     img: mibo_kochi,
-    path: "/centres/kochi",
+    path: "/kochi",
   },
 ];
 
@@ -536,7 +537,9 @@ export default function ConcernsRealCareSection() {
                 <span>Please call us, we will sort it out</span>
               </div>
               <p className="font-extrabold text-[#10C78A] mb-4" style={{ fontSize: "clamp(1.3rem,3vw,1.7rem)" }}>
-                +91 90833 35000
+                <a href={BANGALORE_TEL_LINK} className="hover:underline">
+                  {BANGALORE_PHONE_DISPLAY}
+                </a>
               </p>
               <div className="w-12 h-[3px] bg-gradient-to-r from-[#10C78A] to-[#3B8FE8] rounded mb-8" />
 

@@ -1,4 +1,5 @@
 // src/pages/Centers/components/CentersHeader.tsx
+import { BANGALORE_TEL_LINK, BANGALORE_WHATSAPP_URL } from "../../../utils/contact";
 import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -27,8 +28,8 @@ const CentersHeader = () => {
     {
       label: "LOCATIONS",
       dropdown: [
-        { label: "Bengaluru", path: "/centres/bengaluru" },
-        { label: "Kochi", path: "/centres/kochi" },
+        { label: "Bengaluru", path: "/bengaluru" },
+        { label: "Kochi", path: "/kochi" },
         { label: "Mumbai", path: "/centres/mumbai" },
       ],
     },
@@ -64,14 +65,14 @@ const CentersHeader = () => {
           }`}
         >
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
+            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
           >
             <Phone size={20} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = "https://wa.me/919083335000")
+              (window.location.href = BANGALORE_WHATSAPP_URL)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
           >
@@ -129,14 +130,14 @@ const CentersHeader = () => {
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
+            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-white/30 hover:border-[#34b9a5] text-white hover:text-[#34b9a5] bg-black/20 backdrop-blur-sm"
           >
             <Phone size={18} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = "https://wa.me/919083335000")
+              (window.location.href = BANGALORE_WHATSAPP_URL)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600"
           >

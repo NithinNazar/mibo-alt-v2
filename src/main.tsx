@@ -78,6 +78,7 @@ const App = () => {
           <Route path="/centres/mumbai" element={<Mumbai />} />
           {/* Landing Pages */}
           <Route path="/bangalore" element={<BangaloreLanding />} />
+          <Route path="/bengaluru" element={<BangaloreLanding />} />
           <Route path="/kochi" element={<KochiLanding />} />
           <Route path="/psychiatrist" element={<PsychiatristLanding />} />
           {/* 👤 Auth & Profile */}

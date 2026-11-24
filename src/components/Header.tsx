@@ -1,3 +1,4 @@
+import { BANGALORE_TEL_LINK, BANGALORE_WHATSAPP_URL } from "../utils/contact";
 import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Menu, X, User, Brain, Pill } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -87,14 +88,14 @@ const handleNavigate = (path: string) => {
         {/* Mobile Actions */}
         <div className="flex items-center gap-2 lg:hidden ml-auto">
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
+            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
           >
             <Phone size={20} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = "https://wa.me/919083335000")
+              (window.location.href = BANGALORE_WHATSAPP_URL)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
           >
@@ -144,13 +145,13 @@ const handleNavigate = (path: string) => {
                 <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
                   <span
                     className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/bengaluru")}
+                    onClick={() => handleLocationClick("/bengaluru")}
                   >
                     Bengaluru
                   </span>
                   <span
                     className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/kochi")}
+                    onClick={() => handleLocationClick("/kochi")}
                   >
                     Kochi
                   </span>
@@ -281,14 +282,14 @@ const handleNavigate = (path: string) => {
         {/* Desktop Action Buttons */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
+            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110"
           >
             <Phone size={18} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = "https://wa.me/919083335000")
+              (window.location.href = BANGALORE_WHATSAPP_URL)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110"
           >
@@ -333,13 +334,13 @@ const handleNavigate = (path: string) => {
                 <div className="flex flex-col ml-4 mt-2">
                   <span
                     className="py-1 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/bengaluru")}
+                    onClick={() => handleLocationClick("/bengaluru")}
                   >
                     Bengaluru
                   </span>
                   <span
                     className="py-1 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/kochi")}
+                    onClick={() => handleLocationClick("/kochi")}
                   >
                     Kochi
                   </span>

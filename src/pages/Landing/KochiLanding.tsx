@@ -13,9 +13,22 @@ import {
   Mail,
   Calendar,
   Star,
+  Wind,
+  CloudRain,
+  HeartHandshake,
+  Briefcase,
+  ShieldAlert,
+  Sparkles,
+  LifeBuoy,
+  Moon,
+  Repeat,
+  Flower2,
+  Flame,
+  Compass,
 } from "lucide-react";
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
+import PsychiatristExpertListing from "./PsychiatristExpertListing";
 import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import kochiImage from "../../assets/mibo-kochi-centre-2.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -43,12 +56,6 @@ import confidentialImage from "../../assets/mibo-individual.jpg?w=600&format=web
 import availabilityImage from "../../assets/mibo-avail.JPG?w=600&format=webp&quality=75";
 import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&quality=75";
 
-import drMuhammed from "./Dr.Muhammed.webp";
-import drAnu from "./DrAnusobha.webp";
-import drAnet from "./Anet Augustine-1.webp";
-import drRia from "./Ria Mary-3.webp";
-import jerryMathew from "../../assets/profile pic/ishvion-expert-8-37171c915931757c.png";
-import drSangeetha from "../../assets/profile pic/ishvion-expert-18-b4f4d380b68fe8d7.png";
 
 const KochiLanding = () => {
   const phoneNumber = "9447511479";
@@ -221,18 +228,18 @@ const KochiLanding = () => {
   ];
 
   const concerns = [
-    "Anxiety & Panic Attacks",
-    "Depression & Mood Disorders",
-    "Relationship Counseling",
-    "Work Stress & Burnout",
-    "Trauma & PTSD",
-    "Self-Esteem Issues",
-    "Addiction Recovery",
-    "Sleep Disorders",
-    "OCD & Phobias",
-    "Grief & Loss",
-    "Anger Management",
-    "Life Transitions",
+    { label: "Anxiety & Panic Attacks", icon: Wind },
+    { label: "Depression & Mood Disorders", icon: CloudRain },
+    { label: "Relationship Counseling", icon: HeartHandshake },
+    { label: "Work Stress & Burnout", icon: Briefcase },
+    { label: "Trauma & PTSD", icon: ShieldAlert },
+    { label: "Self-Esteem Issues", icon: Sparkles },
+    { label: "Addiction Recovery", icon: LifeBuoy },
+    { label: "Sleep Disorders", icon: Moon },
+    { label: "OCD & Phobias", icon: Repeat },
+    { label: "Grief & Loss", icon: Flower2 },
+    { label: "Anger Management", icon: Flame },
+    { label: "Life Transitions", icon: Compass },
   ];
 
   const whoItsFor = [
@@ -250,55 +257,6 @@ const KochiLanding = () => {
       image: familyImage,
       title: "Families",
       description: "Build healthier family dynamics and connections",
-    },
-  ];
-
-  const experts = [
-    {
-      image: drMuhammed,
-      name: "Dr. Muhammed Sadik TM",
-      specialization: "Clinical Psychologist, 10+ Years Of Experience",
-    },
-    {
-      image: drAnu,
-      name: "Dr.Anu Sobha Jose",
-      specialization: "Consultant Psychiatrist, 10+ Years Of Experience In",
-      points: [
-        "Women Mental Health",
-        "De-addiction",
-        "Child and Adolescent Psychiatry",
-      ],
-    },
-    {
-      image: drAnet,
-      name: "Anet Augustine",
-      specialization: "Clinical Psychologist, 2+ Years Of Experience in",
-      points: ["Anxeity Dissorder", "Psychosis"],
-    },
-    {
-      image: drRia,
-      name: "Ria Mary Jojo",
-      specialization: "Clinical Psychologist of 3+ Year of Experience",
-      points: [
-        "Licensed by Rehabilitation Council of India",
-        "In-person & Online Consultations",
-      ],
-    },
-    {
-      image: jerryMathew,
-      name: "Jerry P Mathew",
-      specialization: "Clinical Psychologist, 5+ Years Of Experience In",
-      points: ["CBT", "DBT", "ACT", "Anxiety Disorders", "OCD"],
-    },
-    {
-      image: drSangeetha,
-      name: "Dr. Sangeetha O S",
-      specialization: "Consultant Psychiatrist, 4+ Years Of Experience In",
-      points: [
-        "Child and Adolescent Psychiatry",
-        "Mood Disorders",
-        "Women Psychiatry",
-      ],
     },
   ];
 
@@ -422,12 +380,12 @@ const KochiLanding = () => {
             <img src={logo} alt="Mibo Logo" className="h-20 w-auto mb-2" />
 
             {/* Heading */}
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight text-white">
+            <h1 className="text-[27px] min-[400px]:text-[30px] leading-[1.15] tracking-tight sm:tracking-normal sm:text-5xl sm:leading-tight font-extrabold text-white">
               Psychologists & Psychiatrists in Kochi — Confidential Mental
               Health Care for Anxiety, Depression, Stress, OCD & More
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 font-semibold">
+            <p className="text-base sm:text-lg text-white/90 leading-relaxed">
               Consult experienced psychologists and psychiatrists in Kochi for
               anxiety, depression, stress, OCD, relationship counselling and
               other mental health concerns. Book your confidential consultation
@@ -471,7 +429,7 @@ const KochiLanding = () => {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-8">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-8">
             Why Choose Mibo Kochi?
           </h2>
 
@@ -500,7 +458,7 @@ const KochiLanding = () => {
               >
                 {/* Background Image */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-50"
+                  className="absolute inset-0 bg-cover bg-center opacity-20"
                   style={{
                     backgroundImage: `url(${feature.bgImage})`,
                   }}
@@ -518,7 +476,7 @@ const KochiLanding = () => {
                     {feature.title}
                   </h3>
 
-                  <p className="text-miboText text-lg leading-relaxed font-semibold">
+                  <p className="text-miboText text-base sm:text-lg leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -531,7 +489,7 @@ const KochiLanding = () => {
       {/* Services Section with Scrollable Cards */}
       <section className="py-20 bg-[#30baa3]/10">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Our Comprehensive Services
           </h2>
 
@@ -577,24 +535,24 @@ const KochiLanding = () => {
       {/* We Can Help With Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             We Can Help With
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Experiencing any of these concerns? Our specialists can help.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {concerns.map((concern, index) => (
+            {concerns.map(({ label, icon: Icon }, index) => (
               <div
                 key={index}
                 className="bg-[#30baa3]/14 p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-[#30baa3]/50"
               >
-                <CheckCircle className="w-8 h-8 text-[#212154] mx-auto mb-3" />
+                <Icon className="w-8 h-8 text-[#212154] mx-auto mb-3" />
 
                 <p className="text-[#212154] font-semibold text-lg">
-                  {concern}
+                  {label}
                 </p>
               </div>
             ))}
@@ -602,63 +560,26 @@ const KochiLanding = () => {
         </div>
       </section>
 
-      {/* Meet Our Experts Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
-            Meet Our Psychologists & Psychiatrists
-          </h2>
-
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
-            Our experienced mental health professionals are dedicated to
-            providing compassionate and evidence-based care.
-          </p>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {experts.map((expert, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden text-center"
-              >
-                <div className="h-64 overflow-hidden">
-                  <img
-                    src={expert.image}
-                    alt={expert.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#212154] mb-1">
-                    {expert.name}
-                  </h3>
-
-                  <p className="text-miboText font-semibold">
-                    {expert.specialization}
-                  </p>
-
-                  {expert.points && (
-                    <ul className="mt-2 inline-block text-left list-disc pl-5 text-miboText font-semibold">
-                      {expert.points.map((point) => (
-                        <li key={point}>{point}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Meet Our Experts Section — shared, backend-driven listing with
+          Kochi pre-selected (same component as /bengaluru and /psychiatrist). */}
+      <PsychiatristExpertListing
+        defaultLocation="Kochi"
+        requireDefaultLocation
+        serverSideLocation
+        psychiatristsOnly={false}
+        title="Meet Our Psychologists & Psychiatrists"
+        subtitle="Our experienced mental health professionals are dedicated to providing compassionate and evidence-based care."
+        viewAllLink="/experts?location=Kochi"
+      />
 
       {/* Need Help Now Section */}
       <section className="py-20 bg-gradient-to-br from-[#30baa3]/10 to-white">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#212154] mb-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#212154] mb-6">
               Ready to Speak with a Mental Health Expert?
             </h2>
-            <p className="text-xl text-miboText mb-10 font-semibold">
+            <p className="text-miboText text-base sm:text-lg mb-10">
               Our care team will help you choose the right psychologist or
               psychiatrist.
             </p>
@@ -685,11 +606,11 @@ const KochiLanding = () => {
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             What Our Patients Say
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Real stories from real people who found healing and hope at Mibo.
           </p>
 
@@ -726,11 +647,11 @@ const KochiLanding = () => {
       {/* Who It's For Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Who It's For
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Mental health care for everyone, at every stage of life.
           </p>
 
@@ -763,20 +684,20 @@ const KochiLanding = () => {
 
       {/* Location Section */}
       <section className="py-20 bg-gradient-to-b from-[#212154]/8 to-white">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-6 sm:px-10 lg:px-14">
+          <div className="space-y-10">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-[#30baa3]">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#30baa3]">
                 Visit Our Kochi Centre
               </h2>
 
-              <p className="text-xl text-miboText leading-relaxed font-semibold">
+              <p className="text-miboText text-base sm:text-lg leading-relaxed">
                 Our modern facility in Jayanagar offers a peaceful sanctuary for
                 your mental health journey. Experience world-class care in a
                 comfortable setting.
               </p>
 
-              <div className="space-y-4">
+              <div className="grid gap-4 lg:grid-cols-3">
                 <div className="flex items-start gap-4 bg-[#30baa3]/14 p-6 rounded-2xl">
                   <MapPin className="w-8 h-8 text-[#30baa3] flex-shrink-0 mt-1" />
                   <div>
@@ -806,24 +727,26 @@ const KochiLanding = () => {
                     <p className="text-miboText">{email}</p>
                   </div>
                 </div>
-
-                {/* Map */}
-                <div className="rounded-2xl overflow-hidden shadow-lg">
-                  <iframe
-                    src="https://www.google.com/maps?q=10.014698823782494,76.30359075580301&hl=en&z=15&output=embed"
-                    width="100%"
-                    height="300"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Mibo Kochi Location"
-                  ></iframe>
-                </div>
               </div>
             </div>
 
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            {/* Map + carousel: same row, same height */}
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+              {/* Map */}
+              <div className="rounded-3xl overflow-hidden shadow-2xl h-96 md:h-[500px]">
+                <iframe
+                  src="https://www.google.com/maps?q=10.014698823782494,76.30359075580301&hl=en&z=15&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, display: "block" }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Mibo Kochi Location"
+                ></iframe>
+              </div>
+
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <div
                 className="relative w-full h-96 md:h-[500px]"
                 onTouchStart={handleTouchStart}
@@ -897,6 +820,7 @@ const KochiLanding = () => {
                   />
                 ))}
               </div>
+              </div>
             </div>
           </div>
         </div>
@@ -905,11 +829,11 @@ const KochiLanding = () => {
       {/* How to Get Started Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             How to Get Started
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Taking the first step is simple. Here's how you can begin your
             journey to better mental health.
           </p>
@@ -963,11 +887,11 @@ const KochiLanding = () => {
       {/* FAQ Section */}
       <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Frequently Asked Questions
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Find answers to common questions about mental health care at Mibo
             Kochi.
           </p>
@@ -1032,11 +956,11 @@ const KochiLanding = () => {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#212154] to-[#1a1a46] text-white">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-6">
             Book Your Confidential Mental Health Consultation Today
           </h2>
 
-          <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90 font-semibold">
+          <p className="mb-10 max-w-2xl mx-auto text-white/80 text-sm sm:text-base">
             Call now to book a confidential consultation with an experienced
             psychologist or psychiatrist in Kochi.
           </p>

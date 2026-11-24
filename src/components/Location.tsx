@@ -58,7 +58,7 @@ const LocationCardsSlider = () => {
         "Waiting Lounge",
       ],
       image: bengaluruImg,
-      path: "/centres/bengaluru",
+      path: "/bengaluru",
     },
     {
       city: "Mumbai",
@@ -79,7 +79,7 @@ const LocationCardsSlider = () => {
       locations: ["Marine Drive", "Ernakulam", "Kakkanad", "Edappally"],
       amenities: ["Sea View", "Garden Area", "Yoga Studio", "Meditation Space"],
       image: kochiImg,
-      path: "/centres/kochi",
+      path: "/kochi",
     },
   ];
 
@@ -336,4 +336,4 @@ const LocationCardsSlider = () => {
   );
 };
 
-export default LocationCardsSlider;
+export default LocationCardsSlider; 

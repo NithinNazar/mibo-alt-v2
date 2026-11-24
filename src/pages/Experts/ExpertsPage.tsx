@@ -1,3 +1,4 @@
+import { BANGALORE_WHATSAPP_URL } from "../../utils/contact";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -1308,7 +1309,7 @@ export default function ExpertsPage() {
         <button
           onClick={() =>
             window.open(
-              "https://wa.me/919083335000",
+              BANGALORE_WHATSAPP_URL,
               "_blank",
               "noopener,noreferrer",
             )

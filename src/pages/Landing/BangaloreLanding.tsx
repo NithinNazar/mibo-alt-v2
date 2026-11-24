@@ -1,3 +1,4 @@
+import { BANGALORE_PHONE, BANGALORE_TEL_LINK } from "../../utils/contact";
 import React from "react";
 
 import {
@@ -13,9 +14,22 @@ import {
   Mail,
   Calendar,
   Star,
+  Wind,
+  CloudRain,
+  HeartHandshake,
+  Briefcase,
+  ShieldAlert,
+  Sparkles,
+  LifeBuoy,
+  Moon,
+  Repeat,
+  Flower2,
+  Flame,
+  Compass,
 } from "lucide-react";
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
+import PsychiatristExpertListing from "./PsychiatristExpertListing";
 import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -41,13 +55,9 @@ import miboReal7 from "../../assets/mibo-real-7.jpg?w=600&format=webp&quality=75
 import confidentialImage from "../../assets/mibo-individual.jpg?w=600&format=webp&quality=75";
 import availabilityImage from "../../assets/mibo-avail.JPG?w=600&format=webp&quality=75";
 import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&quality=75";
-import drMiller from "./Dr. Miller.webp";
-import drSrinivas from "./Dr. Srinivas Reddy.webp";
-import shifana from "./Shifana Sidheeque.webp";
-import yashaswini from "./Yashaswini.webp";
 
 const BangaloreLanding = () => {
-  const phoneNumber = "9083335000";
+  const phoneNumber = BANGALORE_PHONE;
   const email = "reach@mibocare.com";
   const address =
     "22, 32nd E Cross Rd, near Carmel Convent School, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041";
@@ -74,7 +84,7 @@ const BangaloreLanding = () => {
   ];
 
   const handlePhoneClick = () => {
-    window.location.href = `tel:+919083335000`;
+    window.location.href = `tel:+91${phoneNumber}`;
   };
 
   const nextSlide = () => {
@@ -216,18 +226,18 @@ const BangaloreLanding = () => {
   ];
 
   const concerns = [
-    "Anxiety & Panic Attacks",
-    "Depression & Mood Disorders",
-    "Relationship Counseling",
-    "Work Stress & Burnout",
-    "Trauma & PTSD",
-    "Self-Esteem Issues",
-    "Addiction Recovery",
-    "Sleep Disorders",
-    "OCD & Phobias",
-    "Grief & Loss",
-    "Anger Management",
-    "Life Transitions",
+    { label: "Anxiety & Panic Attacks", icon: Wind },
+    { label: "Depression & Mood Disorders", icon: CloudRain },
+    { label: "Relationship Counseling", icon: HeartHandshake },
+    { label: "Work Stress & Burnout", icon: Briefcase },
+    { label: "Trauma & PTSD", icon: ShieldAlert },
+    { label: "Self-Esteem Issues", icon: Sparkles },
+    { label: "Addiction Recovery", icon: LifeBuoy },
+    { label: "Sleep Disorders", icon: Moon },
+    { label: "OCD & Phobias", icon: Repeat },
+    { label: "Grief & Loss", icon: Flower2 },
+    { label: "Anger Management", icon: Flame },
+    { label: "Life Transitions", icon: Compass },
   ];
 
   const whoItsFor = [
@@ -274,7 +284,7 @@ const BangaloreLanding = () => {
     {
       question: "How can I book an appointment?",
       answer:
-        "You can book an appointment by calling our care team at +91 9083335000. We'll help you schedule a consultation with the most suitable psychologist or psychiatrist based on your concerns.",
+        `You can book an appointment by calling our care team at +91 ${phoneNumber}. We'll help you schedule a consultation with the most suitable psychologist or psychiatrist based on your concerns.`,
     },
     {
       question: "How many therapy sessions will I need?",
@@ -316,33 +326,6 @@ const BangaloreLanding = () => {
       },
     })),
   };
-
-  const experts = [
-    {
-      image: drMiller,
-      name: "Dr. Miller A M",
-      specialization:
-        "Consultant Psychiatrist, 5+ Years of Expereince In mergency Psychiaty, Community care and Queer mental health.",
-    },
-    {
-      image: drSrinivas,
-      name: "Dr. Srinivas Reddy V",
-      specialization:
-        "Consultant Psychiatrist, 15+ Years Of Experience In Adult Psychiatry & De-addiction",
-    },
-    {
-      image: shifana,
-      name: "Shifana Sidheeque TK ",
-      specialization:
-        "Clinical Psychologist, 4+ Years Of Experience In CBT, DBT,Schema Therapy, SFBT Behaviour modification",
-    },
-    {
-      image: yashaswini,
-      name: "Ms. Yashaswini",
-      specialization:
-        "Clinical Psychologist, 3+ Years Of Experience In CBT, DBT,Mindfullness Approach",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-miboLightGreen/20 to-white">
@@ -395,12 +378,12 @@ const BangaloreLanding = () => {
             <img src={logo} alt="Mibo Logo" className="h-20 w-auto mb-2" />
 
             {/* Heading */}
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight text-white">
+            <h1 className="text-[27px] min-[400px]:text-[30px] leading-[1.15] tracking-tight sm:tracking-normal sm:text-5xl sm:leading-tight font-extrabold text-white">
               Psychologists & Psychiatrists in Bengaluru — Confidential Mental
               Health Care for Anxiety, Depression, Stress, OCD & More
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 font-semibold">
+            <p className="text-base sm:text-lg text-white/90 leading-relaxed">
               Consult experienced psychologists and psychiatrists in Bengaluru
               for anxiety, depression, stress, OCD, relationship counselling and
               other mental health concerns. Book your confidential consultation
@@ -434,9 +417,18 @@ const BangaloreLanding = () => {
                 className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
               >
                 <Phone className="w-5 h-5" />
-                Call Now: +91 9083335000
+                Call Now: +91 {phoneNumber}
               </button>
             </div>
+            <p className="text-white/90 text-base sm:text-lg mt-4">
+              Prefer to talk? Call our care team at{" "}
+              <a
+                href={BANGALORE_TEL_LINK}
+                className="font-bold text-white underline underline-offset-4 decoration-[#30baa3] hover:text-[#30baa3] transition-colors whitespace-nowrap"
+              >
+                +91 {phoneNumber}
+              </a>
+            </p>
           </div>
         </div>
       </section>
@@ -444,7 +436,7 @@ const BangaloreLanding = () => {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-8">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-8">
             Why Choose Mibo Bangalore?
           </h2>
 
@@ -473,7 +465,7 @@ const BangaloreLanding = () => {
               >
                 {/* Background Image */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-50"
+                  className="absolute inset-0 bg-cover bg-center opacity-20"
                   style={{
                     backgroundImage: `url(${feature.bgImage})`,
                   }}
@@ -491,7 +483,7 @@ const BangaloreLanding = () => {
                     {feature.title}
                   </h3>
 
-                  <p className="text-miboText text-lg leading-relaxed font-semibold">
+                  <p className="text-miboText text-base sm:text-lg leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -504,24 +496,24 @@ const BangaloreLanding = () => {
       {/* We Can Help With Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             We Can Help With
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Experiencing any of these concerns? Our specialists can help.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {concerns.map((concern, index) => (
+            {concerns.map(({ label, icon: Icon }, index) => (
               <div
                 key={index}
                 className="bg-[#30baa3]/14 p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-center border border-[#30baa3]/50"
               >
-                <CheckCircle className="w-8 h-8 text-[#212154] mx-auto mb-3" />
+                <Icon className="w-8 h-8 text-[#212154] mx-auto mb-3" />
 
                 <p className="text-[#212154] font-semibold text-lg">
-                  {concern}
+                  {label}
                 </p>
               </div>
             ))}
@@ -532,7 +524,7 @@ const BangaloreLanding = () => {
       {/* Services Section with Scrollable Cards */}
       <section className="py-20 bg-[#30baa3]/10">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Our Comprehensive Services
           </h2>
 
@@ -575,55 +567,26 @@ const BangaloreLanding = () => {
         </div>
       </section>
 
-      {/* Meet Our Experts Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
-            Meet Our Psychologists & Psychiatrists
-          </h2>
-
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
-            Our experienced mental health professionals are dedicated to
-            providing compassionate and evidence-based care.
-          </p>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {experts.map((expert, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden text-center"
-              >
-                <div className="h-64 overflow-hidden">
-                  <img
-                    src={expert.image}
-                    alt={expert.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#212154] mb-1">
-                    {expert.name}
-                  </h3>
-
-                  <p className="text-miboText font-semibold">
-                    {expert.specialization}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Meet Our Experts Section — shared, backend-driven listing with
+          Bengaluru pre-selected (same component as /psychiatrist). */}
+      <PsychiatristExpertListing
+        defaultLocation="Bangalore"
+        requireDefaultLocation
+        serverSideLocation
+        psychiatristsOnly={false}
+        title="Meet Our Psychologists & Psychiatrists"
+        subtitle="Our experienced mental health professionals are dedicated to providing compassionate and evidence-based care."
+        viewAllLink="/experts?location=Bangalore"
+      />
 
       {/* Need Help Now Section */}
       <section className="py-20 bg-gradient-to-br from-[#30baa3]/10 to-white">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#212154] mb-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#212154] mb-6">
               Ready to Speak with a Mental Health Expert?
             </h2>
-            <p className="text-xl text-miboText mb-10 font-semibold">
+            <p className="text-miboText text-base sm:text-lg mb-10">
               Our care team will help you choose the right psychologist or
               psychiatrist.
             </p>
@@ -639,8 +602,17 @@ const BangaloreLanding = () => {
                   className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
                 >
                   <Phone className="w-5 h-5" />
-                  +91 9083335000
+                  +91 {phoneNumber}
                 </button>
+                <p className="mt-4 text-miboText text-sm sm:text-base">
+                  Or call us directly at{" "}
+                  <a
+                    href={BANGALORE_TEL_LINK}
+                    className="font-bold text-[#212154] hover:text-[#30baa3] transition-colors whitespace-nowrap"
+                  >
+                    +91 {phoneNumber}
+                  </a>
+                </p>
               </div>
             </div>
           </div>
@@ -650,11 +622,11 @@ const BangaloreLanding = () => {
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-miboLightGreen/20 to-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             What Our Patients Say
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Real stories from real people who found healing and hope at Mibo.
           </p>
 
@@ -691,11 +663,11 @@ const BangaloreLanding = () => {
       {/* Who It's For Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Who It's For
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Mental health care for everyone, at every stage of life.
           </p>
 
@@ -728,20 +700,20 @@ const BangaloreLanding = () => {
 
       {/* Location Section */}
       <section className="py-20 bg-gradient-to-b from-[#212154]/8 to-white">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-6 sm:px-10 lg:px-14">
+          <div className="space-y-10">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-[#30baa3]">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#30baa3]">
                 Visit Our Bangalore Centre
               </h2>
 
-              <p className="text-xl text-miboText leading-relaxed font-semibold">
+              <p className="text-miboText text-base sm:text-lg leading-relaxed">
                 Our modern facility in Jayanagar offers a peaceful sanctuary for
                 your mental health journey. Experience world-class care in a
                 comfortable setting.
               </p>
 
-              <div className="space-y-4">
+              <div className="grid gap-4 lg:grid-cols-3">
                 <div className="flex items-start gap-4 bg-[#30baa3]/14 p-6 rounded-2xl">
                   <MapPin className="w-8 h-8 text-[#30baa3] flex-shrink-0 mt-1" />
                   <div>
@@ -758,7 +730,14 @@ const BangaloreLanding = () => {
                     <h3 className="text-xl font-bold text-[#30baa3] mb-2">
                       Phone
                     </h3>
-                    <p className="text-miboText">+91 {phoneNumber}</p>
+                    <p className="text-miboText">
+                      <a
+                        href={BANGALORE_TEL_LINK}
+                        className="hover:text-[#30baa3] transition-colors"
+                      >
+                        +91 {phoneNumber}
+                      </a>
+                    </p>
                   </div>
                 </div>
 
@@ -771,22 +750,24 @@ const BangaloreLanding = () => {
                     <p className="text-miboText">{email}</p>
                   </div>
                 </div>
+              </div>
+            </div>
 
+            {/* Map + carousel: same row, same height */}
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
                 {/* Map */}
-                <div className="rounded-2xl overflow-hidden shadow-lg">
+                <div className="rounded-3xl overflow-hidden shadow-2xl h-96 md:h-[500px]">
                   <iframe
                     src="https://www.google.com/maps?q=12.926886115826436,77.5959190482547&hl=en&z=15&output=embed"
                     width="100%"
-                    height="300"
-                    style={{ border: 0 }}
+                    height="100%"
+                    style={{ border: 0, display: "block" }}
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     title="Mibo Bangalore Location"
                   ></iframe>
                 </div>
-              </div>
-            </div>
 
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <div
@@ -863,6 +844,7 @@ const BangaloreLanding = () => {
                 ))}
               </div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -870,11 +852,11 @@ const BangaloreLanding = () => {
       {/* How to Get Started Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             How to Get Started
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Taking the first step is simple. Here's how you can begin your
             journey to better mental health.
           </p>
@@ -928,11 +910,11 @@ const BangaloreLanding = () => {
       {/* FAQ Section */}
       <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center text-[#212154] mb-4">
             Frequently Asked Questions
           </h2>
 
-          <p className="text-center text-miboText text-lg font-semibold mb-16 max-w-3xl mx-auto">
+          <p className="text-center text-miboText text-base sm:text-lg mb-16 max-w-3xl mx-auto">
             Find answers to common questions about mental health care at Mibo
             Bengaluru.
           </p>
@@ -997,11 +979,11 @@ const BangaloreLanding = () => {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#212154] to-[#1a1a46] text-white">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-6">
             Book Your Confidential Mental Health Consultation Today
           </h2>
 
-          <p className="text-xl mb-10 max-w-2xl mx-auto opacity-90 font-semibold">
+          <p className="mb-10 max-w-2xl mx-auto text-white/80 text-sm sm:text-base">
             Call now to book a confidential consultation with an experienced
             psychologist or psychiatrist in Bengaluru.
           </p>
@@ -1015,6 +997,15 @@ const BangaloreLanding = () => {
               Call +91 {phoneNumber}
             </button>
           </div>
+          <p className="mt-5 text-white/80 text-sm sm:text-base">
+            Or dial us directly:{" "}
+            <a
+              href={BANGALORE_TEL_LINK}
+              className="font-bold text-white underline underline-offset-4 hover:text-[#30baa3] transition-colors whitespace-nowrap"
+            >
+              +91 {phoneNumber}
+            </a>
+          </p>
         </div>
       </section>
 
@@ -1030,7 +1021,13 @@ const BangaloreLanding = () => {
               <h3 className="text-lg font-bold mb-4">Contact</h3>
               <div className="space-y-2 text-sm opacity-70">
                 <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" /> +91 {phoneNumber}
+                  <Phone className="w-4 h-4" />{" "}
+                  <a
+                    href={BANGALORE_TEL_LINK}
+                    className="hover:opacity-100 hover:underline"
+                  >
+                    +91 {phoneNumber}
+                  </a>
                 </p>
                 <p className="flex items-center gap-2">
                   <Mail className="w-4 h-4" /> {email}

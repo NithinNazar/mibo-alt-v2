@@ -14,7 +14,7 @@ const AddressSection: React.FC<Props> = ({ city }) => (
       Jayanagar, Bengaluru, Karnataka 560041
     </p>
     <p className="mt-2 text-xs md:text-sm text-[#0F4C36]/80">
-      Open Mon–Sat, 9:00 AM – 7:00 PM | Contact: +91 99999 88888
+      Open Mon–Sat, 9:00 AM – 7:00 PM
     </p>
   </section>
 );

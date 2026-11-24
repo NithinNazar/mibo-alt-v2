@@ -1,3 +1,4 @@
+import { BANGALORE_TEL_LINK, BANGALORE_WHATSAPP_URL } from "../../utils/contact";
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, ChevronDown, Phone } from "lucide-react";
 // import { Menu, X, MessageCircle, ChevronDown } from "lucide-react";
@@ -103,14 +104,14 @@ const ProfileHeader = () => {
         <div className="flex items-center gap-2 ml-auto lg:hidden">
           {user && <NotificationBell />}
           <button
-            onClick={() => (window.location.href = "tel:9083335000")}
+            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all"
           >
             <Phone size={20} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = "https://wa.me/919083335000")
+              (window.location.href = BANGALORE_WHATSAPP_URL)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all"
           >

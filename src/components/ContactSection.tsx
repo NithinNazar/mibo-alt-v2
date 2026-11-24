@@ -1,3 +1,4 @@
+import { BANGALORE_PHONE_DISPLAY, BANGALORE_TEL_LINK } from "../utils/contact";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Mail } from "lucide-react";
@@ -96,7 +97,9 @@ const ContactSection = () => {
             Please call us, we will sort it out
           </p>
           <p className="text-[#97f7df] text-lg md:text-xl font-bold">
-            +91 90833 35000
+            <a href={BANGALORE_TEL_LINK} className="hover:underline">
+              {BANGALORE_PHONE_DISPLAY}
+            </a>
           </p>
         </div>
 
@@ -201,7 +204,7 @@ export default ContactSection;
 //             Please call us, we will sort it out
 //           </p>
 //           <p className="text-[#97f7df] text-lg md:text-xl font-bold">
-//             +91 90833 35000
+//             +91 79960 04444
 //           </p>
 //         </div>
 
