@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { inPatientContent } from "./InPatientData";
 import { BANGALORE_TEL_LINK } from "../../../utils/contact";
-import heroImage from "../../../assets/inpatientservice.jpg?w=1200&format=webp&quality=75";
+import InPatientHeroCarousel from "./InPatientHeroCarousel";
 import ExpertsHeader from "../../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../../Experts/Components/ExpertsFooter";
 
@@ -9,23 +9,22 @@ const InPatientPage = () => {
   return (
     <div className="bg-[#E3F7F1] min-h-screen">
       <ExpertsHeader />
-      <div className="relative w-full h-[60vh] overflow-hidden">
-        <img
-          src={heroImage}
-          alt="In-Patient Care"
-          className="w-full h-full object-cover brightness-75"
-        />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-6">
-          <h1 className="text-4xl font-bold mb-3 drop-shadow-lg">
-            {inPatientContent.title}
-          </h1>
-          <p className="text-lg max-w-2xl drop-shadow-md">
-            {inPatientContent.subtitle}
-          </p>
-        </div>
+      <InPatientHeroCarousel
+        title={inPatientContent.title}
+        subtitle={inPatientContent.subtitle}
+        cta={inPatientContent.cta}
+        ctaHref={BANGALORE_TEL_LINK}
+      />
+
+      <div className="text-center px-6 pt-16">
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#0b3d2e]">Our In-Patient Care</h2>
+        <div className="mx-auto mt-3 h-1 w-16 rounded bg-[#046a5d]" />
+        <p className="mt-4 max-w-2xl mx-auto text-gray-700">
+          A comfortable, safe and private space that supports rest, treatment and overall well-being during your recovery journey.
+        </p>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+      <div className="max-w-6xl mx-auto px-6 pt-10 pb-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
         {inPatientContent.sections.map((section, index) => {
           const Icon = section.icon;
           return (

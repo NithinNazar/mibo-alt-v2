@@ -27,6 +27,7 @@ import {
   BedDouble,
   ClipboardCheck,
   MessageCircleHeart,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import miboIcon from "../assets/logo1.png?w=200&format=webp&quality=85";
@@ -124,444 +125,506 @@ const handleNavigate = (path: string) => {
   setMenuOpen(false);
 };
 
+  // ---- Menu data (same destinations / handlers as before) -----------------
+  const locationItems = [
+    { label: "Bengaluru", path: "/bengaluru" },
+    { label: "Kochi", path: "/kochi" },
+    { label: "Mumbai", path: "/centres/mumbai" },
+  ];
+
+  const serviceItems = [
+    { label: "Psychiatrist", path: "/psychiatrist", Icon: Stethoscope },
+    { label: "In-patient Care", path: "/services/in-patient", Icon: BedDouble },
+    {
+      label: "Clinical Psychologist",
+      path: "/experts?specialization=Clinical%20Psychologist",
+      Icon: Brain,
+    },
+    {
+      label: "Counselling Psychologist",
+      path: "/experts?specialization=Counsellor",
+      Icon: MessageCircleHeart,
+    },
+    {
+      label: "Assessment",
+      path: "/experts?specialization=Clinical%20Psychologist",
+      Icon: ClipboardCheck,
+    },
+  ];
+
+  const expertItems = [
+    {
+      label: "Clinical Psychologists",
+      specialization: "Clinical Psychologist",
+      description: "Find safe, compassionate care for your mental health journey.",
+      Icon: Brain,
+    },
+    {
+      label: "Psychiatrists",
+      specialization: "Psychiatrist",
+      description: "Expert medical care for advanced mental health conditions.",
+      Icon: Pill,
+    },
+  ];
+
+  const simpleLinks = {
+    about: { label: "About Us", path: "/about", Icon: Info },
+    who: { label: "Who It's For", path: "/who-its-for", Icon: Users },
+    why: { label: "Why MIBO", path: "/why-mibo", Icon: Sparkles },
+    blog: { label: "Blog", path: "/blog", Icon: BookOpen },
+    contact: { label: "Contact", path: "/contact", Icon: Phone },
+  };
+
+  // ---- Shared style tokens ---------------------------------------------------
+  // Icons are hidden between lg and xl so nine links never crowd the buttons.
+  const navItemCls =
+    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-1.5 xl:px-2 py-2 text-[13px] xl:text-[14px] font-semibold leading-none text-gray-800 hover:text-[#0b7f66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 transition-colors duration-200 cursor-pointer";
+  const navIconCls = "hidden xl:block text-[#0b7f66] flex-shrink-0";
+  const dropdownPanelCls =
+    "bg-white rounded-xl shadow-lg ring-1 ring-black/5 text-gray-800 flex flex-col py-2";
+  const dropdownItemCls =
+    "w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-sm font-medium hover:bg-emerald-50 hover:text-[#0b7f66] cursor-pointer transition-colors duration-150";
+  const iconBtnBase =
+    "w-10 h-10 flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40";
+  const phoneBtnCls = `${iconBtnBase} border border-gray-300 bg-white text-gray-700 hover:border-[#0b7f66] hover:text-[#0b7f66]`;
+  const whatsappBtnCls = `${iconBtnBase} bg-[#25b45a] text-white hover:bg-[#1f9d4e] shadow-sm`;
+  const signInCls =
+    "inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#1c0d54] px-5 text-sm font-semibold text-white whitespace-nowrap shadow-md hover:bg-[#2a1470] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c0d54]/40";
+  const mobileRowCls =
+    "w-full flex items-center gap-3 px-2 py-3 text-[15px] font-semibold text-gray-800 hover:text-[#0b7f66] text-left cursor-pointer";
+
   return (
     <header
-      className={`w-full fixed top-0 left-0 z-50 bg-white shadow-sm border-b border-gray-100 font-['Quicksand',sans-serif] transition-all duration-300 ease-out ${
+      className={`w-full fixed top-0 left-0 z-50 bg-white border-b border-gray-100 shadow-[0_2px_12px_rgba(15,23,42,0.06)] font-['Quicksand',sans-serif] transition-all duration-300 ease-out ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
-      <div className="max-w-[1480px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 flex-wrap gap-y-2">
-        {/* Logo */}
-        <div
-          className="flex-shrink-0 cursor-pointer"
+      <div className="max-w-[1480px] mx-auto h-16 md:h-20 flex items-center gap-3 xl:gap-5 px-4 sm:px-6 lg:px-8">
+        {/* ============ LEFT: Branding ============ */}
+        <button
+          type="button"
+          aria-label="Mibo home"
+          className="flex-shrink-0 flex items-center cursor-pointer"
           onClick={() => navigate("/")}
         >
           <img
             src={miboIcon}
-            alt="Mibo Icon"
-            className="w-12 h-12 md:w-14 md:h-14 drop-shadow-lg"
+            alt="Mibo"
+            className="h-10 md:h-12 w-auto max-w-none object-contain drop-shadow-lg"
           />
-        </div>
+        </button>
 
-        {/* Mobile Actions */}
-        <div className="flex items-center gap-2 lg:hidden ml-auto">
-          <button
-            onClick={() => (window.location.href = contactTelLink)}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
-          >
-            <Phone size={20} />
-          </button>
-          <button
-            onClick={() =>
-              (window.location.href = contactWhatsappUrl)
-            }
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
-          >
-            <MessageCircle size={20} />
-          </button>
-          {isAuthenticated ? (
-            <button
-              onClick={() => handleNavigate("/profileDashboard")}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c0d54] text-white hover:bg-[#2a1470] transition-all duration-300"
-            >
-              <User size={20} />
-            </button>
-          ) : (
-            <button
-              onClick={() => handleNavigate("/patientAuth")}
-              className="bg-[#1c0d54] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#2a1470] transition-all duration-300"
-            >
-              SIGN IN
-            </button>
-          )}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="text-[#18356C] hover:text-[#34b9a5] transition-colors duration-300"
-          >
-            {menuOpen ? <X size={32} /> : <Menu size={32} />}
-          </button>
-        </div>
+        <div className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0" aria-hidden="true" />
 
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex flex-grow justify-center gap-6 text-sm text-gray-700 font-medium">
-          <span
+        {/* ============ CENTRE: Navigation ============ */}
+        <nav
+          aria-label="Primary"
+          className="hidden lg:flex flex-1 min-w-0 items-center justify-evenly"
+        >
+          {/* Book Appointment (primary pill) */}
+          <button
+            type="button"
             onClick={() => handleNavigate("/experts")}
-            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105 font-semibold"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0b7f66] px-3.5 xl:px-4 h-10 text-[13px] xl:text-[14px] font-semibold text-white shadow-sm hover:bg-[#096b57] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 cursor-pointer"
           >
-            <CalendarCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
-            BOOK APPOINTMENT
-          </span>
+            <CalendarCheck size={16} className="hidden xl:block flex-shrink-0" />
+            Book Appointment
+          </button>
+
+          {/* Locations */}
           <div
-            className="relative cursor-pointer"
+            className="relative"
             onMouseEnter={() => setLocationsOpen(true)}
             onMouseLeave={() => setLocationsOpen(false)}
           >
-            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
-              <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-              LOCATIONS ▾
-            </span>
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={locationsOpen}
+              onClick={() => setLocationsOpen((o) => !o)}
+              className={navItemCls}
+            >
+              <MapPin size={16} className={navIconCls} />
+              Locations
+              <ChevronDown
+                size={14}
+                className={`flex-shrink-0 transition-transform duration-200 ${locationsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
             {locationsOpen && (
-              <div className="absolute top-full left-0 pt-4 -mt-4 w-40 z-50">
-                <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleLocationClick("/bengaluru")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Bengaluru
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleLocationClick("/kochi")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Kochi
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/mumbai")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Mumbai
-                  </span>
+              <div className="absolute top-full left-0 pt-2 w-44 z-50">
+                <div className={dropdownPanelCls}>
+                  {locationItems.map(({ label, path }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className={dropdownItemCls}
+                      onClick={() => {
+                        setLocationsOpen(false);
+                        handleLocationClick(path);
+                      }}
+                    >
+                      <MapPin size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Services */}
           <div
-            className="relative cursor-pointer"
+            className="relative"
             onMouseEnter={() => setServicesOpen(true)}
             onMouseLeave={() => setServicesOpen(false)}
           >
-            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
-              <HeartHandshake size={16} className="text-[#34b9a5] flex-shrink-0" />
-              SERVICES ▾
-            </span>
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={servicesOpen}
+              onClick={() => setServicesOpen((o) => !o)}
+              className={navItemCls}
+            >
+              <HeartHandshake size={16} className={navIconCls} />
+              Services
+              <ChevronDown
+                size={14}
+                className={`flex-shrink-0 transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`}
+              />
+            </button>
             {servicesOpen && (
-              <div className="absolute top-full left-0 pt-4 -mt-4 w-64 z-50">
-                <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/psychiatrist")}
-                  >
-                    <Stethoscope size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Psychiatrist
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/in-patient")}
-                  >
-                    <BedDouble size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    In-patient Care
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
-                  >
-                    <Brain size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Clinical Psychologist
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Counsellor")}
-                  >
-                    <MessageCircleHeart size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Counselling Psychologist
-                  </span>
-                  <span
-                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
-                  >
-                    <ClipboardCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Assessment
-                  </span>
+              <div className="absolute top-full left-0 pt-2 w-64 z-50">
+                <div className={dropdownPanelCls}>
+                  {serviceItems.map(({ label, path, Icon }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className={dropdownItemCls}
+                      onClick={() => {
+                        setServicesOpen(false);
+                        handleServiceClick(path);
+                      }}
+                    >
+                      <Icon size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
-          <span
-            onClick={() => handleNavigate("/about")}
-            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
-          >
-            <Info size={16} className="text-[#34b9a5] flex-shrink-0" />
-            ABOUT US
-          </span>
-          <span
-            onClick={() => handleNavigate("/who-its-for")}
-            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
-          >
-            <Users size={16} className="text-[#34b9a5] flex-shrink-0" />
-            WHO IT'S FOR
-          </span>
-          <span
-            onClick={() => handleNavigate("/why-mibo")}
-            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
-          >
-            <Sparkles size={16} className="text-[#34b9a5] flex-shrink-0" />
-            WHY MIBO
-          </span>
+
+          {/* About Us / Who It's For / Why MIBO */}
+          {[simpleLinks.about, simpleLinks.who, simpleLinks.why].map(
+            ({ label, path, Icon }) => (
+              <button
+                type="button"
+                key={label}
+                onClick={() => handleNavigate(path)}
+                className={navItemCls}
+              >
+                <Icon size={16} className={navIconCls} />
+                {label}
+              </button>
+            ),
+          )}
+
+          {/* Experts */}
           <div
-            className="relative cursor-pointer"
+            className="relative"
             onMouseEnter={() => setExpertsOpen(true)}
             onMouseLeave={() => setExpertsOpen(false)}
           >
-            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
-              <UserCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
-              EXPERTS ▾
-            </span>
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={expertsOpen}
+              onClick={() => setExpertsOpen((o) => !o)}
+              className={navItemCls}
+            >
+              <UserCheck size={16} className={navIconCls} />
+              Experts
+              <ChevronDown
+                size={14}
+                className={`flex-shrink-0 transition-transform duration-200 ${expertsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
             {expertsOpen && (
-              <div className="absolute top-full left-0 pt-4 -mt-4 w-80 z-50">
-                <div className="bg-white shadow-xl rounded-lg text-black flex flex-col py-3 border border-gray-100">
-                  <div
-                    className="px-4 py-3 hover:bg-green-50 cursor-pointer transition-colors duration-200 group"
-                    onClick={() => handleExpertClick("Clinical Psychologist")}
-                  >
-                    <div className="flex items-start gap-3">
-                      <Brain className="w-5 h-5 text-[#34b9a5] mt-0.5 group-hover:scale-110 transition-transform" />
-                      <div>
-                        <div className="font-bold text-gray-800 group-hover:text-[#34b9a5] transition-colors">
-                          Clinical Psychologists
+              <div className="absolute top-full right-0 xl:left-0 xl:right-auto pt-2 w-80 z-50">
+                <div className={`${dropdownPanelCls} py-3`}>
+                  {expertItems.map(({ label, specialization, description, Icon }, idx) => (
+                    <div key={label}>
+                      {idx > 0 && <div className="border-t border-gray-100 my-1" />}
+                      <button
+                        type="button"
+                        className="group w-full px-4 py-3 text-left hover:bg-emerald-50 cursor-pointer transition-colors duration-200"
+                        onClick={() => {
+                          setExpertsOpen(false);
+                          handleExpertClick(specialization);
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Icon className="w-5 h-5 mt-0.5 text-[#0b7f66] flex-shrink-0 group-hover:scale-110 transition-transform" />
+                          <div>
+                            <div className="font-bold text-gray-800 group-hover:text-[#0b7f66] transition-colors">
+                              {label}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1 leading-relaxed">
+                              {description}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-600 mt-1 leading-relaxed">
-                          Find safe, compassionate care for your mental health
-                          journey.
-                        </div>
-                      </div>
+                      </button>
                     </div>
-                  </div>
-                  <div className="border-t border-gray-100 my-1"></div>
-                  <div
-                    className="px-4 py-3 hover:bg-green-50 cursor-pointer transition-colors duration-200 group"
-                    onClick={() => handleExpertClick("Psychiatrist")}
-                  >
-                    <div className="flex items-start gap-3">
-                      <Pill className="w-5 h-5 text-[#34b9a5] mt-0.5 group-hover:scale-110 transition-transform" />
-                      <div>
-                        <div className="font-bold text-gray-800 group-hover:text-[#34b9a5] transition-colors">
-                          Psychiatrists
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1 leading-relaxed">
-                          Expert medical care for advanced mental health
-                          conditions.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
-          <span
-            onClick={() => handleNavigate("/blog")}
-            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
-          >
-            <BookOpen size={16} className="text-[#34b9a5] flex-shrink-0" />
-            BLOG
-          </span>
+
+          {/* Blog / Contact */}
+          {[simpleLinks.blog, simpleLinks.contact].map(({ label, path, Icon }) => (
+            <button
+              type="button"
+              key={label}
+              onClick={() => handleNavigate(path)}
+              className={navItemCls}
+            >
+              <Icon size={16} className={navIconCls} />
+              {label}
+            </button>
+          ))}
         </nav>
 
-        {/* Desktop Action Buttons */}
-        <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+        <div className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0" aria-hidden="true" />
+
+        {/* ============ RIGHT: Actions (desktop) ============ */}
+        <div className="hidden lg:flex items-center gap-2 xl:gap-3 flex-shrink-0">
           <button
+            type="button"
+            aria-label="Call Mibo"
             onClick={() => (window.location.href = contactTelLink)}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110"
+            className={phoneBtnCls}
           >
             <Phone size={18} />
           </button>
           <button
-            onClick={() =>
-              (window.location.href = contactWhatsappUrl)
-            }
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110"
+            type="button"
+            aria-label="Chat on WhatsApp"
+            onClick={() => (window.location.href = contactWhatsappUrl)}
+            className={whatsappBtnCls}
           >
             <MessageCircle size={18} />
           </button>
           {isAuthenticated ? (
             <button
+              type="button"
+              aria-label="My profile"
               onClick={() => handleNavigate("/profileDashboard")}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c0d54] text-white hover:bg-[#2a1470] transition-all duration-300 shadow-lg hover:scale-110"
+              className={`${iconBtnBase} bg-[#1c0d54] text-white shadow-md hover:bg-[#2a1470]`}
             >
               <User size={18} />
             </button>
           ) : (
             <button
+              type="button"
               onClick={() => handleNavigate("/patientAuth")}
-              className="bg-[#1c0d54] text-white px-6 py-2 rounded-full hover:bg-[#2a1470] font-semibold whitespace-nowrap text-sm transition-all duration-300 shadow-lg hover:scale-105"
+              className={signInCls}
             >
-              SIGN IN
+              <User size={16} className="hidden xl:block flex-shrink-0" />
+              Sign In
             </button>
           )}
         </div>
+
+        {/* ============ Mobile / tablet actions ============ */}
+        <div className="flex items-center gap-2 lg:hidden ml-auto">
+          <button
+            type="button"
+            aria-label="Call Mibo"
+            onClick={() => (window.location.href = contactTelLink)}
+            className={`${phoneBtnCls} !w-9 !h-9`}
+          >
+            <Phone size={18} />
+          </button>
+          <button
+            type="button"
+            aria-label="Chat on WhatsApp"
+            onClick={() => (window.location.href = contactWhatsappUrl)}
+            className={`${whatsappBtnCls} !w-9 !h-9`}
+          >
+            <MessageCircle size={18} />
+          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              aria-label="My profile"
+              onClick={() => handleNavigate("/profileDashboard")}
+              className={`${iconBtnBase} !w-9 !h-9 bg-[#1c0d54] text-white hover:bg-[#2a1470]`}
+            >
+              <User size={18} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleNavigate("/patientAuth")}
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#1c0d54] px-3.5 text-xs sm:text-sm font-semibold text-white whitespace-nowrap hover:bg-[#2a1470] transition-colors duration-200"
+            >
+              Sign In
+            </button>
+          )}
+          <button
+            type="button"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-9 h-9 flex items-center justify-center rounded-md text-[#18356C] hover:text-[#0b7f66] transition-colors duration-200"
+          >
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* ============ Mobile / tablet dropdown ============ */}
       {menuOpen && (
-        <div className="lg:hidden px-4 py-6 bg-[#C2D3E4] backdrop-blur-lg border-t border-white/20">
-          <nav className="flex flex-col gap-4 text-[#18276c] font-medium">
-            <span
+        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <nav aria-label="Mobile" className="flex flex-col px-4 py-4 sm:px-6">
+            <button
+              type="button"
               onClick={() => handleNavigate("/experts")}
-              className="py-2 px-2 bg-[#34b9a5] text-white rounded-full justify-center flex items-center gap-2 cursor-pointer hover:bg-[#2a857f] transition-colors duration-300"
+              className="mb-2 w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#0b7f66] h-11 text-[15px] font-semibold text-white hover:bg-[#096b57] transition-colors duration-200 cursor-pointer"
             >
-              <CalendarCheck size={16} className="flex-shrink-0" />
-              BOOK APPOINTMENT
-            </span>
-            <div className="flex flex-col">
-              <span
+              <CalendarCheck size={18} className="flex-shrink-0" />
+              Book Appointment
+            </button>
+
+            {/* Locations */}
+            <div className="border-b border-gray-100">
+              <button
+                type="button"
+                aria-expanded={mobileLocationsOpen}
                 onClick={() => setMobileLocationsOpen(!mobileLocationsOpen)}
-                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className={mobileRowCls}
               >
-                <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                LOCATIONS ▾
-              </span>
+                <MapPin size={18} className="text-[#0b7f66] flex-shrink-0" />
+                <span className="flex-1">Locations</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-500 transition-transform duration-200 ${mobileLocationsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
               {mobileLocationsOpen && (
-                <div className="flex flex-col ml-4 mt-2">
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleLocationClick("/bengaluru")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Bengaluru
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleLocationClick("/kochi")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Kochi
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleLocationClick("/centres/mumbai")}
-                  >
-                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Mumbai
-                  </span>
+                <div className="flex flex-col pb-2 pl-9">
+                  {locationItems.map(({ label, path }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
+                      onClick={() => handleLocationClick(path)}
+                    >
+                      <MapPin size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-            <div className="flex flex-col">
-              <span
+
+            {/* Services */}
+            <div className="border-b border-gray-100">
+              <button
+                type="button"
+                aria-expanded={mobileServicesOpen}
                 onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className={mobileRowCls}
               >
-                <HeartHandshake size={16} className="text-[#34b9a5] flex-shrink-0" />
-                SERVICES ▾
-              </span>
+                <HeartHandshake size={18} className="text-[#0b7f66] flex-shrink-0" />
+                <span className="flex-1">Services</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-500 transition-transform duration-200 ${mobileServicesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
               {mobileServicesOpen && (
-                <div className="flex flex-col ml-4 mt-2">
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/psychiatrist")}
-                  >
-                    <Stethoscope size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Psychiatrist
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/in-patient")}
-                  >
-                    <BedDouble size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    In-patient Care
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
-                  >
-                    <Brain size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Clinical Psychologist
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Counsellor")}
-                  >
-                    <MessageCircleHeart size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Counselling Psychologist
-                  </span>
-                  <span
-                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
-                  >
-                    <ClipboardCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
-                    Assessment
-                  </span>
+                <div className="flex flex-col pb-2 pl-9">
+                  {serviceItems.map(({ label, path, Icon }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
+                      onClick={() => handleServiceClick(path)}
+                    >
+                      <Icon size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-            <span
-              onClick={() => handleNavigate("/about")}
-              className="flex items-center gap-2"
-            >
-              <Info size={16} className="text-[#34b9a5] flex-shrink-0" />
-              ABOUT US
-            </span>
-            <span
-              onClick={() => handleNavigate("/who-its-for")}
-              className="flex items-center gap-2"
-            >
-              <Users size={16} className="text-[#34b9a5] flex-shrink-0" />
-              WHO IT'S FOR
-            </span>
-            <span
-              onClick={() => handleNavigate("/why-mibo")}
-              className="flex items-center gap-2"
-            >
-              <Sparkles size={16} className="text-[#34b9a5] flex-shrink-0" />
-              WHY MIBO
-            </span>
-            <div className="flex flex-col">
-              <span
+
+            {[simpleLinks.about, simpleLinks.who, simpleLinks.why].map(
+              ({ label, path, Icon }) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => handleNavigate(path)}
+                  className={`${mobileRowCls} border-b border-gray-100`}
+                >
+                  <Icon size={18} className="text-[#0b7f66] flex-shrink-0" />
+                  {label}
+                </button>
+              ),
+            )}
+
+            {/* Experts */}
+            <div className="border-b border-gray-100">
+              <button
+                type="button"
+                aria-expanded={mobileExpertsOpen}
                 onClick={() => setMobileExpertsOpen(!mobileExpertsOpen)}
-                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className={mobileRowCls}
               >
-                <UserCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
-                EXPERTS ▾
-              </span>
+                <UserCheck size={18} className="text-[#0b7f66] flex-shrink-0" />
+                <span className="flex-1">Experts</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-500 transition-transform duration-200 ${mobileExpertsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
               {mobileExpertsOpen && (
-                <div className="flex flex-col ml-4 mt-2 gap-2">
-                  <div
-                    className="py-2 px-3 bg-white/50 rounded-lg cursor-pointer hover:bg-white/70 transition-colors"
-                    onClick={() => handleExpertClick("Clinical Psychologist")}
-                  >
-                    <div className="flex items-start gap-2">
-                      <Brain className="w-4 h-4 text-[#34b9a5] mt-0.5 flex-shrink-0" />
-                      <div>
-                        <div className="font-bold text-sm text-gray-800">
-                          Clinical Psychologists
-                        </div>
-                        <div className="text-xs text-gray-600 mt-0.5">
-                          Find safe, compassionate care for your mental health
-                          journey.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="py-2 px-3 bg-white/50 rounded-lg cursor-pointer hover:bg-white/70 transition-colors"
-                    onClick={() => handleExpertClick("Psychiatrist")}
-                  >
-                    <div className="flex items-start gap-2">
-                      <Pill className="w-4 h-4 text-[#34b9a5] mt-0.5 flex-shrink-0" />
-                      <div>
-                        <div className="font-bold text-sm text-gray-800">
-                          Psychiatrists
-                        </div>
-                        <div className="text-xs text-gray-600 mt-0.5">
-                          Expert medical care for advanced mental health
-                          conditions.
+                <div className="flex flex-col gap-2 pb-3 pl-9">
+                  {expertItems.map(({ label, specialization, description, Icon }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className="w-full text-left py-2.5 px-3 bg-emerald-50/70 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                      onClick={() => handleExpertClick(specialization)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <Icon className="w-4 h-4 text-[#0b7f66] mt-0.5 flex-shrink-0" />
+                        <div>
+                          <div className="font-bold text-sm text-gray-800">{label}</div>
+                          <div className="text-xs text-gray-600 mt-0.5">{description}</div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-            <span
-              onClick={() => handleNavigate("/blog")}
-              className="flex items-center gap-2"
-            >
-              <BookOpen size={16} className="text-[#34b9a5] flex-shrink-0" />
-              BLOG
-            </span>
+
+            {[simpleLinks.blog, simpleLinks.contact].map(({ label, path, Icon }, idx, arr) => (
+              <button
+                type="button"
+                key={label}
+                onClick={() => handleNavigate(path)}
+                className={`${mobileRowCls} ${idx < arr.length - 1 ? "border-b border-gray-100" : ""}`}
+              >
+                <Icon size={18} className="text-[#0b7f66] flex-shrink-0" />
+                {label}
+              </button>
+            ))}
           </nav>
         </div>
       )}

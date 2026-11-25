@@ -1,3 +1,4 @@
+import { DEFAULT_PHONE_DISPLAY, DEFAULT_TEL_LINK } from "../../utils/contact";
 import React from "react";
 
 import {
@@ -422,6 +423,10 @@ const KochiLanding = () => {
                 Call Now: +91 9447511479
               </button>
             </div>
+            <p className="text-white/90 text-base sm:text-lg mt-2">
+              Or call{" "}
+              <a href={DEFAULT_TEL_LINK} className="font-bold text-white underline underline-offset-4 hover:text-[#30baa3] transition-colors whitespace-nowrap">{DEFAULT_PHONE_DISPLAY}</a>
+            </p>
           </div>
         </div>
       </section>
@@ -597,6 +602,10 @@ const KochiLanding = () => {
                   <Phone className="w-5 h-5" />
                   +91 9447511479
                 </button>
+                <p className="mt-4 text-miboText text-sm sm:text-base">
+                  Or call{" "}
+                  <a href={DEFAULT_TEL_LINK} className="font-bold text-[#212154] hover:text-[#30baa3] transition-colors whitespace-nowrap">{DEFAULT_PHONE_DISPLAY}</a>
+                </p>
               </div>
             </div>
           </div>
@@ -715,6 +724,9 @@ const KochiLanding = () => {
                       Phone
                     </h3>
                     <p className="text-miboText">+91 {phoneNumber}</p>
+                    <p className="text-miboText">
+                      <a href={DEFAULT_TEL_LINK} className="hover:text-[#30baa3] transition-colors">{DEFAULT_PHONE_DISPLAY}</a>
+                    </p>
                   </div>
                 </div>
 
@@ -974,6 +986,10 @@ const KochiLanding = () => {
               Call +91 {phoneNumber}
             </button>
           </div>
+          <p className="mt-5 text-white/80 text-sm sm:text-base">
+            Or call{" "}
+            <a href={DEFAULT_TEL_LINK} className="font-bold text-white underline underline-offset-4 hover:text-[#30baa3] transition-colors whitespace-nowrap">{DEFAULT_PHONE_DISPLAY}</a>
+          </p>
         </div>
       </section>
 
@@ -990,6 +1006,10 @@ const KochiLanding = () => {
               <div className="space-y-2 text-sm opacity-70">
                 <p className="flex items-center gap-2">
                   <Phone className="w-4 h-4" /> +91 {phoneNumber}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />{" "}
+                  <a href={DEFAULT_TEL_LINK} className="hover:opacity-100 hover:underline">{DEFAULT_PHONE_DISPLAY}</a>
                 </p>
                 <p className="flex items-center gap-2">
                   <Mail className="w-4 h-4" /> {email}

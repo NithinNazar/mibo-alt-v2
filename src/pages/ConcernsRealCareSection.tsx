@@ -1,4 +1,4 @@
-import { BANGALORE_PHONE_DISPLAY, BANGALORE_TEL_LINK } from "../utils/contact";
+import { DEFAULT_PHONE_DISPLAY, DEFAULT_TEL_LINK } from "../utils/contact";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -537,8 +537,8 @@ export default function ConcernsRealCareSection() {
                 <span>Please call us, we will sort it out</span>
               </div>
               <p className="font-extrabold text-[#10C78A] mb-4" style={{ fontSize: "clamp(1.3rem,3vw,1.7rem)" }}>
-                <a href={BANGALORE_TEL_LINK} className="hover:underline">
-                  {BANGALORE_PHONE_DISPLAY}
+                <a href={DEFAULT_TEL_LINK} className="hover:underline">
+                  {DEFAULT_PHONE_DISPLAY}
                 </a>
               </p>
               <div className="w-12 h-[3px] bg-gradient-to-r from-[#10C78A] to-[#3B8FE8] rounded mb-8" />
