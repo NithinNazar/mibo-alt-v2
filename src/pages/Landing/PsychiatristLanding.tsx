@@ -8,7 +8,7 @@
 import { BANGALORE_PHONE, BANGALORE_TEL_LINK } from "../../utils/contact";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Brain,
   Calendar,
@@ -51,8 +51,11 @@ const PATIENT_PHONE = BANGALORE_PHONE;
 // Deep link into the Experts listing, pre-filtered to Bangalore
 // psychiatrists — ExpertsPage reads these two params on mount (see
 // resolveLocationFromParam / resolveCategoryFromParam there).
-const EXPERTS_PSYCHIATRIST_LINK =
-  "/experts?location=Bangalore&specialization=Psychiatrist";
+const PSYCHIATRIST_LOCATIONS = ["Bangalore", "Kochi", "Mumbai"];
+
+// Builds the same deep link for any location (defaults keep Bangalore).
+const expertsPsychiatristLink = (location: string) =>
+  `/experts?location=${location}&specialization=Psychiatrist`;
 
 // Real MIBO Bangalore clinic details — reused from the existing
 // BangaloreLanding page rather than invented for this page.
@@ -115,6 +118,15 @@ const CONDITIONS_WE_HELP_WITH = [
 
 const PsychiatristLanding = () => {
   const navigate = useNavigate();
+  // Opened from a location landing page (/kochi, /bengaluru) as
+  // /psychiatrist?location=<City>: that city is applied as the default
+  // Location filter. Unknown/missing values keep the existing Bangalore default.
+  const [searchParams] = useSearchParams();
+  const requestedLocation = searchParams.get("location")?.trim().toLowerCase();
+  const selectedLocation =
+    PSYCHIATRIST_LOCATIONS.find((l) => l.toLowerCase() === requestedLocation) ??
+    "Bangalore";
+  const EXPERTS_PSYCHIATRIST_LINK = expertsPsychiatristLink(selectedLocation);
 
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
@@ -460,7 +472,11 @@ const PsychiatristLanding = () => {
         {/* ---------------------------------------------------------------- */}
         {/* Psychiatrist profile cards                                       */}
         {/* ---------------------------------------------------------------- */}
-        <PsychiatristExpertListing viewAllLink={EXPERTS_PSYCHIATRIST_LINK} />
+        <PsychiatristExpertListing
+          key={selectedLocation}
+          defaultLocation={selectedLocation}
+          viewAllLink={EXPERTS_PSYCHIATRIST_LINK}
+        />
 
         {/* ---------------------------------------------------------------- */}
         {/* How It Works                                                     */}

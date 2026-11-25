@@ -423,6 +423,23 @@ export default function ExpertsPage() {
   // on `md:` and up.
   const barsVisible = useScrollDirection({ disabled: !!openFilter });
 
+  // Re-apply the URL filters when they change while this page is already open
+  // (e.g. choosing a Services item in the navbar while on /experts). The first
+  // run is skipped: initial state is already derived from the URL on mount.
+  const specializationParam = searchParams.get("specialization");
+  const locationParam = searchParams.get("location");
+  const urlFiltersKeyRef = useRef(`${specializationParam}|${locationParam}`);
+  useEffect(() => {
+    const key = `${specializationParam}|${locationParam}`;
+    if (urlFiltersKeyRef.current === key) return;
+    urlFiltersKeyRef.current = key;
+    setSelectedCategory(resolveCategoryFromParam(specializationParam));
+    setSelectedFilters((prev) => ({
+      ...prev,
+      Location: resolveLocationFromParam(locationParam),
+    }));
+  }, [specializationParam, locationParam]);
+
   useEffect(() => {
     // Scroll instantly to top
     window.scrollTo({ top: 0, behavior: "instant" });

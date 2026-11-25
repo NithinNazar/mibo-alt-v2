@@ -1,13 +1,11 @@
 import { motion } from "framer-motion";
 import { inPatientContent } from "./InPatientData";
-import { useNavigate } from "react-router-dom";
+import { BANGALORE_TEL_LINK } from "../../../utils/contact";
 import heroImage from "../../../assets/inpatientservice.jpg?w=1200&format=webp&quality=75";
 import ExpertsHeader from "../../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../../Experts/Components/ExpertsFooter";
 
 const InPatientPage = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="bg-[#E3F7F1] min-h-screen">
       <ExpertsHeader />
@@ -50,14 +48,14 @@ const InPatientPage = () => {
       </div>
 
       <div className="text-center pb-16">
-        <motion.button
+        <motion.a
+          href={BANGALORE_TEL_LINK}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate("/experts")}
-          className="bg-[#0b1180] text-white px-10 py-3 rounded-xl shadow-md hover:bg-[#046a5d] transition"
+          className="inline-block bg-[#0b1180] text-white px-10 py-3 rounded-xl shadow-md hover:bg-[#046a5d] transition"
         >
           {inPatientContent.cta}
-        </motion.button>
+        </motion.a>
       </div>
       <ExpertsFooter />
     </div>

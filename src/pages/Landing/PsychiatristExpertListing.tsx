@@ -26,7 +26,6 @@ import {
   Briefcase,
   CalendarCheck,
   Check,
-  ChevronLeft,
   ChevronRight,
   ClipboardList,
   Eye,
@@ -197,9 +196,9 @@ const parsePrice = (price: string): number => {
 // hardcoded/dummy experts are ever rendered.
 const SAMPLE_FALLBACK: DisplayDoctor[] = [];
 
-// Experts shown per page. If the backend returns real pagination metadata
-// it is used as-is; otherwise the page slices the returned list itself.
-const EXPERTS_PAGE_SIZE = 4;
+// Landing pages show every matching expert in one continuous list (no
+// pagination), so a single request asks for a limit large enough to cover them.
+const EXPERTS_PAGE_SIZE = 100;
 
 // Used only when one city maps to several centres and the per-centre
 // responses must be merged client-side (no single server page exists).
@@ -569,35 +568,8 @@ const PsychiatristExpertListing = ({
     else resetToFirstPage();
   };
 
-  // Server pagination when the backend provides it; otherwise pagination
-  // computed from the (filtered) list the backend returned.
-  const effectivePagination =
-    expertsPagination ??
-    (!usingFallback && filteredDoctors.length > 0
-      ? {
-          page: expertsPage,
-          limit: EXPERTS_PAGE_SIZE,
-          total: filteredDoctors.length,
-          totalPages: Math.max(
-            1,
-            Math.ceil(filteredDoctors.length / EXPERTS_PAGE_SIZE),
-          ),
-        }
-      : null);
-  const pagedDoctors =
-    expertsPagination || usingFallback
-      ? filteredDoctors
-      : filteredDoctors.slice(
-          (expertsPage - 1) * EXPERTS_PAGE_SIZE,
-          expertsPage * EXPERTS_PAGE_SIZE,
-        );
-
-  const goToExpertsPage = (nextPage: number) => {
-    if (!effectivePagination) return;
-    if (nextPage < 1 || nextPage > effectivePagination.totalPages) return;
-    if (nextPage === expertsPage) return;
-    setExpertsPage(nextPage);
-  };
+  // All matching experts are shown in one continuous list (no pagination).
+  const pagedDoctors = filteredDoctors;
 
   return (
     <>
@@ -841,64 +813,6 @@ const PsychiatristExpertListing = ({
                     );
                   })}
                 </div>
-
-                {/* Pagination — only for the live/backend-driven listing.
-                    The sample fallback set is static local data, so no
-                    controls are shown for it. */}
-                {!usingFallback && (
-                  <div className="flex flex-col items-center gap-2 mt-10">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => goToExpertsPage(expertsPage - 1)}
-                        disabled={!effectivePagination || expertsPage <= 1}
-                        aria-label="Previous page"
-                        className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-
-                      {effectivePagination ? (
-                        Array.from(
-                          { length: effectivePagination.totalPages },
-                          (_, i) => i + 1,
-                        ).map((num) => (
-                          <button
-                            key={num}
-                            type="button"
-                            onClick={() => goToExpertsPage(num)}
-                            aria-current={num === expertsPage ? "page" : undefined}
-                            className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-colors ${
-                              num === expertsPage
-                                ? "bg-[#0e6b4f] text-white"
-                                : "border border-[#e6ede9] bg-white text-[#212154] hover:border-[#138158] hover:text-[#0e6b4f]"
-                            }`}
-                          >
-                            {num}
-                          </button>
-                        ))
-                      ) : (
-                        <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#0e6b4f] text-white font-semibold text-sm">
-                          {expertsPage}
-                        </span>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => goToExpertsPage(expertsPage + 1)}
-                        disabled={
-                          !effectivePagination ||
-                          expertsPage >= effectivePagination.totalPages
-                        }
-                        aria-label="Next page"
-                        className="flex items-center justify-center w-10 h-10 rounded-full border border-[#e6ede9] bg-white text-[#212154] font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:border-[#138158] hover:enabled:text-[#0e6b4f] transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                  </div>
-                )}
               </>
             )}
           </div>

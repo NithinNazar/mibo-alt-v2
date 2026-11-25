@@ -1,7 +1,34 @@
-import { BANGALORE_TEL_LINK, BANGALORE_WHATSAPP_URL } from "../utils/contact";
+import {
+  DEFAULT_TEL_LINK,
+  DEFAULT_WHATSAPP_URL,
+  BANGALORE_TEL_LINK,
+  BANGALORE_WHATSAPP_URL,
+  KOCHI_TEL_LINK,
+  KOCHI_WHATSAPP_URL,
+} from "../utils/contact";
 import { useState, useEffect } from "react";
-import { Phone, MessageCircle, Menu, X, User, Brain, Pill } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Phone,
+  MessageCircle,
+  Menu,
+  X,
+  User,
+  Brain,
+  Pill,
+  CalendarCheck,
+  MapPin,
+  HeartHandshake,
+  Info,
+  Users,
+  Sparkles,
+  UserCheck,
+  BookOpen,
+  Stethoscope,
+  BedDouble,
+  ClipboardCheck,
+  MessageCircleHeart,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import miboIcon from "../assets/logo1.png?w=200&format=webp&quality=85";
 import authService from "../services/authService";
 
@@ -17,6 +44,37 @@ const Header = () => {
   const [mobileExpertsOpen, setMobileExpertsOpen] = useState(false);
 
   const navigate = useNavigate();
+  const routerLocation = useLocation();
+
+  // On a location landing page, links to the Experts / Psychiatrist pages carry
+  // that location so the destination opens with the Location filter applied.
+  const landingLocation = (() => {
+    const path = routerLocation.pathname.replace(/\/+$/, "").toLowerCase();
+    if (path === "/kochi") return "Kochi";
+    if (path === "/bengaluru" || path === "/bangalore") return "Bangalore";
+    return null;
+  })();
+  // Call / WhatsApp buttons use the number of the location landing page being
+  // viewed (Kochi: 9447511479, Bangalore: 7996004444); every other page uses
+  // the default Mibo number (+91 90833 35000).
+  const contactTelLink =
+    landingLocation === "Kochi"
+      ? KOCHI_TEL_LINK
+      : landingLocation === "Bangalore"
+        ? BANGALORE_TEL_LINK
+        : DEFAULT_TEL_LINK;
+  const contactWhatsappUrl =
+    landingLocation === "Kochi"
+      ? KOCHI_WHATSAPP_URL
+      : landingLocation === "Bangalore"
+        ? BANGALORE_WHATSAPP_URL
+        : DEFAULT_WHATSAPP_URL;
+  const withLandingLocation = (path: string) => {
+    if (!landingLocation) return path;
+    const base = path.split("?")[0];
+    if (base !== "/experts" && base !== "/psychiatrist") return path;
+    return `${path}${path.includes("?") ? "&" : "?"}location=${landingLocation}`;
+  };
 
   useEffect(() => {
     const checkAuth = () => setIsAuthenticated(authService.isAuthenticated());
@@ -41,7 +99,7 @@ const Header = () => {
   };
 
   const handleServiceClick = (path: string) => {
-    navigate(path);
+    navigate(withLandingLocation(path));
     setMenuOpen(false);
     setMobileServicesOpen(false);
   };
@@ -58,17 +116,17 @@ const handleExpertClick = (specialization: string) => {
   // }
 
   sessionStorage.setItem("expertsFilter", specialization);
-  navigate("/experts");
+  navigate(withLandingLocation("/experts"));
 };
 
 const handleNavigate = (path: string) => {
-  navigate(path);
+  navigate(withLandingLocation(path));
   setMenuOpen(false);
 };
 
   return (
     <header
-      className={`w-full fixed top-0 left-0 z-50 bg-white shadow-sm border-b border-gray-100 transition-all duration-300 ease-out ${
+      className={`w-full fixed top-0 left-0 z-50 bg-white shadow-sm border-b border-gray-100 font-['Quicksand',sans-serif] transition-all duration-300 ease-out ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
@@ -88,14 +146,14 @@ const handleNavigate = (path: string) => {
         {/* Mobile Actions */}
         <div className="flex items-center gap-2 lg:hidden ml-auto">
           <button
-            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
+            onClick={() => (window.location.href = contactTelLink)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300"
           >
             <Phone size={20} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = BANGALORE_WHATSAPP_URL)
+              (window.location.href = contactWhatsappUrl)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300"
           >
@@ -128,8 +186,9 @@ const handleNavigate = (path: string) => {
         <nav className="hidden lg:flex flex-grow justify-center gap-6 text-sm text-gray-700 font-medium">
           <span
             onClick={() => handleNavigate("/experts")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105 font-semibold"
+            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105 font-semibold"
           >
+            <CalendarCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
             BOOK APPOINTMENT
           </span>
           <div
@@ -137,28 +196,32 @@ const handleNavigate = (path: string) => {
             onMouseEnter={() => setLocationsOpen(true)}
             onMouseLeave={() => setLocationsOpen(false)}
           >
-            <span className="hover:text-[#34b9a5] transition-all duration-300">
+            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
+              <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
               LOCATIONS ▾
             </span>
             {locationsOpen && (
               <div className="absolute top-full left-0 pt-4 -mt-4 w-40 z-50">
                 <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
                     onClick={() => handleLocationClick("/bengaluru")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Bengaluru
                   </span>
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
                     onClick={() => handleLocationClick("/kochi")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Kochi
                   </span>
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
                     onClick={() => handleLocationClick("/centres/mumbai")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Mumbai
                   </span>
                 </div>
@@ -170,29 +233,47 @@ const handleNavigate = (path: string) => {
             onMouseEnter={() => setServicesOpen(true)}
             onMouseLeave={() => setServicesOpen(false)}
           >
-            <span className="hover:text-[#34b9a5] transition-all duration-300">
+            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
+              <HeartHandshake size={16} className="text-[#34b9a5] flex-shrink-0" />
               SERVICES ▾
             </span>
             {servicesOpen && (
-              <div className="absolute top-full left-0 pt-4 -mt-4 w-44 z-50">
+              <div className="absolute top-full left-0 pt-4 -mt-4 w-64 z-50">
                 <div className="bg-white shadow-lg rounded-md text-black flex flex-col py-2">
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/psychiatrist")}
+                  >
+                    <Stethoscope size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Psychiatrist
+                  </span>
+                  <span
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
                     onClick={() => handleServiceClick("/services/in-patient")}
                   >
-                    In-Patient
+                    <BedDouble size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    In-patient Care
                   </span>
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/in-person")}
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
                   >
-                    In-Person
+                    <Brain size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Clinical Psychologist
                   </span>
                   <span
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/online")}
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Counsellor")}
                   >
-                    Online
+                    <MessageCircleHeart size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Counselling Psychologist
+                  </span>
+                  <span
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
+                  >
+                    <ClipboardCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Assessment
                   </span>
                 </div>
               </div>
@@ -200,33 +281,32 @@ const handleNavigate = (path: string) => {
           </div>
           <span
             onClick={() => handleNavigate("/about")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
           >
+            <Info size={16} className="text-[#34b9a5] flex-shrink-0" />
             ABOUT US
           </span>
           <span
             onClick={() => handleNavigate("/who-its-for")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
           >
+            <Users size={16} className="text-[#34b9a5] flex-shrink-0" />
             WHO IT'S FOR
           </span>
           <span
             onClick={() => handleNavigate("/why-mibo")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
           >
+            <Sparkles size={16} className="text-[#34b9a5] flex-shrink-0" />
             WHY MIBO
-          </span>
-          <span 
-            onClick={() => handleNavigate("/psychiatrist")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105">
-            PSYCHIATRIST 
           </span>
           <div
             className="relative cursor-pointer"
             onMouseEnter={() => setExpertsOpen(true)}
             onMouseLeave={() => setExpertsOpen(false)}
           >
-            <span className="hover:text-[#34b9a5] transition-all duration-300">
+            <span className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] transition-all duration-300">
+              <UserCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
               EXPERTS ▾
             </span>
             {expertsOpen && (
@@ -273,8 +353,9 @@ const handleNavigate = (path: string) => {
           </div>
           <span
             onClick={() => handleNavigate("/blog")}
-            className="hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center gap-1.5 hover:text-[#34b9a5] cursor-pointer transition-all duration-300 hover:scale-105"
           >
+            <BookOpen size={16} className="text-[#34b9a5] flex-shrink-0" />
             BLOG
           </span>
         </nav>
@@ -282,14 +363,14 @@ const handleNavigate = (path: string) => {
         {/* Desktop Action Buttons */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
           <button
-            onClick={() => (window.location.href = BANGALORE_TEL_LINK)}
+            onClick={() => (window.location.href = contactTelLink)}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#34b9a5] text-gray-700 hover:text-[#34b9a5] transition-all duration-300 hover:scale-110"
           >
             <Phone size={18} />
           </button>
           <button
             onClick={() =>
-              (window.location.href = BANGALORE_WHATSAPP_URL)
+              (window.location.href = contactWhatsappUrl)
             }
             className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 hover:scale-110"
           >
@@ -319,35 +400,40 @@ const handleNavigate = (path: string) => {
           <nav className="flex flex-col gap-4 text-[#18276c] font-medium">
             <span
               onClick={() => handleNavigate("/experts")}
-              className="py-2 px-2 bg-[#34b9a5] text-white rounded-full text-center cursor-pointer hover:bg-[#2a857f] transition-colors duration-300"
+              className="py-2 px-2 bg-[#34b9a5] text-white rounded-full justify-center flex items-center gap-2 cursor-pointer hover:bg-[#2a857f] transition-colors duration-300"
             >
+              <CalendarCheck size={16} className="flex-shrink-0" />
               BOOK APPOINTMENT
             </span>
             <div className="flex flex-col">
               <span
                 onClick={() => setMobileLocationsOpen(!mobileLocationsOpen)}
-                className="hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
               >
+                <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                 LOCATIONS ▾
               </span>
               {mobileLocationsOpen && (
                 <div className="flex flex-col ml-4 mt-2">
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
                     onClick={() => handleLocationClick("/bengaluru")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Bengaluru
                   </span>
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
                     onClick={() => handleLocationClick("/kochi")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Kochi
                   </span>
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
                     onClick={() => handleLocationClick("/centres/mumbai")}
                   >
+                    <MapPin size={16} className="text-[#34b9a5] flex-shrink-0" />
                     Mumbai
                   </span>
                 </div>
@@ -356,44 +442,78 @@ const handleNavigate = (path: string) => {
             <div className="flex flex-col">
               <span
                 onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                className="hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
               >
+                <HeartHandshake size={16} className="text-[#34b9a5] flex-shrink-0" />
                 SERVICES ▾
               </span>
               {mobileServicesOpen && (
                 <div className="flex flex-col ml-4 mt-2">
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                    onClick={() => handleServiceClick("/psychiatrist")}
+                  >
+                    <Stethoscope size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Psychiatrist
+                  </span>
+                  <span
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
                     onClick={() => handleServiceClick("/services/in-patient")}
                   >
-                    In-Patient
+                    <BedDouble size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    In-patient Care
                   </span>
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/in-person")}
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
                   >
-                    In-Person
+                    <Brain size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Clinical Psychologist
                   </span>
                   <span
-                    className="py-1 hover:text-green-600 cursor-pointer"
-                    onClick={() => handleServiceClick("/services/online")}
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Counsellor")}
                   >
-                    Online
+                    <MessageCircleHeart size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Counselling Psychologist
+                  </span>
+                  <span
+                    className="py-1 flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                    onClick={() => handleServiceClick("/experts?specialization=Clinical%20Psychologist")}
+                  >
+                    <ClipboardCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
+                    Assessment
                   </span>
                 </div>
               )}
             </div>
-            <span onClick={() => handleNavigate("/about")}>ABOUT US</span>
-            <span onClick={() => handleNavigate("/who-its-for")}>
+            <span
+              onClick={() => handleNavigate("/about")}
+              className="flex items-center gap-2"
+            >
+              <Info size={16} className="text-[#34b9a5] flex-shrink-0" />
+              ABOUT US
+            </span>
+            <span
+              onClick={() => handleNavigate("/who-its-for")}
+              className="flex items-center gap-2"
+            >
+              <Users size={16} className="text-[#34b9a5] flex-shrink-0" />
               WHO IT'S FOR
             </span>
-            <span onClick={() => handleNavigate("/why-mibo")}>WHY MIBO</span>
-            <span onClick={() => handleNavigate("/psychiatrist")}>PSYCHIATRIST</span>
+            <span
+              onClick={() => handleNavigate("/why-mibo")}
+              className="flex items-center gap-2"
+            >
+              <Sparkles size={16} className="text-[#34b9a5] flex-shrink-0" />
+              WHY MIBO
+            </span>
             <div className="flex flex-col">
               <span
                 onClick={() => setMobileExpertsOpen(!mobileExpertsOpen)}
-                className="hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
+                className="flex items-center gap-2 hover:text-[#34b9a5] cursor-pointer py-2 border-b border-white/10"
               >
+                <UserCheck size={16} className="text-[#34b9a5] flex-shrink-0" />
                 EXPERTS ▾
               </span>
               {mobileExpertsOpen && (
@@ -435,7 +555,13 @@ const handleNavigate = (path: string) => {
                 </div>
               )}
             </div>
-            <span onClick={() => handleNavigate("/blog")}>BLOG</span>
+            <span
+              onClick={() => handleNavigate("/blog")}
+              className="flex items-center gap-2"
+            >
+              <BookOpen size={16} className="text-[#34b9a5] flex-shrink-0" />
+              BLOG
+            </span>
           </nav>
         </div>
       )}
