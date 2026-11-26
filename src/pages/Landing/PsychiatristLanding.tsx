@@ -5,7 +5,12 @@
 // (backend data, filters, pagination, profile modal, booking) lives in
 // ./PsychiatristExpertListing and is shared with the city landing pages.
 
-import { BANGALORE_PHONE, BANGALORE_TEL_LINK } from "../../utils/contact";
+import {
+  BANGALORE_PHONE,
+  BANGALORE_TEL_LINK,
+  KOCHI_PHONE,
+  KOCHI_TEL_LINK,
+} from "../../utils/contact";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -46,7 +51,6 @@ import adMobile from "./ad-mobile.jpg";
 import { psychiatristFaqData } from "./psychiatristFaqData";
 import { psychiatristReviewsData } from "./psychiatristReviewsData";
 
-const PATIENT_PHONE = BANGALORE_PHONE;
 
 // Deep link into the Experts listing, pre-filtered to Bangalore
 // psychiatrists — ExpertsPage reads these two params on mount (see
@@ -57,13 +61,38 @@ const PSYCHIATRIST_LOCATIONS = ["Bangalore", "Kochi", "Mumbai"];
 const expertsPsychiatristLink = (location: string) =>
   `/experts?location=${location}&specialization=Psychiatrist`;
 
-// Real MIBO Bangalore clinic details — reused from the existing
-// BangaloreLanding page rather than invented for this page.
-const CLINIC_ADDRESS =
-  "22, 32nd E Cross Rd, near Carmel Convent School, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041";
+// Real MIBO clinic details per city — reused from the existing Bangalore and
+// Kochi landing pages. Cities without an entry (e.g. Mumbai) fall back to Bangalore.
 const CLINIC_EMAIL = "reach@mibocare.com";
-const CLINIC_MAP_EMBED_URL =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.7014776263536!2d77.5959189!3d12.926898300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae15995eb9d80d%3A0x627959ca498fde09!2sMibo%20The%20Mind%20Expert!5e0!3m2!1sen!2sin!4v1790150878647!5m2!1sen!2sin";
+const CITY_CONTENT: Record<
+  string,
+  {
+    name: string;
+    address: string;
+    phone: string;
+    telLink: string;
+    mapEmbedUrl: string;
+  }
+> = {
+  Bangalore: {
+    name: "Bangalore",
+    address:
+      "22, 32nd E Cross Rd, near Carmel Convent School, 4th T Block East, Jayanagar, Bengaluru, Karnataka 560041",
+    phone: BANGALORE_PHONE,
+    telLink: BANGALORE_TEL_LINK,
+    mapEmbedUrl:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.7014776263536!2d77.5959189!3d12.926898300000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae15995eb9d80d%3A0x627959ca498fde09!2sMibo%20The%20Mind%20Expert!5e0!3m2!1sen!2sin!4v1790150878647!5m2!1sen!2sin",
+  },
+  Kochi: {
+    name: "Kochi",
+    address:
+      "13/1818, Kannanthodathu Rd, near Changampuzha Park Metro Station, Devankulangara, Mamangalam, Edappally, Kochi, Ernakulam, Kerala 682024",
+    phone: KOCHI_PHONE,
+    telLink: KOCHI_TEL_LINK,
+    mapEmbedUrl:
+      "https://www.google.com/maps?q=10.014698823782494,76.30359075580301&hl=en&z=15&output=embed",
+  },
+};
 
 // Static, non-personal process copy — describes the booking flow itself,
 // not any individual patient or clinician record.
@@ -127,6 +156,14 @@ const PsychiatristLanding = () => {
     PSYCHIATRIST_LOCATIONS.find((l) => l.toLowerCase() === requestedLocation) ??
     "Bangalore";
   const EXPERTS_PSYCHIATRIST_LINK = expertsPsychiatristLink(selectedLocation);
+  // City-specific copy, address, phone and map (Bangalore fallback).
+  const city = CITY_CONTENT[selectedLocation] ?? CITY_CONTENT.Bangalore;
+  const PATIENT_PHONE = city.phone;
+  const CITY_TEL_LINK = city.telLink;
+  const faqItems = psychiatristFaqData.map((faq) => ({
+    question: faq.question.replaceAll("Bangalore", city.name),
+    answer: faq.answer.replaceAll("Bangalore", city.name),
+  }));
 
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
@@ -145,7 +182,7 @@ const PsychiatristLanding = () => {
   }, [showPromoPopup]);
 
   const handleCall = () => {
-    window.location.href = `tel:+91${PATIENT_PHONE}`;
+    window.location.href = CITY_TEL_LINK;
   };
 
   // Real patient testimonials sourced from MIBO's Google Business Profile
@@ -171,7 +208,7 @@ const PsychiatristLanding = () => {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: psychiatristFaqData.map((faq) => ({
+    mainEntity: faqItems.map((faq) => ({
       "@type": "Question",
       name: faq.question,
       acceptedAnswer: {
@@ -263,7 +300,7 @@ const PsychiatristLanding = () => {
               </span>
               <h1 className="text-[27px] min-[400px]:text-[30px] leading-[1.15] tracking-tight sm:tracking-normal sm:text-5xl sm:leading-tight font-extrabold text-[#212154] mb-4">
                 Psychiatrist in <br className="sm:hidden" />
-                Bangalore for
+                {city.name} for
                 <br />
                 <span className="text-[#138158]">
                   Expert Mental <br className="sm:hidden" />
@@ -273,7 +310,7 @@ const PsychiatristLanding = () => {
               <p className="text-[#3f4a5a] font-medium text-[13px] leading-relaxed -mx-3 px-3 py-2 rounded-xl bg-white/85 backdrop-blur-sm sm:mx-0 sm:p-0 sm:rounded-none sm:bg-transparent sm:backdrop-blur-none sm:text-miboText sm:font-normal sm:text-lg sm:leading-normal mb-5 sm:mb-8 max-w-full sm:max-w-xl">
                 Get compassionate, confidential and evidence-based
                 psychiatric care from experienced psychiatrists in
-                Bangalore. Consult us in person or online based on your
+                {city.name}. Consult us in person or online based on your
                 convenience.
               </p>
 
@@ -296,7 +333,7 @@ const PsychiatristLanding = () => {
               <p className="text-sm sm:text-base text-miboText mb-4 sm:mb-8">
                 Or call us at{" "}
                 <a
-                  href={BANGALORE_TEL_LINK}
+                  href={CITY_TEL_LINK}
                   className="font-bold text-[#212154] hover:text-[#138158] transition-colors whitespace-nowrap"
                 >
                   +91 {PATIENT_PHONE}
@@ -532,17 +569,17 @@ const PsychiatristLanding = () => {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* Psychiatrist Consultation in Bangalore (Location)                */}
+        {/* Psychiatrist Consultation in {city} (Location)  */}
         {/* ---------------------------------------------------------------- */}
         <section className="py-12 sm:py-16 md:py-20 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-10">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-[#212154] mb-4">
-                  Psychiatrist Consultation in Bangalore
+                  Psychiatrist Consultation in {city.name}
                 </h2>
                 <p className="text-miboText text-base sm:text-lg leading-relaxed mb-6">
-                  MIBO provides psychiatric consultations in Bangalore
+                  MIBO provides psychiatric consultations in {city.name}
                   through experienced psychiatrists, with options for
                   in-person and online consultations. Choose a convenient
                   appointment and get professional mental health care in a
@@ -556,7 +593,7 @@ const PsychiatristLanding = () => {
                       <h3 className="text-sm font-bold text-[#212154] mb-1">
                         Address
                       </h3>
-                      <p className="text-miboText text-sm">{CLINIC_ADDRESS}</p>
+                      <p className="text-miboText text-sm">{city.address}</p>
                     </div>
                   </div>
 
@@ -568,7 +605,7 @@ const PsychiatristLanding = () => {
                       </h3>
                       <p className="text-miboText text-sm">
                         <a
-                          href={BANGALORE_TEL_LINK}
+                          href={CITY_TEL_LINK}
                           className="hover:text-[#138158] transition-colors"
                         >
                           +91 {PATIENT_PHONE}
@@ -591,14 +628,14 @@ const PsychiatristLanding = () => {
 
               <div className="rounded-2xl overflow-hidden shadow-lg border border-[#eef4f1] h-80 md:h-[420px]">
                 <iframe
-                  src={CLINIC_MAP_EMBED_URL}
+                  src={city.mapEmbedUrl}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="MIBO Bangalore Location"
+                  title={`MIBO ${city.name} Location`}
                 ></iframe>
               </div>
             </div>
@@ -758,7 +795,7 @@ const PsychiatristLanding = () => {
             </p>
 
             <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-              {psychiatristFaqData.map((faq, index) => {
+              {faqItems.map((faq, index) => {
                 const isOpen = openFaqIndex === index;
 
                 return (
@@ -805,7 +842,7 @@ const PsychiatristLanding = () => {
         <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[#212154] to-[#1a1a46] text-white">
           <div className="container mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-4xl font-extrabold mb-4 leading-snug">
-              Book Your Psychiatric Consultation in Bangalore
+              Book Your Psychiatric Consultation in {city.name}
             </h2>
             <p className="text-white/80 mb-8 max-w-2xl mx-auto text-sm sm:text-base">
               Take the first step towards better mental health. Speak with
@@ -829,7 +866,7 @@ const PsychiatristLanding = () => {
             <p className="mt-5 text-white/80 text-sm sm:text-base">
               Or dial us directly:{" "}
               <a
-                href={BANGALORE_TEL_LINK}
+                href={CITY_TEL_LINK}
                 className="font-bold text-white underline underline-offset-4 hover:text-[#97f7df] transition-colors whitespace-nowrap"
               >
                 +91 {PATIENT_PHONE}

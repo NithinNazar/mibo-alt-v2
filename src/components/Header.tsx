@@ -53,6 +53,16 @@ const Header = () => {
     const path = routerLocation.pathname.replace(/\/+$/, "").toLowerCase();
     if (path === "/kochi") return "Kochi";
     if (path === "/bengaluru" || path === "/bangalore") return "Bangalore";
+    // /psychiatrist?location=<City> (opened from a city landing page)
+    if (path === "/psychiatrist") {
+      const requested = new URLSearchParams(routerLocation.search)
+        .get("location")
+        ?.trim()
+        .toLowerCase();
+      if (requested === "kochi") return "Kochi";
+      if (requested === "bangalore" || requested === "bengaluru")
+        return "Bangalore";
+    }
     return null;
   })();
   // Call / WhatsApp buttons use the number of the location landing page being
@@ -107,23 +117,23 @@ const Header = () => {
 
   // Handle expert click based on specialization
 
-const handleExpertClick = (specialization: string) => {
-  setMenuOpen(false);
-  setMobileExpertsOpen(false);
+  const handleExpertClick = (specialization: string) => {
+    setMenuOpen(false);
+    setMobileExpertsOpen(false);
 
-  // if (specialization === "Psychiatrist") {
-  //   window.location.href = "/experts";
-  //   return;
-  // }
+    // if (specialization === "Psychiatrist") {
+    //   window.location.href = "/experts";
+    //   return;
+    // }
 
-  sessionStorage.setItem("expertsFilter", specialization);
-  navigate(withLandingLocation("/experts"));
-};
+    sessionStorage.setItem("expertsFilter", specialization);
+    navigate(withLandingLocation("/experts"));
+  };
 
-const handleNavigate = (path: string) => {
-  navigate(withLandingLocation(path));
-  setMenuOpen(false);
-};
+  const handleNavigate = (path: string) => {
+    navigate(withLandingLocation(path));
+    setMenuOpen(false);
+  };
 
   // ---- Menu data (same destinations / handlers as before) -----------------
   const locationItems = [
@@ -156,7 +166,8 @@ const handleNavigate = (path: string) => {
     {
       label: "Clinical Psychologists",
       specialization: "Clinical Psychologist",
-      description: "Find safe, compassionate care for your mental health journey.",
+      description:
+        "Find safe, compassionate care for your mental health journey.",
       Icon: Brain,
     },
     {
@@ -172,7 +183,7 @@ const handleNavigate = (path: string) => {
     who: { label: "Who It's For", path: "/who-its-for", Icon: Users },
     why: { label: "Why MIBO", path: "/why-mibo", Icon: Sparkles },
     blog: { label: "Blog", path: "/blog", Icon: BookOpen },
-    contact: { label: "Contact", path: "/contact", Icon: Phone },
+    contact: { label: "Contact Us", path: "/contact", Icon: Phone },
   };
 
   // ---- Shared style tokens ---------------------------------------------------
@@ -214,22 +225,27 @@ const handleNavigate = (path: string) => {
           />
         </button>
 
-        <div className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0" aria-hidden="true" />
+        <div
+          className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0"
+          aria-hidden="true"
+        />
 
         {/* ============ CENTRE: Navigation ============ */}
         <nav
           aria-label="Primary"
           className="hidden lg:flex flex-1 min-w-0 items-center justify-evenly"
         >
-          {/* Book Appointment (primary pill) */}
-          <button
-            type="button"
-            onClick={() => handleNavigate("/experts")}
-            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0b7f66] px-3.5 xl:px-4 h-10 text-[13px] xl:text-[14px] font-semibold text-white shadow-sm hover:bg-[#096b57] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 cursor-pointer"
-          >
-            <CalendarCheck size={16} className="hidden xl:block flex-shrink-0" />
-            Book Appointment
-          </button>
+          {[simpleLinks.about].map(({ label, path, Icon }) => (
+            <button
+              type="button"
+              key={label}
+              onClick={() => handleNavigate(path)}
+              className={navItemCls}
+            >
+              <Icon size={16} className={navIconCls} />
+              {label}
+            </button>
+          ))}
 
           {/* Locations */}
           <div
@@ -264,7 +280,10 @@ const handleNavigate = (path: string) => {
                         handleLocationClick(path);
                       }}
                     >
-                      <MapPin size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      <MapPin
+                        size={16}
+                        className="text-[#0b7f66] flex-shrink-0"
+                      />
                       {label}
                     </button>
                   ))}
@@ -306,7 +325,10 @@ const handleNavigate = (path: string) => {
                         handleServiceClick(path);
                       }}
                     >
-                      <Icon size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      <Icon
+                        size={16}
+                        className="text-[#0b7f66] flex-shrink-0"
+                      />
                       {label}
                     </button>
                   ))}
@@ -314,21 +336,6 @@ const handleNavigate = (path: string) => {
               </div>
             )}
           </div>
-
-          {/* About Us / Who It's For / Why MIBO */}
-          {[simpleLinks.about, simpleLinks.who, simpleLinks.why].map(
-            ({ label, path, Icon }) => (
-              <button
-                type="button"
-                key={label}
-                onClick={() => handleNavigate(path)}
-                className={navItemCls}
-              >
-                <Icon size={16} className={navIconCls} />
-                {label}
-              </button>
-            ),
-          )}
 
           {/* Experts */}
           <div
@@ -353,38 +360,47 @@ const handleNavigate = (path: string) => {
             {expertsOpen && (
               <div className="absolute top-full right-0 xl:left-0 xl:right-auto pt-2 w-80 z-50">
                 <div className={`${dropdownPanelCls} py-3`}>
-                  {expertItems.map(({ label, specialization, description, Icon }, idx) => (
-                    <div key={label}>
-                      {idx > 0 && <div className="border-t border-gray-100 my-1" />}
-                      <button
-                        type="button"
-                        className="group w-full px-4 py-3 text-left hover:bg-emerald-50 cursor-pointer transition-colors duration-200"
-                        onClick={() => {
-                          setExpertsOpen(false);
-                          handleExpertClick(specialization);
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <Icon className="w-5 h-5 mt-0.5 text-[#0b7f66] flex-shrink-0 group-hover:scale-110 transition-transform" />
-                          <div>
-                            <div className="font-bold text-gray-800 group-hover:text-[#0b7f66] transition-colors">
-                              {label}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1 leading-relaxed">
-                              {description}
+                  {expertItems.map(
+                    ({ label, specialization, description, Icon }, idx) => (
+                      <div key={label}>
+                        {idx > 0 && (
+                          <div className="border-t border-gray-100 my-1" />
+                        )}
+                        <button
+                          type="button"
+                          className="group w-full px-4 py-3 text-left hover:bg-emerald-50 cursor-pointer transition-colors duration-200"
+                          onClick={() => {
+                            setExpertsOpen(false);
+                            handleExpertClick(specialization);
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Icon className="w-5 h-5 mt-0.5 text-[#0b7f66] flex-shrink-0 group-hover:scale-110 transition-transform" />
+                            <div>
+                              <div className="font-bold text-gray-800 group-hover:text-[#0b7f66] transition-colors">
+                                {label}
+                              </div>
+                              <div className="text-xs text-gray-600 mt-1 leading-relaxed">
+                                {description}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    </div>
-                  ))}
+                        </button>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Blog / Contact */}
-          {[simpleLinks.blog, simpleLinks.contact].map(({ label, path, Icon }) => (
+          {/* Who It's For / Why MIBO / Blog / Contact */}
+          {[
+            simpleLinks.who,
+            simpleLinks.why,
+            simpleLinks.blog,
+            simpleLinks.contact,
+          ].map(({ label, path, Icon }) => (
             <button
               type="button"
               key={label}
@@ -395,9 +411,24 @@ const handleNavigate = (path: string) => {
               {label}
             </button>
           ))}
+          {/* Book Appointment (primary pill) */}
+          <button
+            type="button"
+            onClick={() => handleNavigate("/experts")}
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#0b7f66] px-3.5 xl:px-4 h-10 text-[13px] xl:text-[14px] font-semibold text-white shadow-sm hover:bg-[#096b57] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 cursor-pointer"
+          >
+            <CalendarCheck
+              size={16}
+              className="hidden xl:block flex-shrink-0"
+            />
+            Book Appointment
+          </button>
         </nav>
 
-        <div className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0" aria-hidden="true" />
+        <div
+          className="hidden lg:block h-8 w-px bg-gray-200 flex-shrink-0"
+          aria-hidden="true"
+        />
 
         {/* ============ RIGHT: Actions (desktop) ============ */}
         <div className="hidden lg:flex items-center gap-2 xl:gap-3 flex-shrink-0">
@@ -490,14 +521,17 @@ const handleNavigate = (path: string) => {
       {menuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
           <nav aria-label="Mobile" className="flex flex-col px-4 py-4 sm:px-6">
-            <button
-              type="button"
-              onClick={() => handleNavigate("/experts")}
-              className="mb-2 w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#0b7f66] h-11 text-[15px] font-semibold text-white hover:bg-[#096b57] transition-colors duration-200 cursor-pointer"
-            >
-              <CalendarCheck size={18} className="flex-shrink-0" />
-              Book Appointment
-            </button>
+            {[simpleLinks.about].map(({ label, path, Icon }) => (
+              <button
+                type="button"
+                key={label}
+                onClick={() => handleNavigate(path)}
+                className={`${mobileRowCls} border-b border-gray-100`}
+              >
+                <Icon size={18} className="text-[#0b7f66] flex-shrink-0" />
+                {label}
+              </button>
+            ))}
 
             {/* Locations */}
             <div className="border-b border-gray-100">
@@ -523,7 +557,10 @@ const handleNavigate = (path: string) => {
                       className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
                       onClick={() => handleLocationClick(path)}
                     >
-                      <MapPin size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      <MapPin
+                        size={16}
+                        className="text-[#0b7f66] flex-shrink-0"
+                      />
                       {label}
                     </button>
                   ))}
@@ -539,7 +576,10 @@ const handleNavigate = (path: string) => {
                 onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
                 className={mobileRowCls}
               >
-                <HeartHandshake size={18} className="text-[#0b7f66] flex-shrink-0" />
+                <HeartHandshake
+                  size={18}
+                  className="text-[#0b7f66] flex-shrink-0"
+                />
                 <span className="flex-1">Services</span>
                 <ChevronDown
                   size={18}
@@ -555,27 +595,16 @@ const handleNavigate = (path: string) => {
                       className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
                       onClick={() => handleServiceClick(path)}
                     >
-                      <Icon size={16} className="text-[#0b7f66] flex-shrink-0" />
+                      <Icon
+                        size={16}
+                        className="text-[#0b7f66] flex-shrink-0"
+                      />
                       {label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-
-            {[simpleLinks.about, simpleLinks.who, simpleLinks.why].map(
-              ({ label, path, Icon }) => (
-                <button
-                  type="button"
-                  key={label}
-                  onClick={() => handleNavigate(path)}
-                  className={`${mobileRowCls} border-b border-gray-100`}
-                >
-                  <Icon size={18} className="text-[#0b7f66] flex-shrink-0" />
-                  {label}
-                </button>
-              ),
-            )}
 
             {/* Experts */}
             <div className="border-b border-gray-100">
@@ -594,37 +623,56 @@ const handleNavigate = (path: string) => {
               </button>
               {mobileExpertsOpen && (
                 <div className="flex flex-col gap-2 pb-3 pl-9">
-                  {expertItems.map(({ label, specialization, description, Icon }) => (
-                    <button
-                      type="button"
-                      key={label}
-                      className="w-full text-left py-2.5 px-3 bg-emerald-50/70 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
-                      onClick={() => handleExpertClick(specialization)}
-                    >
-                      <div className="flex items-start gap-2">
-                        <Icon className="w-4 h-4 text-[#0b7f66] mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="font-bold text-sm text-gray-800">{label}</div>
-                          <div className="text-xs text-gray-600 mt-0.5">{description}</div>
+                  {expertItems.map(
+                    ({ label, specialization, description, Icon }) => (
+                      <button
+                        type="button"
+                        key={label}
+                        className="w-full text-left py-2.5 px-3 bg-emerald-50/70 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                        onClick={() => handleExpertClick(specialization)}
+                      >
+                        <div className="flex items-start gap-2">
+                          <Icon className="w-4 h-4 text-[#0b7f66] mt-0.5 flex-shrink-0" />
+                          <div>
+                            <div className="font-bold text-sm text-gray-800">
+                              {label}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-0.5">
+                              {description}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ),
+                  )}
                 </div>
               )}
             </div>
 
-            {[simpleLinks.blog, simpleLinks.contact].map(({ label, path, Icon }, idx, arr) => (
+            {[
+              simpleLinks.who,
+              simpleLinks.why,
+              simpleLinks.blog,
+              simpleLinks.contact,
+            ].map(({ label, path, Icon }) => (
               <button
                 type="button"
                 key={label}
                 onClick={() => handleNavigate(path)}
-                className={`${mobileRowCls} ${idx < arr.length - 1 ? "border-b border-gray-100" : ""}`}
+                className={`${mobileRowCls} border-b border-gray-100`}
               >
                 <Icon size={18} className="text-[#0b7f66] flex-shrink-0" />
                 {label}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => handleNavigate("/experts")}
+              className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#0b7f66] h-11 text-[15px] font-semibold text-white hover:bg-[#096b57] transition-colors duration-200 cursor-pointer"
+            >
+              <CalendarCheck size={18} className="flex-shrink-0" />
+              Book Appointment
+            </button>
           </nav>
         </div>
       )}
