@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import ExpertsPage from "./pages/Experts/ExpertsPage";
 import AboutPage from "./pages/About/AboutPage";
 import ContactPage from "./pages/Contact/ContactPage";
+import ContactWhatsApp from "./pages/Contact/ContactWhatsApp";
 import Blogpage from "./pages/Blog/Blogpage";
 import WhyMiboPage from "./pages/WhyMibo/WhyMibo";
 import WhoItsForPage from "./pages/WhoItsFor/WhoItsForPage";
@@ -66,6 +67,7 @@ const App = () => {
           <Route path="/experts" element={<ExpertsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/contact/whatsapp" element={<ContactWhatsApp />} />
           <Route path="/blog" element={<Blogpage />} />{" "}
           <Route path="/why-mibo" element={<WhyMiboPage />} />{" "}
           <Route path="/who-its-for" element={<WhoItsForPage />} />

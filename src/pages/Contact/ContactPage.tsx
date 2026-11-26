@@ -1,5 +1,6 @@
 import React from "react";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../Experts/Components/ExpertsFooter";
 import CallButton from "../../components/CallButton";
@@ -146,8 +147,15 @@ const ContactPage: React.FC = () => {
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
           <CallButton label="General enquiries:" />
+          <Link
+            to="/contact/whatsapp"
+            className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white text-sm font-bold px-7 py-3 rounded-full transition-colors"
+          >
+            <MessageCircle size={16} className="flex-shrink-0" fill="white" />
+            General enquiries: WhatsApp
+          </Link>
         </div>
       </section>
 

@@ -35,6 +35,8 @@ import {
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import PsychiatristExpertListing from "./PsychiatristExpertListing";
+import ExploreOtherCentre from "../../components/ExploreOtherCentre";
+import { useScrollToExpertListing } from "../../hooks/useScrollToExpertListing";
 import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import bangaloreImage from "../../assets/mibo_bangalore.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -62,6 +64,8 @@ import availabilityImage from "../../assets/mibo-avail.JPG?w=600&format=webp&qua
 import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&quality=75";
 
 const BangaloreLanding = () => {
+  // Scrolls to the expert listing when arriving from "Explore our other centre".
+  useScrollToExpertListing();
   const phoneNumber = BANGALORE_PHONE;
   const email = "reach@mibocare.com";
   const address =
@@ -585,8 +589,12 @@ const BangaloreLanding = () => {
         psychiatristsOnly={false}
         title="Meet Our Psychologists & Psychiatrists"
         subtitle="Our experienced mental health professionals are dedicated to providing compassionate and evidence-based care."
-        viewAllLink="/experts?location=Bangalore"
+        viewAllLink="/experts"
+        viewAllState={{ location: "Bangalore" }}
       />
+
+      {/* Switch between centres */}
+      <ExploreOtherCentre />
 
       {/* Need Help Now Section */}
       <section className="py-20 bg-gradient-to-br from-[#30baa3]/10 to-white">

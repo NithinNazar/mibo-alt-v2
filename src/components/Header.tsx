@@ -53,14 +53,15 @@ const Header = () => {
     const path = routerLocation.pathname.replace(/\/+$/, "").toLowerCase();
     if (path === "/kochi") return "Kochi";
     if (path === "/bengaluru" || path === "/bangalore") return "Bangalore";
-    // /psychiatrist?location=<City> (opened from a city landing page)
+    // /psychiatrist opened from a city landing page carries that city in
+    // router state ({ location: "<City>" }) — never in the URL.
     if (path === "/psychiatrist") {
-      const requested = new URLSearchParams(routerLocation.search)
-        .get("location")
-        ?.trim()
-        .toLowerCase();
-      if (requested === "kochi") return "Kochi";
-      if (requested === "bangalore" || requested === "bengaluru")
+      const requested = (routerLocation.state as { location?: unknown } | null)
+        ?.location;
+      const requestedKey =
+        typeof requested === "string" ? requested.trim().toLowerCase() : "";
+      if (requestedKey === "kochi") return "Kochi";
+      if (requestedKey === "bangalore" || requestedKey === "bengaluru")
         return "Bangalore";
     }
     return null;
@@ -80,11 +81,20 @@ const Header = () => {
       : landingLocation === "Bangalore"
         ? BANGALORE_WHATSAPP_URL
         : DEFAULT_WHATSAPP_URL;
-  const withLandingLocation = (path: string) => {
-    if (!landingLocation) return path;
-    const base = path.split("?")[0];
-    if (base !== "/experts" && base !== "/psychiatrist") return path;
-    return `${path}${path.includes("?") ? "&" : "?"}location=${landingLocation}`;
+  // Navigates to `path`. For /experts and /psychiatrist the location of the
+  // current landing page (and any `?specialization=` declared on a menu path)
+  // is passed as router state, so the URL itself stays clean.
+  const navigateWithLanding = (path: string) => {
+    const [base, query] = path.split("?");
+    if (base !== "/experts" && base !== "/psychiatrist") {
+      navigate(path);
+      return;
+    }
+    const specialization = new URLSearchParams(query ?? "").get("specialization");
+    const state: { location?: string; specialization?: string } = {};
+    if (landingLocation) state.location = landingLocation;
+    if (specialization) state.specialization = specialization;
+    navigate(base, Object.keys(state).length ? { state } : undefined);
   };
 
   useEffect(() => {
@@ -110,7 +120,7 @@ const Header = () => {
   };
 
   const handleServiceClick = (path: string) => {
-    navigate(withLandingLocation(path));
+    navigateWithLanding(path);
     setMenuOpen(false);
     setMobileServicesOpen(false);
   };
@@ -126,12 +136,16 @@ const Header = () => {
     //   return;
     // }
 
-    sessionStorage.setItem("expertsFilter", specialization);
-    navigate(withLandingLocation("/experts"));
+    navigate("/experts", {
+      state: {
+        specialization,
+        ...(landingLocation ? { location: landingLocation } : {}),
+      },
+    });
   };
 
   const handleNavigate = (path: string) => {
-    navigate(withLandingLocation(path));
+    navigateWithLanding(path);
     setMenuOpen(false);
   };
 
@@ -139,12 +153,11 @@ const Header = () => {
   const locationItems = [
     { label: "Bengaluru", path: "/bengaluru" },
     { label: "Kochi", path: "/kochi" },
-    { label: "Mumbai", path: "/centres/mumbai" },
+    // { label: "Mumbai", path: "/centres/mumbai" },
   ];
 
   const serviceItems = [
     { label: "Psychiatrist", path: "/psychiatrist", Icon: Stethoscope },
-    { label: "In-patient Care", path: "/services/in-patient", Icon: BedDouble },
     {
       label: "Clinical Psychologist",
       path: "/experts?specialization=Clinical%20Psychologist",
@@ -155,8 +168,9 @@ const Header = () => {
       path: "/experts?specialization=Counsellor",
       Icon: MessageCircleHeart,
     },
+    { label: "In-patient Care", path: "/services/in-patient", Icon: BedDouble },
     {
-      label: "Assessment",
+      label: "Mind Lab",
       path: "/experts?specialization=Clinical%20Psychologist",
       Icon: ClipboardCheck,
     },
@@ -180,8 +194,8 @@ const Header = () => {
 
   const simpleLinks = {
     about: { label: "About Us", path: "/about", Icon: Info },
-    who: { label: "Who It's For", path: "/who-its-for", Icon: Users },
-    why: { label: "Why MIBO", path: "/why-mibo", Icon: Sparkles },
+    // who: { label: "Who It's For", path: "/who-its-for", Icon: Users },
+    // why: { label: "Why MIBO", path: "/why-mibo", Icon: Sparkles },
     blog: { label: "Blog", path: "/blog", Icon: BookOpen },
     contact: { label: "Contact Us", path: "/contact", Icon: Phone },
   };
@@ -189,12 +203,12 @@ const Header = () => {
   // ---- Shared style tokens ---------------------------------------------------
   // Icons are hidden between lg and xl so nine links never crowd the buttons.
   const navItemCls =
-    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-1.5 xl:px-2 py-2 text-[13px] xl:text-[14px] font-semibold leading-none text-gray-800 hover:text-[#0b7f66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 transition-colors duration-200 cursor-pointer";
+    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-1.5 xl:px-2 py-2 text-[13px] xl:text-[14px] font-bold leading-none text-gray-800 hover:text-[#0b7f66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40 transition-colors duration-200 cursor-pointer";
   const navIconCls = "hidden xl:block text-[#0b7f66] flex-shrink-0";
   const dropdownPanelCls =
     "bg-white rounded-xl shadow-lg ring-1 ring-black/5 text-gray-800 flex flex-col py-2";
   const dropdownItemCls =
-    "w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-sm font-medium hover:bg-emerald-50 hover:text-[#0b7f66] cursor-pointer transition-colors duration-150";
+    "w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-sm font-semibold hover:bg-emerald-50 hover:text-[#0b7f66] cursor-pointer transition-colors duration-150";
   const iconBtnBase =
     "w-10 h-10 flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7f66]/40";
   const phoneBtnCls = `${iconBtnBase} border border-gray-300 bg-white text-gray-700 hover:border-[#0b7f66] hover:text-[#0b7f66]`;
@@ -202,7 +216,7 @@ const Header = () => {
   const signInCls =
     "inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#1c0d54] px-5 text-sm font-semibold text-white whitespace-nowrap shadow-md hover:bg-[#2a1470] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c0d54]/40";
   const mobileRowCls =
-    "w-full flex items-center gap-3 px-2 py-3 text-[15px] font-semibold text-gray-800 hover:text-[#0b7f66] text-left cursor-pointer";
+    "w-full flex items-center gap-3 px-2 py-3 text-[15px] font-bold text-gray-800 hover:text-[#0b7f66] text-left cursor-pointer";
 
   return (
     <header
@@ -396,8 +410,8 @@ const Header = () => {
 
           {/* Who It's For / Why MIBO / Blog / Contact */}
           {[
-            simpleLinks.who,
-            simpleLinks.why,
+            // simpleLinks.who,
+            // simpleLinks.why,
             simpleLinks.blog,
             simpleLinks.contact,
           ].map(({ label, path, Icon }) => (
@@ -554,7 +568,7 @@ const Header = () => {
                     <button
                       type="button"
                       key={label}
-                      className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
+                      className="flex items-center gap-2 py-2 text-sm font-semibold text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
                       onClick={() => handleLocationClick(path)}
                     >
                       <MapPin
@@ -592,7 +606,7 @@ const Header = () => {
                     <button
                       type="button"
                       key={label}
-                      className="flex items-center gap-2 py-2 text-sm font-medium text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
+                      className="flex items-center gap-2 py-2 text-sm font-semibold text-gray-700 hover:text-[#0b7f66] text-left cursor-pointer"
                       onClick={() => handleServiceClick(path)}
                     >
                       <Icon

@@ -43,6 +43,7 @@ import clinicianService from "../../services/clinicianService";
 import centreService from "../../services/centreService";
 import { isPsychiatrist } from "../../utils/isPsychiatrist";
 import type { Clinician } from "../../types";
+import { EXPERT_LISTING_SECTION_ID } from "../../hooks/useScrollToExpertListing";
 import ExpertiseMarquee from "../Experts/Components/ExpertiseMarquee";
 import ExpertMedia from "../Experts/Components/ExpertMedia";
 import PsychiatristFilterBar, {
@@ -211,6 +212,8 @@ export interface PsychiatristExpertListingProps {
   requireDefaultLocation?: boolean;
   serverSideLocation?: boolean;
   viewAllLink?: string;
+  /** Router state sent with `viewAllLink` (e.g. preselected location). */
+  viewAllState?: { location?: string; specialization?: string };
   /** false = list psychologists AND psychiatrists (city landing pages). */
   psychiatristsOnly?: boolean;
   title?: string;
@@ -221,7 +224,8 @@ const PsychiatristExpertListing = ({
   defaultLocation = DEFAULT_LOCATION_FALLBACK,
   requireDefaultLocation = false,
   serverSideLocation = false,
-  viewAllLink = "/experts?location=Bangalore&specialization=Psychiatrist",
+  viewAllLink = "/experts",
+  viewAllState = { location: "Bangalore", specialization: "Psychiatrist" },
   psychiatristsOnly = true,
   title = "Our Psychiatrists",
   subtitle = "Compassionate professionals ready to support your mental well-being.",
@@ -573,7 +577,10 @@ const PsychiatristExpertListing = ({
 
   return (
     <>
-        <section className="py-12 sm:py-16 md:py-20 bg-[#f7fbfa]">
+        <section
+          id={EXPERT_LISTING_SECTION_ID}
+          className="scroll-mt-24 py-12 sm:py-16 md:py-20 bg-[#f7fbfa]"
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-10">
             <div className="relative flex flex-col items-center text-center gap-4 mb-8 sm:mb-10">
               <div>
@@ -588,7 +595,7 @@ const PsychiatristExpertListing = ({
                 </p>
               </div>
               <button
-                onClick={() => navigate(viewAllLink)}
+                onClick={() => navigate(viewAllLink, { state: viewAllState })}
                 className="md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 border border-[#212154]/20 hover:border-[#138158] text-[#212154] font-semibold px-5 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 whitespace-nowrap w-full max-w-[240px] mx-auto sm:w-auto sm:max-w-none sm:mx-0"
               >
                 View All Experts

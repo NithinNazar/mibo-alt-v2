@@ -1,6 +1,17 @@
 import { BANGALORE_WHATSAPP_URL } from "../../utils/contact";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  DEFAULT_CATEGORY,
+  emptyFilters,
+  loadStoredFilters,
+  parseExpertsNavState,
+  persistFilters,
+  resolveFilterState,
+  safeSessionStorage,
+  type ExpertsFilterSelection,
+  type ExpertsNavState,
+} from "../../utils/expertsFilters";
 import {
   Users,
   UserRound,
@@ -34,6 +45,7 @@ import {
 import { createPortal } from "react-dom";
 import ExpertsHeader from "./Components/ExpertsHeader";
 import ExpertsFooter from "./Components/ExpertsFooter";
+import ExploreOtherCentre from "../../components/ExploreOtherCentre";
 import ExpertiseMarquee from "./Components/ExpertiseMarquee";
 import ExpertMedia from "./Components/ExpertMedia";
 import "./Components/doctorCard.css";
@@ -76,17 +88,22 @@ const CATEGORIES = [
   { label: "All Experts", icon: Users },
   { label: "Clinical Psychologists", icon: UserRound },
   { label: "Psychiatrists", icon: Stethoscope },
-  { label: "Counsellors", icon: MessageSquare },
-  { label: "Therapists", icon: User },
+  { label: "Counselling Psychologist", icon: MessageSquare },
 ];
 
-// Matches an incoming `?specialization=` URL query value (e.g. the
+// Matches an incoming `specialization` navigation-state value (e.g. the
 // "Psychiatrist" link from PsychiatristLanding) to one of the CATEGORIES
 // pill labels above (e.g. "Psychiatrists"), tolerating singular/plural and
 // casing differences. Falls back to "All Experts" for anything unrecognized.
 function resolveCategoryFromParam(raw: string | null): string {
   if (!raw) return "All Experts";
+  // Header/menu values that differ from the pill label.
+  const ALIASES: Record<string, string> = {
+    counsellor: "Counselling Psychologist",
+    counsellors: "Counselling Psychologist",
+  };
   const wanted = raw.trim().toLowerCase();
+  if (ALIASES[wanted]) return ALIASES[wanted];
   const match = CATEGORIES.find(
     (c) =>
       c.label.toLowerCase() === wanted ||
@@ -95,7 +112,7 @@ function resolveCategoryFromParam(raw: string | null): string {
   return match ? match.label : "All Experts";
 }
 
-// Matches an incoming `?location=` URL query value (e.g. "Bangalore" from
+// Matches an incoming `location` navigation-state value (e.g. "Bangalore" from
 // PsychiatristLanding) to one of the known Location filter options,
 // tolerating casing differences. Mirrors FILTER_OPTIONS.Location below.
 const LOCATION_QUERY_OPTIONS = ["Bangalore", "Kochi", "Mumbai"];
@@ -166,6 +183,8 @@ function FilterDropdown({
 
 export default function ExpertsPage() {
   const navigate = useNavigate();
+  const routerLocation = useLocation();
+  // `?doctor=` is kept: it deep-links the profile modal and is not a filter.
   const [searchParams, setSearchParams] = useSearchParams();
   // --- USE_DUMMY_DOCTORS is a temporary flag to use hardcoded doctor data for
   //  development and testing. In production, this should be set to false to
@@ -239,22 +258,6 @@ export default function ExpertsPage() {
       console.error("Failed to copy share link:", err);
     }
   };
-  // Both default from the URL (`?location=Bangalore&specialization=Psychiatrist`,
-  // as sent by PsychiatristLanding's CTAs) so a deep link lands pre-filtered.
-  // Read once on mount, same as the rest of this page's initial state.
-  const [selectedCategory, setSelectedCategory] = useState(() =>
-    resolveCategoryFromParam(searchParams.get("specialization")),
-  );
-  const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, string[]>
-  >({
-    Location: resolveLocationFromParam(searchParams.get("location")),
-    Expertise: [],
-    Language: [],
-    Price: [],
-    Gender: [],
-  });
-
   // --- Filter dropdown state ---
   const [openFilter, setOpenFilter] = useState<string | null>(null);
 
@@ -332,6 +335,42 @@ export default function ExpertsPage() {
     Price: PRICE_BANDS.map((band) => band.label),
     Gender: ["Male", "Female", "Other"],
   };
+
+  // --- Filter state (React state is the source of truth; never the URL) ---
+  // Initial value priority: 1) explicit navigation state (`location` /
+  // `specialization`, set by landing pages and header menus), 2) validated
+  // sessionStorage selection, 3) defaults. Legacy `?location=` /
+  // `?specialization=` links are honoured once, then stripped (see effect below).
+  const navState = routerLocation.state as ExpertsNavState | null;
+  const navRequest = parseExpertsNavState({
+    location: navState?.location ?? searchParams.get("location"),
+    specialization:
+      navState?.specialization ?? searchParams.get("specialization"),
+  });
+  const [initialFilterState] = useState(() =>
+    resolveFilterState({
+      nav: navRequest,
+      stored: loadStoredFilters(
+        safeSessionStorage(),
+        CATEGORIES.map((c) => c.label),
+        {
+          Location: FILTER_OPTIONS.Location,
+          Expertise: FILTER_OPTIONS.Expertise,
+          Language: FILTER_OPTIONS.Language,
+          Price: FILTER_OPTIONS.Price,
+          Gender: FILTER_OPTIONS.Gender,
+        },
+      ),
+      resolveLocation: resolveLocationFromParam,
+      resolveCategory: resolveCategoryFromParam,
+    }),
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialFilterState.category,
+  );
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string[]>
+  >(initialFilterState.filters);
 
   // Maps the visible pill label to the key used in selectedFilters state
   const FILTER_KEY_MAP: Record<string, string> = {
@@ -423,40 +462,57 @@ export default function ExpertsPage() {
   // on `md:` and up.
   const barsVisible = useScrollDirection({ disabled: !!openFilter });
 
-  // Re-apply the URL filters when they change while this page is already open
-  // (e.g. choosing a Services item in the navbar while on /experts). The first
-  // run is skipped: initial state is already derived from the URL on mount.
-  const specializationParam = searchParams.get("specialization");
-  const locationParam = searchParams.get("location");
-  const urlFiltersKeyRef = useRef(`${specializationParam}|${locationParam}`);
+  // Navigation-state requests (e.g. choosing a Services item in the navbar
+  // while already on /experts). On first mount the initial state above already
+  // applied the request, so only later navigations (new location key) re-apply.
+  // Either way the request is consumed: history state / legacy query params are
+  // replaced so the URL stays clean and a refresh restores sessionStorage
+  // rather than replaying a stale request.
+  const appliedNavKeyRef = useRef<string | null>(
+    navRequest ? routerLocation.key : null,
+  );
   useEffect(() => {
-    const key = `${specializationParam}|${locationParam}`;
-    if (urlFiltersKeyRef.current === key) return;
-    urlFiltersKeyRef.current = key;
-    setSelectedCategory(resolveCategoryFromParam(specializationParam));
-    setSelectedFilters((prev) => ({
-      ...prev,
-      Location: resolveLocationFromParam(locationParam),
-    }));
-  }, [specializationParam, locationParam]);
+    if (!navRequest) return;
+    if (appliedNavKeyRef.current !== routerLocation.key) {
+      appliedNavKeyRef.current = routerLocation.key;
+      if (navRequest.specialization) {
+        setSelectedCategory(
+          resolveCategoryFromParam(navRequest.specialization),
+        );
+      }
+      if (navRequest.location) {
+        const loc = resolveLocationFromParam(navRequest.location);
+        setSelectedFilters((prev) => ({ ...prev, Location: loc }));
+      }
+    }
+    const params = new URLSearchParams(routerLocation.search);
+    params.delete("location");
+    params.delete("specialization");
+    const search = params.toString();
+    navigate(
+      {
+        pathname: routerLocation.pathname,
+        search: search ? `?${search}` : "",
+        hash: routerLocation.hash,
+      },
+      { replace: true, state: null },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routerLocation.key]);
+
+  // Persist every change; a fully-default selection removes the stored entry,
+  // which is what makes "Clear All" wipe sessionStorage.
+  useEffect(() => {
+    persistFilters(safeSessionStorage(), {
+      category: selectedCategory,
+      filters: selectedFilters as ExpertsFilterSelection,
+    });
+  }, [selectedCategory, selectedFilters]);
 
   useEffect(() => {
     // Scroll instantly to top
     window.scrollTo({ top: 0, behavior: "instant" });
     fetchClinicians();
-
-    // Check if there's a filter from the header navigation
-    const savedFilter = sessionStorage.getItem("expertsFilter");
-    if (savedFilter) {
-      // Apply the filter by setting the category
-      setSelectedCategory(
-        savedFilter === "Clinical Psychologist"
-          ? "Clinical Psychologists"
-          : "Psychiatrists",
-      );
-      // Clear the sessionStorage after applying
-      sessionStorage.removeItem("expertsFilter");
-    }
   }, []);
 
   const fetchClinicians = async () => {
@@ -765,7 +821,7 @@ export default function ExpertsPage() {
               designation.includes("clinical psychologist") ||
               qualification.includes("clinical psychology")
             );
-          case "Counsellors":
+          case "Counselling Psychologist":
             return (
               designation.includes("counsellor") ||
               designation.includes("counselor") ||
@@ -962,13 +1018,8 @@ export default function ExpertsPage() {
               <div className="flex items-center gap-4 sm:gap-5 flex-nowrap md:flex-wrap shrink-0">
                 <span
                   onClick={() => {
-                    setSelectedFilters({
-                      Location: [],
-                      Expertise: [],
-                      Language: [],
-                      Price: [],
-                      Gender: [],
-                    });
+                    setSelectedCategory(DEFAULT_CATEGORY);
+                    setSelectedFilters(emptyFilters());
                     setSortBy(null);
                     setOpenFilter(null);
                   }}
@@ -1291,14 +1342,8 @@ export default function ExpertsPage() {
             </p>
             <button
               onClick={() => {
-                setSelectedCategory("All Experts");
-                setSelectedFilters({
-                  Location: [],
-                  Expertise: [],
-                  Language: [],
-                  Price: [],
-                  Gender: [],
-                });
+                setSelectedCategory(DEFAULT_CATEGORY);
+                setSelectedFilters(emptyFilters());
               }}
               className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"
             >
@@ -1307,6 +1352,9 @@ export default function ExpertsPage() {
           </div>
         )}
       </section>
+
+      {/* --- EXPLORE OTHER CENTRE --- */}
+      <ExploreOtherCentre />
 
       {/* --- CARE BAR --- */}
       <div className="max-w-[1180px] mx-4 sm:mx-6 md:mx-auto mt-8 mb-12 sm:mb-16 md:mb-[70px] py-5 sm:py-6 px-5 sm:px-6 rounded-[20px] flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap gap-4 bg-[#eaf6f1]">

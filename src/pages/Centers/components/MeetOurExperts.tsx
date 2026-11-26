@@ -1,4 +1,5 @@
 import React from "react";
+import ExploreOtherCentre from "../../../components/ExploreOtherCentre";
 
 // Bangalore experts
 import drMiller from "../../Landing/Dr. Miller.webp";
@@ -81,6 +82,7 @@ const MeetOurExperts: React.FC<MeetOurExpertsProps> = ({ city }) => {
   const experts = city === "Kochi" ? kochiExperts : bangaloreExperts;
 
   return (
+    <>
     <section className="py-20 bg-gradient-to-b from-white to-miboLightGreen/20">
       <div className="container mx-auto px-6">
         <h2 className="text-4xl md:text-5xl font-bold text-center text-[#212154] mb-4">
@@ -120,6 +122,8 @@ const MeetOurExperts: React.FC<MeetOurExpertsProps> = ({ city }) => {
         </div>
       </div>
     </section>
+    <ExploreOtherCentre />
+    </>
   );
 };
 

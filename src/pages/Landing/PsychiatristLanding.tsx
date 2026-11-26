@@ -13,7 +13,7 @@ import {
 } from "../../utils/contact";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Brain,
   Calendar,
@@ -43,6 +43,7 @@ import {
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import PsychiatristExpertListing from "./PsychiatristExpertListing";
+import ExploreOtherCentre from "../../components/ExploreOtherCentre";
 import heroBanner from "./banner.jpg";
 import heroBannerMobile from "./banner-mobile.png";
 import notAloneImg from "./you-are-not-alone.jpg";
@@ -52,14 +53,17 @@ import { psychiatristFaqData } from "./psychiatristFaqData";
 import { psychiatristReviewsData } from "./psychiatristReviewsData";
 
 
-// Deep link into the Experts listing, pre-filtered to Bangalore
-// psychiatrists — ExpertsPage reads these two params on mount (see
-// resolveLocationFromParam / resolveCategoryFromParam there).
+// Router state for the Experts listing, pre-filtered to psychiatrists in a
+// city — ExpertsPage reads `location` / `specialization` from navigation state
+// (see resolveLocationFromParam / resolveCategoryFromParam there). Nothing
+// filter-related goes in the URL.
 const PSYCHIATRIST_LOCATIONS = ["Bangalore", "Kochi", "Mumbai"];
 
-// Builds the same deep link for any location (defaults keep Bangalore).
-const expertsPsychiatristLink = (location: string) =>
-  `/experts?location=${location}&specialization=Psychiatrist`;
+const EXPERTS_PATH = "/experts";
+const expertsPsychiatristState = (location: string) => ({
+  location,
+  specialization: "Psychiatrist",
+});
 
 // Real MIBO clinic details per city — reused from the existing Bangalore and
 // Kochi landing pages. Cities without an entry (e.g. Mumbai) fall back to Bangalore.
@@ -147,15 +151,20 @@ const CONDITIONS_WE_HELP_WITH = [
 
 const PsychiatristLanding = () => {
   const navigate = useNavigate();
-  // Opened from a location landing page (/kochi, /bengaluru) as
-  // /psychiatrist?location=<City>: that city is applied as the default
-  // Location filter. Unknown/missing values keep the existing Bangalore default.
-  const [searchParams] = useSearchParams();
-  const requestedLocation = searchParams.get("location")?.trim().toLowerCase();
+  // Opened from a location landing page (/kochi, /bengaluru) via router state
+  // { location: "<City>" }: that city is applied as the default Location
+  // filter. Unknown/missing values keep the existing Bangalore default.
+  const routerLocation = useLocation();
+  const stateLocation = (routerLocation.state as { location?: unknown } | null)
+    ?.location;
+  const requestedLocation =
+    typeof stateLocation === "string"
+      ? stateLocation.trim().toLowerCase()
+      : undefined;
   const selectedLocation =
     PSYCHIATRIST_LOCATIONS.find((l) => l.toLowerCase() === requestedLocation) ??
     "Bangalore";
-  const EXPERTS_PSYCHIATRIST_LINK = expertsPsychiatristLink(selectedLocation);
+  const EXPERTS_PSYCHIATRIST_STATE = expertsPsychiatristState(selectedLocation);
   // City-specific copy, address, phone and map (Bangalore fallback).
   const city = CITY_CONTENT[selectedLocation] ?? CITY_CONTENT.Bangalore;
   const PATIENT_PHONE = city.phone;
@@ -316,7 +325,7 @@ const PsychiatristLanding = () => {
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4 mb-2 sm:mb-10 w-[88%] sm:w-auto">
                 {/* <button
-                  onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
+                  onClick={() => navigate(EXPERTS_PATH, { state: EXPERTS_PSYCHIATRIST_STATE })}
                   className="bg-[#138158] hover:bg-[#0e6b4f] text-white font-semibold px-4 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base rounded-full transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Book Psychiatrist Consultation
@@ -512,8 +521,12 @@ const PsychiatristLanding = () => {
         <PsychiatristExpertListing
           key={selectedLocation}
           defaultLocation={selectedLocation}
-          viewAllLink={EXPERTS_PSYCHIATRIST_LINK}
+          viewAllLink={EXPERTS_PATH}
+          viewAllState={EXPERTS_PSYCHIATRIST_STATE}
         />
+
+        {/* Switch between centres */}
+        <ExploreOtherCentre />
 
         {/* ---------------------------------------------------------------- */}
         {/* How It Works                                                     */}
@@ -851,7 +864,7 @@ const PsychiatristLanding = () => {
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
               {/* <button
-                onClick={() => navigate(EXPERTS_PSYCHIATRIST_LINK)}
+                onClick={() => navigate(EXPERTS_PATH, { state: EXPERTS_PSYCHIATRIST_STATE })}
                 className="bg-white text-[#212154] px-7 py-3.5 rounded-full font-semibold hover:bg-white/90 transition-colors w-full sm:w-auto"
               >
                 Book Appointment

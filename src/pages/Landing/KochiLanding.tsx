@@ -30,6 +30,8 @@ import {
 import logo from "../../assets/logo1.png?w=200&format=webp&quality=85";
 import ExpertsHeader from "../Experts/Components/ExpertsHeader";
 import PsychiatristExpertListing from "./PsychiatristExpertListing";
+import ExploreOtherCentre from "../../components/ExploreOtherCentre";
+import { useScrollToExpertListing } from "../../hooks/useScrollToExpertListing";
 import heroImage from "../../assets/mibo_kochi.jpg?w=1920&format=webp&quality=90";
 import kochiImage from "../../assets/mibo-kochi-centre-2.jpg?w=1200&format=webp&quality=75";
 import groupImage from "../../assets/group_session.jpg?w=600&format=webp&quality=75";
@@ -59,6 +61,8 @@ import whyChooseImage from "../../assets/mibo-why-choose.jpg?w=800&format=webp&q
 
 
 const KochiLanding = () => {
+  // Scrolls to the expert listing when arriving from "Explore our other centre".
+  useScrollToExpertListing();
   const phoneNumber = "9447511479";
   const email = "reach@mibocare.com";
   const address =
@@ -574,8 +578,12 @@ const KochiLanding = () => {
         psychiatristsOnly={false}
         title="Meet Our Psychologists & Psychiatrists"
         subtitle="Our experienced mental health professionals are dedicated to providing compassionate and evidence-based care."
-        viewAllLink="/experts?location=Kochi"
+        viewAllLink="/experts"
+        viewAllState={{ location: "Kochi" }}
       />
+
+      {/* Switch between centres */}
+      <ExploreOtherCentre />
 
       {/* Need Help Now Section */}
       <section className="py-20 bg-gradient-to-br from-[#30baa3]/10 to-white">
