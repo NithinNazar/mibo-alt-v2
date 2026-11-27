@@ -421,13 +421,13 @@ const KochiLanding = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
                 onClick={handlePhoneClick}
-                className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                className="self-start sm:self-auto whitespace-nowrap bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-5 py-2.5 sm:px-8 sm:py-4 rounded-full text-sm sm:text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 sm:gap-3"
               >
-                <Phone className="w-5 h-5" />
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
                 Call Now: +91 9447511479
               </button>
             </div>
-            <p className="text-white/90 text-base sm:text-lg mt-2">
+            <p className="text-white/90 text-sm sm:text-lg mt-2">
               Or call{" "}
               <a href={DEFAULT_TEL_LINK} className="font-bold text-white underline underline-offset-4 hover:text-[#30baa3] transition-colors whitespace-nowrap">{DEFAULT_PHONE_DISPLAY}</a>
             </p>
@@ -605,9 +605,9 @@ const KochiLanding = () => {
                 </h3>
                 <button
                   onClick={handlePhoneClick}
-                  className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
+                  className="bg-[#30baa3] hover:bg-[#2a9e8f] text-white px-5 py-2.5 sm:px-8 sm:py-4 rounded-full text-sm sm:text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2 sm:gap-3 mx-auto"
                 >
-                  <Phone className="w-5 h-5" />
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
                   +91 9447511479
                 </button>
                 <p className="mt-4 text-miboText text-sm sm:text-base">
@@ -988,9 +988,9 @@ const KochiLanding = () => {
           <div className="flex justify-center">
             <button
               onClick={handlePhoneClick}
-              className="bg-white text-[#212154] px-8 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center"
+              className="bg-white text-[#212154] px-5 py-2.5 sm:px-8 sm:py-4 rounded-full text-sm sm:text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 sm:gap-3 justify-center"
             >
-              <Phone className="w-5 h-5" />
+              <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
               Call +91 {phoneNumber}
             </button>
           </div>

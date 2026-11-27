@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Phone } from "lucide-react";
 import { inPatientContent } from "./InPatientData";
 import {
-  BANGALORE_PHONE,
   BANGALORE_PHONE_DISPLAY,
   BANGALORE_TEL_LINK,
   BANGALORE_WHATSAPP_URL,
@@ -54,35 +53,23 @@ const InPatientPage = () => {
         })}
       </div>
 
-      <div className="text-center pb-16">
-        <motion.a
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 px-6 pb-16">
+        <a
           href={BANGALORE_TEL_LINK}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="inline-block bg-[#0b1180] text-white px-10 py-3 rounded-xl shadow-md hover:bg-[#046a5d] transition"
+          className="inline-flex items-center gap-2 sm:gap-3 whitespace-nowrap rounded-full bg-white px-4 py-2.5 text-sm sm:px-8 sm:py-4 sm:text-lg font-semibold text-black shadow-xl transition-all duration-300 hover:scale-105 hover:bg-white/80"
         >
-          {inPatientContent.cta}
-        </motion.a>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-gray-700">
-          <p>
-            Contact:{" "}
-            <a
-              href={BANGALORE_TEL_LINK}
-              className="font-bold text-[#0b1180] hover:text-[#046a5d] transition-colors whitespace-nowrap"
-            >
-              {BANGALORE_PHONE}
-            </a>
-          </p>
-          <a
-            href={BANGALORE_WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 font-semibold text-white shadow-md hover:bg-[#1fa855] transition"
-          >
-            <MessageCircle className="h-5 w-5" aria-hidden="true" />
-            Chat With Us
-          </a>
-        </div>
+          <Phone className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+          Call Now: {BANGALORE_PHONE_DISPLAY}
+        </a>
+        <a
+          href={BANGALORE_WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 sm:gap-3 whitespace-nowrap rounded-full bg-[#25D366] px-4 py-2.5 text-sm sm:px-8 sm:py-4 sm:text-lg font-semibold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-[#1fa855]"
+        >
+          <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+          Chat With Us
+        </a>
       </div>
       <ExpertsFooter />
     </div>
