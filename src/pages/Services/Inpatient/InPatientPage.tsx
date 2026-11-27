@@ -1,6 +1,12 @@
 import { motion } from "framer-motion";
+import { MessageCircle } from "lucide-react";
 import { inPatientContent } from "./InPatientData";
-import { BANGALORE_PHONE_DISPLAY, BANGALORE_TEL_LINK } from "../../../utils/contact";
+import {
+  BANGALORE_PHONE,
+  BANGALORE_PHONE_DISPLAY,
+  BANGALORE_TEL_LINK,
+  BANGALORE_WHATSAPP_URL,
+} from "../../../utils/contact";
 import InPatientHeroCarousel from "./InPatientHeroCarousel";
 import ExpertsHeader from "../../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../../Experts/Components/ExpertsFooter";
@@ -14,6 +20,8 @@ const InPatientPage = () => {
         subtitle={inPatientContent.subtitle}
         cta={inPatientContent.cta}
         ctaHref={BANGALORE_TEL_LINK}
+        phoneDisplay={BANGALORE_PHONE_DISPLAY}
+        whatsappHref={BANGALORE_WHATSAPP_URL}
       />
 
       <div className="text-center px-6 pt-16">
@@ -55,15 +63,26 @@ const InPatientPage = () => {
         >
           {inPatientContent.cta}
         </motion.a>
-        <p className="mt-4 text-gray-700">
-          Or call us at{" "}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-gray-700">
+          <p>
+            Contact:{" "}
+            <a
+              href={BANGALORE_TEL_LINK}
+              className="font-bold text-[#0b1180] hover:text-[#046a5d] transition-colors whitespace-nowrap"
+            >
+              {BANGALORE_PHONE}
+            </a>
+          </p>
           <a
-            href={BANGALORE_TEL_LINK}
-            className="font-bold text-[#0b1180] hover:text-[#046a5d] transition-colors whitespace-nowrap"
+            href={BANGALORE_WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 font-semibold text-white shadow-md hover:bg-[#1fa855] transition"
           >
-            {BANGALORE_PHONE_DISPLAY}
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            Chat With Us
           </a>
-        </p>
+        </div>
       </div>
       <ExpertsFooter />
     </div>

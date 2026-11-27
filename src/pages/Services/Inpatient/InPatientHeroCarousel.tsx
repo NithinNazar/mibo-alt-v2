@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Phone } from "lucide-react";
 import room01 from "../../../assets/rooms-banglore/room-01.jpg?w=1600&format=webp&quality=75";
 // import room02 from "../../../assets/rooms-banglore/room-02.jpg?w=1600&format=webp&quality=75";
 // import room03 from "../../../assets/rooms-banglore/room-03.jpg?w=1600&format=webp&quality=75";
@@ -11,7 +11,8 @@ import room01 from "../../../assets/rooms-banglore/room-01.jpg?w=1600&format=web
 // import room09 from "../../../assets/rooms-banglore/room-09.jpg?w=1600&format=webp&quality=75";
 // import room10 from "../../../assets/rooms-banglore/room-10.jpg?w=1600&format=webp&quality=75";
 
-const ROOM_IMAGES: string[] = [room01,
+const ROOM_IMAGES: string[] = [
+  room01,
   //  room02, room03, room04, room05, room06, room07, room08, room09, room10
   ];
 const INTERVAL_MS = 4500;
@@ -22,9 +23,13 @@ interface Props {
   subtitle: string;
   cta: string;
   ctaHref: string;
+  /** Optional number: switches the hero CTA to a "Call Now: <number>" pill (tap-to-call via ctaHref). */
+  phoneDisplay?: string;
+  /** Optional WhatsApp link shown as a "Chat With Us" button. */
+  whatsappHref?: string;
 }
 
-const InPatientHeroCarousel = ({ title, subtitle, cta, ctaHref }: Props) => {
+const InPatientHeroCarousel = ({ title, subtitle, cta, ctaHref, phoneDisplay, whatsappHref }: Props) => {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -116,12 +121,35 @@ const InPatientHeroCarousel = ({ title, subtitle, cta, ctaHref }: Props) => {
           </h1>
           <div className="mt-4 h-1 w-16 rounded bg-white" />
           <p className="mt-4 text-base sm:text-lg max-w-xl drop-shadow-md">{subtitle}</p>
-          <a
-            href={ctaHref}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[#0b1180] shadow-md hover:bg-[#E3F7F1] transition"
-          >
-            {cta} <span aria-hidden="true">→</span>
-          </a>
+          <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-3 sm:gap-4">
+            {phoneDisplay ? (
+              <a
+                href={ctaHref}
+                className="inline-flex items-center gap-2 sm:gap-3 whitespace-nowrap rounded-full bg-white px-4 py-2.5 text-sm sm:px-8 sm:py-4 sm:text-lg font-semibold text-black shadow-xl transition-all duration-300 hover:scale-105 hover:bg-[#E3F7F1]"
+              >
+                <Phone className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                Call Now: {phoneDisplay}
+              </a>
+            ) : (
+              <a
+                href={ctaHref}
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[#0b1180] shadow-md hover:bg-[#E3F7F1] transition"
+              >
+                {cta} <span aria-hidden="true">→</span>
+              </a>
+            )}
+            {whatsappHref && (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 sm:gap-3 whitespace-nowrap rounded-full bg-[#25D366] px-4 py-2.5 text-sm sm:px-8 sm:py-4 sm:text-lg font-semibold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-[#1fa855]"
+              >
+                <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                Chat With Us
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
