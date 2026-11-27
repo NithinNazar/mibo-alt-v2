@@ -1,3 +1,4 @@
+import { buildExpertsPath, locationToSlug, resolveLocationSlug } from "../utils/locationSlugs";
 import {
   DEFAULT_TEL_LINK,
   DEFAULT_WHATSAPP_URL,
@@ -53,17 +54,13 @@ const Header = () => {
     const path = routerLocation.pathname.replace(/\/+$/, "").toLowerCase();
     if (path === "/kochi") return "Kochi";
     if (path === "/bengaluru" || path === "/bangalore") return "Bangalore";
-    // /psychiatrist opened from a city landing page carries that city in
-    // router state ({ location: "<City>" }) — never in the URL.
-    if (path === "/psychiatrist") {
-      const requested = (routerLocation.state as { location?: unknown } | null)
-        ?.location;
-      const requestedKey =
-        typeof requested === "string" ? requested.trim().toLowerCase() : "";
-      if (requestedKey === "kochi") return "Kochi";
-      if (requestedKey === "bangalore" || requestedKey === "bengaluru")
-        return "Bangalore";
-    }
+    // Location-specific listing pages carry the city in the URL:
+    // /psychiatrist/:location, /experts/:location and
+    // /expert/:category/:location — so the Experts / Services menus keep it.
+    const match = path.match(
+      /^\/(?:psychiatrist|experts|expert\/[^/]+)\/([^/]+)$/,
+    );
+    if (match) return resolveLocationSlug(match[1]);
     return null;
   })();
   // Call / WhatsApp buttons use the number of the location landing page being
@@ -82,8 +79,8 @@ const Header = () => {
         ? BANGALORE_WHATSAPP_URL
         : DEFAULT_WHATSAPP_URL;
   // Navigates to `path`. For /experts and /psychiatrist the location of the
-  // current landing page (and any `?specialization=` declared on a menu path)
-  // is passed as router state, so the URL itself stays clean.
+  // current landing page goes into the URL, and a `?specialization=` declared
+  // on a menu path becomes the category slug (/expert/:category[/:location]).
   const navigateWithLanding = (path: string) => {
     const [base, query] = path.split("?");
     if (base !== "/experts" && base !== "/psychiatrist") {
@@ -91,10 +88,14 @@ const Header = () => {
       return;
     }
     const specialization = new URLSearchParams(query ?? "").get("specialization");
-    const state: { location?: string; specialization?: string } = {};
-    if (landingLocation) state.location = landingLocation;
-    if (specialization) state.specialization = specialization;
-    navigate(base, Object.keys(state).length ? { state } : undefined);
+    if (base === "/experts") {
+      // category + city both live in the path; unknown specializations fall
+      // back to the all-experts listing.
+      navigate(buildExpertsPath(specialization, landingLocation));
+      return;
+    }
+    const slug = locationToSlug(landingLocation);
+    navigate(slug ? `${base}/${slug}` : base);
   };
 
   useEffect(() => {
@@ -136,12 +137,7 @@ const Header = () => {
     //   return;
     // }
 
-    navigate("/experts", {
-      state: {
-        specialization,
-        ...(landingLocation ? { location: landingLocation } : {}),
-      },
-    });
+    navigate(buildExpertsPath(specialization, landingLocation));
   };
 
   const handleNavigate = (path: string) => {

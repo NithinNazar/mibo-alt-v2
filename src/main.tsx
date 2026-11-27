@@ -23,6 +23,7 @@ import InPersonPage from "./pages/Services/Inperson/InPersonPage";
 // --- Shared components ---
 import PremiumSplashScreen from "./components/Spalshscreen";
 import ScrollToTop from "./components/ScrollToTop";
+import { ExpertRouteGuard, LocationSlugGuard } from "./utils/locationSlugs";
 
 // --- Auth & Dashboard ---
 import PatientDashboard from "./pages/profileDashboard/PatientDashboard";
@@ -64,7 +65,24 @@ const App = () => {
         <Routes>
           {/*  Public pages */}
           <Route path="/" element={<Home />} />
-          <Route path="/experts" element={<ExpertsPage />} />
+          {/* Expert listing: category and location live in the path. All four
+              routes share one element so the page is not remounted. */}
+          {[
+            "/experts",
+            "/experts/:location",
+            "/expert/:category",
+            "/expert/:category/:location",
+          ].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ExpertRouteGuard>
+                  <ExpertsPage />
+                </ExpertRouteGuard>
+              }
+            />
+          ))}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/contact/whatsapp" element={<ContactWhatsApp />} />
@@ -84,7 +102,19 @@ const App = () => {
           <Route path="/bangalore" element={<BangaloreLanding />} />
           <Route path="/bengaluru" element={<BangaloreLanding />} />
           <Route path="/kochi" element={<KochiLanding />} />
+          {/* Bare /psychiatrist defaults to Bangalore (see PsychiatristLanding) */}
           <Route path="/psychiatrist" element={<PsychiatristLanding />} />
+          <Route
+            path="/psychiatrist/:location"
+            element={
+              <LocationSlugGuard
+                basePath="/psychiatrist"
+                fallbackPath="/psychiatrist"
+              >
+                <PsychiatristLanding />
+              </LocationSlugGuard>
+            }
+          />
           {/* 👤 Auth & Profile */}
           {/* Auth route alias - redirect /auth to /patientAuth for backward compatibility */}
           <Route

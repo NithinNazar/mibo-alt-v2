@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { inPatientContent } from "./InPatientData";
-import { BANGALORE_TEL_LINK } from "../../../utils/contact";
+import { BANGALORE_PHONE_DISPLAY, BANGALORE_TEL_LINK } from "../../../utils/contact";
 import InPatientHeroCarousel from "./InPatientHeroCarousel";
 import ExpertsHeader from "../../Experts/Components/ExpertsHeader";
 import ExpertsFooter from "../../Experts/Components/ExpertsFooter";
@@ -55,6 +55,15 @@ const InPatientPage = () => {
         >
           {inPatientContent.cta}
         </motion.a>
+        <p className="mt-4 text-gray-700">
+          Or call us at{" "}
+          <a
+            href={BANGALORE_TEL_LINK}
+            className="font-bold text-[#0b1180] hover:text-[#046a5d] transition-colors whitespace-nowrap"
+          >
+            {BANGALORE_PHONE_DISPLAY}
+          </a>
+        </p>
       </div>
       <ExpertsFooter />
     </div>

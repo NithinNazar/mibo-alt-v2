@@ -578,8 +578,8 @@ const KochiLanding = () => {
         psychiatristsOnly={false}
         title="Meet Our Psychologists & Psychiatrists"
         subtitle="Our experienced mental health professionals are dedicated to providing compassionate and evidence-based care."
-        viewAllLink="/experts"
-        viewAllState={{ location: "Kochi" }}
+        viewAllLink="/experts/kochi"
+        viewAllState={{}}
       />
 
       {/* Switch between centres */}

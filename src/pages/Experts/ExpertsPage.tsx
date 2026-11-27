@@ -1,16 +1,25 @@
 import { BANGALORE_WHATSAPP_URL } from "../../utils/contact";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import {
+  ALL_EXPERTS_LABEL,
+  buildExpertsPath,
+  resolveCategorySlug,
+  resolveLocationSlug,
+} from "../../utils/locationSlugs";
 import {
   DEFAULT_CATEGORY,
   emptyFilters,
   loadStoredFilters,
-  parseExpertsNavState,
   persistFilters,
   resolveFilterState,
   safeSessionStorage,
   type ExpertsFilterSelection,
-  type ExpertsNavState,
 } from "../../utils/expertsFilters";
 import {
   Users,
@@ -341,15 +350,16 @@ export default function ExpertsPage() {
   // `specialization`, set by landing pages and header menus), 2) validated
   // sessionStorage selection, 3) defaults. Legacy `?location=` /
   // `?specialization=` links are honoured once, then stripped (see effect below).
-  const navState = routerLocation.state as ExpertsNavState | null;
-  const navRequest = parseExpertsNavState({
-    location: navState?.location ?? searchParams.get("location"),
-    specialization:
-      navState?.specialization ?? searchParams.get("specialization"),
-  });
-  const [initialFilterState] = useState(() =>
-    resolveFilterState({
-      nav: navRequest,
+  // The URL owns the category and location filters:
+  //   /experts -> none, /experts/:location, /expert/:category[/:location].
+  // Router state, query params and sessionStorage never supply them (the
+  // route guard in main.tsx has already redirected unsupported slugs).
+  const { category: categorySlug, location: locationSlug } = useParams();
+  const urlCity = resolveLocationSlug(locationSlug);
+  const urlCategory = resolveCategorySlug(categorySlug) ?? ALL_EXPERTS_LABEL;
+  const [initialFilterState] = useState(() => {
+    const resolved = resolveFilterState({
+      nav: null,
       stored: loadStoredFilters(
         safeSessionStorage(),
         CATEGORIES.map((c) => c.label),
@@ -363,8 +373,12 @@ export default function ExpertsPage() {
       ),
       resolveLocation: resolveLocationFromParam,
       resolveCategory: resolveCategoryFromParam,
-    }),
-  );
+    });
+    // Never inherit a stale stored category/location; the URL decides.
+    resolved.category = urlCategory;
+    resolved.filters.Location = urlCity ? [urlCity] : [];
+    return resolved;
+  });
   const [selectedCategory, setSelectedCategory] = useState(
     initialFilterState.category,
   );
@@ -381,17 +395,74 @@ export default function ExpertsPage() {
     Gender: "Gender",
   };
 
-  const toggleFilterOption = (filterKey: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterKey] || [];
-      return {
-        ...prev,
-        [filterKey]: current.includes(value)
-          ? current.filter((v) => v !== value)
-          : [...current, value],
-      };
-    });
+  const skipUrlSyncRef = useRef(false);
+
+  // Keeps the URL in step with the filters: category slug plus exactly one
+  // supported city. Several / unsupported cities are not representable in the
+  // path, so the URL then carries the category only.
+  const syncUrl = (category: string, locations: string[]) => {
+    const pathname = buildExpertsPath(
+      category,
+      locations.length === 1 ? locations[0] : null,
+    );
+    if (pathname === routerLocation.pathname) return;
+    skipUrlSyncRef.current = true; // filters already updated by the caller
+    navigate({ pathname, search: routerLocation.search });
   };
+
+  const toggleFilterOption = (filterKey: string, value: string) => {
+    const current = selectedFilters[filterKey] || [];
+    const next = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    const nextFilters = { ...selectedFilters, [filterKey]: next };
+    setSelectedFilters(nextFilters);
+    if (filterKey === "Location") {
+      // Persist first so the stored selection matches the destination URL
+      // even if the route change remounts this page.
+      persistFilters(safeSessionStorage(), {
+        category: selectedCategory,
+        filters: nextFilters as ExpertsFilterSelection,
+      });
+      syncUrl(selectedCategory, next);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategory(DEFAULT_CATEGORY);
+    setSelectedFilters(emptyFilters());
+    persistFilters(safeSessionStorage(), {
+      category: DEFAULT_CATEGORY,
+      filters: emptyFilters(),
+    });
+    syncUrl(DEFAULT_CATEGORY, []);
+  };
+
+  const selectCategory = (label: string) => {
+    setSelectedCategory(label);
+    persistFilters(safeSessionStorage(), {
+      category: label,
+      filters: selectedFilters as ExpertsFilterSelection,
+    });
+    syncUrl(label, selectedFilters.Location || []);
+  };
+
+  // URL -> filters: runs on mount and on every URL change (including browser
+  // back/forward), so category and location always match the address bar.
+  useEffect(() => {
+    if (skipUrlSyncRef.current) {
+      skipUrlSyncRef.current = false;
+      return;
+    }
+    const want = urlCity ? [urlCity] : [];
+    setSelectedCategory(urlCategory);
+    setSelectedFilters((prev) =>
+      prev.Location?.length === want.length &&
+      prev.Location.every((c, i) => c === want[i])
+        ? prev
+        : { ...prev, Location: want },
+    );
+  }, [urlCity, urlCategory]);
 
   const openFilterDropdown = (label: string) => {
     if (openFilter === label) {
@@ -461,44 +532,6 @@ export default function ExpertsPage() {
   // dropdown portal. Desktop is unaffected — StickySearchBar ignores this prop
   // on `md:` and up.
   const barsVisible = useScrollDirection({ disabled: !!openFilter });
-
-  // Navigation-state requests (e.g. choosing a Services item in the navbar
-  // while already on /experts). On first mount the initial state above already
-  // applied the request, so only later navigations (new location key) re-apply.
-  // Either way the request is consumed: history state / legacy query params are
-  // replaced so the URL stays clean and a refresh restores sessionStorage
-  // rather than replaying a stale request.
-  const appliedNavKeyRef = useRef<string | null>(
-    navRequest ? routerLocation.key : null,
-  );
-  useEffect(() => {
-    if (!navRequest) return;
-    if (appliedNavKeyRef.current !== routerLocation.key) {
-      appliedNavKeyRef.current = routerLocation.key;
-      if (navRequest.specialization) {
-        setSelectedCategory(
-          resolveCategoryFromParam(navRequest.specialization),
-        );
-      }
-      if (navRequest.location) {
-        const loc = resolveLocationFromParam(navRequest.location);
-        setSelectedFilters((prev) => ({ ...prev, Location: loc }));
-      }
-    }
-    const params = new URLSearchParams(routerLocation.search);
-    params.delete("location");
-    params.delete("specialization");
-    const search = params.toString();
-    navigate(
-      {
-        pathname: routerLocation.pathname,
-        search: search ? `?${search}` : "",
-        hash: routerLocation.hash,
-      },
-      { replace: true, state: null },
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routerLocation.key]);
 
   // Persist every change; a fully-default selection removes the stored entry,
   // which is what makes "Clear All" wipe sessionStorage.
@@ -940,7 +973,7 @@ export default function ExpertsPage() {
             {CATEGORIES.map(({ label, icon: Icon }) => (
               <button
                 key={label}
-                onClick={() => setSelectedCategory(label)}
+                onClick={() => selectCategory(label)}
                 className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 min-h-[40px] rounded-full text-[12.5px] sm:text-[13.5px] font-semibold border transition-all whitespace-nowrap shrink-0 snap-start ${
                   selectedCategory === label
                     ? "bg-[#0e6b4f] text-white border-[#0e6b4f] shadow-[0_3px_10px_rgba(14,107,79,.22)]"
@@ -1018,8 +1051,7 @@ export default function ExpertsPage() {
               <div className="flex items-center gap-4 sm:gap-5 flex-nowrap md:flex-wrap shrink-0">
                 <span
                   onClick={() => {
-                    setSelectedCategory(DEFAULT_CATEGORY);
-                    setSelectedFilters(emptyFilters());
+                    clearAllFilters();
                     setSortBy(null);
                     setOpenFilter(null);
                   }}
@@ -1342,8 +1374,7 @@ export default function ExpertsPage() {
             </p>
             <button
               onClick={() => {
-                setSelectedCategory(DEFAULT_CATEGORY);
-                setSelectedFilters(emptyFilters());
+                clearAllFilters();
               }}
               className="mt-4 px-6 py-2 bg-[#0e6b4f] text-white rounded-full hover:bg-[#138158] transition"
             >

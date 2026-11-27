@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import room01 from "../../../assets/rooms-banglore/room-01.jpg?w=1600&format=webp&quality=75";
-import room02 from "../../../assets/rooms-banglore/room-02.jpg?w=1600&format=webp&quality=75";
-import room03 from "../../../assets/rooms-banglore/room-03.jpg?w=1600&format=webp&quality=75";
-import room04 from "../../../assets/rooms-banglore/room-04.jpg?w=1600&format=webp&quality=75";
-import room05 from "../../../assets/rooms-banglore/room-05.jpg?w=1600&format=webp&quality=75";
-import room06 from "../../../assets/rooms-banglore/room-06.jpg?w=1600&format=webp&quality=75";
-import room07 from "../../../assets/rooms-banglore/room-07.jpg?w=1600&format=webp&quality=75";
-import room08 from "../../../assets/rooms-banglore/room-08.jpg?w=1600&format=webp&quality=75";
-import room09 from "../../../assets/rooms-banglore/room-09.jpg?w=1600&format=webp&quality=75";
-import room10 from "../../../assets/rooms-banglore/room-10.jpg?w=1600&format=webp&quality=75";
+// import room02 from "../../../assets/rooms-banglore/room-02.jpg?w=1600&format=webp&quality=75";
+// import room03 from "../../../assets/rooms-banglore/room-03.jpg?w=1600&format=webp&quality=75";
+// import room04 from "../../../assets/rooms-banglore/room-04.jpg?w=1600&format=webp&quality=75";
+// import room05 from "../../../assets/rooms-banglore/room-05.jpg?w=1600&format=webp&quality=75";
+// import room06 from "../../../assets/rooms-banglore/room-06.jpg?w=1600&format=webp&quality=75";
+// import room07 from "../../../assets/rooms-banglore/room-07.jpg?w=1600&format=webp&quality=75";
+// import room08 from "../../../assets/rooms-banglore/room-08.jpg?w=1600&format=webp&quality=75";
+// import room09 from "../../../assets/rooms-banglore/room-09.jpg?w=1600&format=webp&quality=75";
+// import room10 from "../../../assets/rooms-banglore/room-10.jpg?w=1600&format=webp&quality=75";
 
-const ROOM_IMAGES: string[] = [room01, room02, room03, room04, room05, room06, room07, room08, room09, room10];
+const ROOM_IMAGES: string[] = [room01,
+  //  room02, room03, room04, room05, room06, room07, room08, room09, room10
+  ];
 const INTERVAL_MS = 4500;
 const RESUME_DELAY_MS = 4000;
 
@@ -151,11 +153,11 @@ const InPatientHeroCarousel = ({ title, subtitle, cta, ctaHref }: Props) => {
             onClick={go(() => setActive(i))}
             className="p-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full"
           >
-            <span
+            {/* <span
               className={`block h-2.5 w-2.5 rounded-full transition ${
                 i === active ? "bg-[#1fa37a] ring-2 ring-white scale-110" : "bg-white/80"
               }`}
-            />
+            /> */}
           </button>
         ))}
       </div>
