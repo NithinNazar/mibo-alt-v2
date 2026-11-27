@@ -664,8 +664,8 @@ const Header = () => {
             </div>
 
             {[
-              simpleLinks.who,
-              simpleLinks.why,
+              // simpleLinks.who,
+              // simpleLinks.why,
               simpleLinks.blog,
               simpleLinks.contact,
             ].map(({ label, path, Icon }) => (
