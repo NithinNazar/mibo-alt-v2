@@ -665,8 +665,7 @@ const PsychiatristExpertListing = ({
                       (typeof doc.id === "number"
                         ? doc.id
                         : doc.id.toString().length) % 10;
-                    const rating = (4.5 + ratingSeed / 20).toFixed(1);
-                    const reviewCount = 40 + ratingSeed * 17;
+                    const rating = (4.8 + ratingSeed / 20).toFixed(1);
                     const isOnline = doc.sessionTypes.includes("Online");
                     const isInPerson = doc.sessionTypes.includes("In-person");
 
@@ -693,7 +692,7 @@ const PsychiatristExpertListing = ({
                             <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[12px] sm:text-[12.5px] leading-[1.3] text-[#3a463f] mb-2.5 font-semibold">
                               <span className="flex items-center gap-1 shrink-0">
                                 <Star className="w-[13px] h-[13px] fill-[#f5b400] text-[#f5b400] shrink-0" />
-                                {rating} ({reviewCount})
+                                {rating}
                               </span>
                               <span className="flex items-center gap-1 text-[#637268] font-medium shrink-0">
                                 <MapPin className="w-[13px] h-[13px] shrink-0" />

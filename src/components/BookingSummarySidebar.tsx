@@ -84,11 +84,6 @@ export default function BookingSummarySidebar({
                 >
                   {doctor.rating.toFixed(1)}
                 </span>
-                {typeof doctor.reviewsCount === "number" && (
-                  <span className="text-xs text-gray-500">
-                    ({doctor.reviewsCount} reviews)
-                  </span>
-                )}
               </div>
             )}
           </div>

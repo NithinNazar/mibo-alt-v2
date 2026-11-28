@@ -1,4 +1,14 @@
-import { BANGALORE_WHATSAPP_URL } from "../../utils/contact";
+import {
+  BANGALORE_PHONE_DISPLAY,
+  BANGALORE_TEL_LINK,
+  BANGALORE_WHATSAPP_URL,
+  KOCHI_PHONE_DISPLAY,
+  KOCHI_TEL_LINK,
+  KOCHI_WHATSAPP_URL,
+  DEFAULT_PHONE_DISPLAY,
+  DEFAULT_TEL_LINK,
+  DEFAULT_WHATSAPP_URL,
+} from "../../utils/contact";
 import { useEffect, useState, useMemo, useRef } from "react";
 import {
   useLocation,
@@ -36,6 +46,7 @@ import {
   CalendarClock,
   Headphones,
   MessageCircle,
+  Phone,
   BadgeCheck,
   ClipboardList,
   ChevronDown,
@@ -942,6 +953,29 @@ export default function ExpertsPage() {
   // Show skeleton only on initial load, not on filter changes
   const showSkeletons = loading && doctors.length === 0;
 
+  // Care-bar contact follows the Location filter: exactly one of Bangalore /
+  // Kochi -> that city's number; none (or any other selection) -> default.
+  const activeCity =
+    selectedFilters.Location.length === 1 ? selectedFilters.Location[0] : null;
+  const careContact =
+    activeCity === "Bangalore"
+      ? {
+          display: BANGALORE_PHONE_DISPLAY,
+          tel: BANGALORE_TEL_LINK,
+          whatsapp: BANGALORE_WHATSAPP_URL,
+        }
+      : activeCity === "Kochi"
+        ? {
+            display: KOCHI_PHONE_DISPLAY,
+            tel: KOCHI_TEL_LINK,
+            whatsapp: KOCHI_WHATSAPP_URL,
+          }
+        : {
+            display: DEFAULT_PHONE_DISPLAY,
+            tel: DEFAULT_TEL_LINK,
+            whatsapp: DEFAULT_WHATSAPP_URL,
+          };
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-white text-[#16241f] font-['Inter',sans-serif]">
       {/* --- HEADER  --- */}
@@ -1136,8 +1170,7 @@ export default function ExpertsPage() {
             const ratingSeed =
               (typeof doc.id === "number" ? doc.id : doc.id.toString().length) %
               10;
-            const rating = (4.5 + ratingSeed / 20).toFixed(1); // 4.5 - 4.9
-            const reviewCount = 40 + ratingSeed * 17;
+            const rating = (4.8 + ratingSeed / 20).toFixed(1); // 4.5 - 4.9
             const isOnline = doc.sessionTypes.includes("Online");
             const isInPerson = doc.sessionTypes.includes("In-person");
             // Check if the nextAvailableSlot is a valid date
@@ -1149,7 +1182,7 @@ export default function ExpertsPage() {
 
             // Debug log for clinicians with slots
             if (doc.nextAvailableSlot) {
-              console.log(`🔍 [RENDER] Clinician ${doc.id} (${doc.name}):`, {
+              console.log(` [RENDER] Clinician ${doc.id} (${doc.name}):`, {
                 nextAvailableSlot: doc.nextAvailableSlot,
                 nextSlotDate,
                 hasValidSlot,
@@ -1180,7 +1213,7 @@ export default function ExpertsPage() {
                     <div className="flex items-center gap-3.5 text-[12.5px] leading-[1.3] text-[#3a463f] mb-2.5 whitespace-nowrap font-semibold">
                       <span className="flex items-center gap-1 shrink-0">
                         <Star className="w-[13px] h-[13px] fill-[#f5b400] text-[#f5b400] shrink-0" />
-                        {rating} ({reviewCount})
+                        {rating}
                       </span>
                       <span className="flex items-center gap-1 text-[#637268] font-medium shrink-0">
                         <MapPin className="w-[13px] h-[13px] shrink-0" />
@@ -1402,21 +1435,24 @@ export default function ExpertsPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() =>
-            window.open(
-              BANGALORE_WHATSAPP_URL,
-              "_blank",
-              "noopener,noreferrer",
-            )
-          }
-          className="w-full sm:w-auto flex items-center justify-center gap-2.5 rounded-full pl-2 pr-5 sm:pr-6 py-2.5 sm:py-2 min-h-[44px] text-[12px] sm:text-[12.5px] font-bold text-[#0e6b4f] bg-white shadow-[0_2px_8px_rgba(12,59,46,0.08)] hover:shadow-[0_4px_14px_rgba(12,59,46,0.14)] transition-shadow whitespace-nowrap"
-        >
-          <span className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center text-white flex-shrink-0 transition-all duration-300">
-            <MessageCircle className="w-4 h-4" />
-          </span>
-          TALK TO OUR CARE TEAM
-        </button>
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+          <a
+            href={careContact.tel}
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-md transition-all duration-300 hover:scale-105 hover:bg-white/80"
+          >
+            <Phone className="h-4 w-4" aria-hidden="true" />
+            Call Now: {careContact.display}
+          </a>
+          <a
+            href={careContact.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#1fa855]"
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+            Chat With Us
+          </a>
+        </div>
       </div>
 
       {/* --- TESTIMONIALS --- */}
@@ -1523,17 +1559,17 @@ export default function ExpertsPage() {
       <div className="bg-gradient-to-br from-[#0a2e23] to-[#281a5e] text-white text-center py-6 sm:py-7 px-4 text-[13.5px] sm:text-[14.5px] font-medium leading-relaxed">
         If you didn't find what you were looking for, please reach out to us at{" "}
         <a
-          href="mailto:support@mibohealth.com"
+          href="mailto:reach@mibocare.com"
           className="text-[#8fe0c2] font-bold underline underline-offset-2"
         >
-          support@mibohealth.com
+          reach@mibocare.com
         </a>{" "}
         or call{" "}
         <a
-          href="tel:+912071171501"
+          href={careContact.tel}
           className="text-[#8fe0c2] font-bold underline underline-offset-2"
         >
-          +91 20711 71501
+          {careContact.display}
         </a>
         . We're here for you — for anything you might need.
       </div>
